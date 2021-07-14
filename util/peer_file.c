@@ -300,7 +300,7 @@ void print_peers()
 }
 
 // Stampa i vicini di tutti i peer (comando showneighbor)
-void print_peers_nbs(int connected)
+void print_peers_nbs()
 {
     struct PeerElem *head, *tail;
     int first;

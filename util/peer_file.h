@@ -18,5 +18,5 @@ struct Neighbors get_neighbors(int);
 struct Neighbors insert_peer(int);
 struct Neighbors remove_peer(int);
 void print_peers_number();
-void print_peers(int);
-void print_peers_nbs(int);
+void print_peers();
+void print_peers_nbs();

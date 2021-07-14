@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <time.h>
 
+#include "peer_file.h"
 // Costanti
 #include "const.h"
 

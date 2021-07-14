@@ -1,12 +1,13 @@
 struct PeerElement
 {
+public:
     int port;
     struct PeerElement *next;
 };
 struct PeerList
 {
+public:
     int peers;
-    int mutex;
     struct PeerElement *list; 
 };
 

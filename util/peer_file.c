@@ -273,7 +273,7 @@ struct Neighbors remove_peer(int port)
 // Stampa il numero di peer connessi
 void print_peers_number()
 {
-    printf("Ci sono [ %d ] peer connessi alla rete", connected_peersn.peers)
+    printf("Ci sono [ %d ] peer connessi alla rete", connected_peersn.peers);
 }
 
 // Stampa i peer connessi alla rete (comando showpeers)
@@ -302,8 +302,6 @@ void print_peers()
 // Stampa i vicini di tutti i peer (comando showneighbor)
 void print_peers_nbs()
 {
-    struct PeerElem *head, *tail;
-    int first;
     if (connected_peersn.peers == 0)
     {
         printf("Non ci sono peers connessi alla rete\n");
@@ -316,13 +314,15 @@ void print_peers_nbs()
     }
     else
     {
+        struct PeerElem *head, *tail;
+        int first;
         printf("I peer connessi alla rete sono:");
         printf("\tprev -> peer -> next\n");
 
         first = connected_peersn.list->port;
         head = connected_peersn.list->next;
         tail = connected_peersn.list;
-        printf("\t%d -> %d -> %d\n", get_port(connected_peersn.peers - 1), first, head->port;
+        printf("\t%d -> %d -> %d\n", get_port(connected_peersn.peers - 1), first, head->port);
 
         while (head->port != first)
         {

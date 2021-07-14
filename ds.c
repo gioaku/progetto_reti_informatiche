@@ -14,7 +14,6 @@
 #include "./util/util.h"
 // Gestione del file con i peer connessi alla rete
 #include "./util/peer_file.h"
-#include "./util/neighbors.h"
 // Gesione dei messaggi
 #include "./util/msg.h"
 // Costanti

@@ -1,12 +1,12 @@
+#include "neighbors.h"
+
 struct PeerElement
 {
-public:
     int port;
     struct PeerElement *next;
 };
 struct PeerList
 {
-public:
     int peers;
     struct PeerElement *list; 
 };

@@ -178,7 +178,7 @@ int main(int argc, char **argv)
                     print_peers_number();
                 }
             }
-
+        }
             // Gestione comandi da stdin
             if (FD_ISSET(0, &readset))
             {

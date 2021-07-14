@@ -1,0 +1,25 @@
+***DS***
+PeerList
+peer msg
+    boot
+        insert peer
+        send ack and nbs
+        update nbs for others
+        peer#++
+    exit
+        remove peer 
+        send ack
+        update nbs
+        peer#--
+stdin msg
+    help
+        print help
+    showpeers
+        print peer ports
+    showneighbor arg
+        if arg print nb(arg)
+        else print nb(all)
+    esc
+        send exit udp to all peers
+        wait for acks
+        exit

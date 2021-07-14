@@ -1,0 +1,29 @@
+***PEER***
+myport
+nbs
+
+ds msg - UDP msg
+    close
+        save registers
+    update nb prev
+    update nb next
+
+stdin msg
+    help
+    start addr, port
+        boot
+    stop
+        send openregister to nb1
+        send closed registers to nb1
+        send exit udp to ds
+
+***fun***
+
+boot
+    reload registers
+    send udp
+    set timer
+    on ack 
+        set nb
+    on timer
+        go to send udp

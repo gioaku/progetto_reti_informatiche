@@ -1,0 +1,11 @@
+check all msg codes
+check all const.h
+check all messages state and possible errors
+check mutex 
+check debug/verbose log
+check function parameters correspondence between .h and .c 
+check return values correspondence
+
+I peer connessi alla rete sono:
+     --     port     -- 
+     --     0000     -- 

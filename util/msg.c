@@ -56,16 +56,12 @@ int s_send_udp(int socket, char *buffer, int buff_l, int send_port)
 {
     struct sockaddr_in send_addr;
     socklen_t send_addr_len;
-    int tries = SEND_TRIES;
 
     send_addr_len = sizeof(send_addr);
     set_address(&send_addr, &send_addr_len, send_port);
 
-    while (tries-- > 0)
-    {
-        if (sendto(socket, buffer, MESS_TYPE_LEN + 1, 0, (struct sockaddr *)&send_addr, send_addr_len) > 0)
-            return 1;
-    }
+    if (sendto(socket, buffer, MESS_TYPE_LEN + 1, 0, (struct sockaddr *)&send_addr, send_addr_len) > 0)
+        return 1;
 
     // impossibile mendare il messaggio
     printf("Errore impossibile inviare il messaggio");
@@ -127,14 +123,13 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
 int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acked)
 {
     char recv_buffer[MAX_SOCKET_RECV];
-    int tries = SEND_TRIES;
-    do
-    {
-        // invia il messaggio
-        s_send_udp(socket, buffer, buff_l, port);
+    int tries = ACK_TRIES;
 
-        // fino a che non riceve l'ack
-    } while (recv_udp(socket, recv_buffer, MESS_TYPE_LEN, port, acked) && tries-- > 0);
+    // invia il messaggio
+    s_send_udp(socket, buffer, buff_l, port);
+    while (recv_udp(socket, recv_buffer, MESS_TYPE_LEN, port, acked) && tries-- > 0)
+    {
+    };
 
     if (tries > -1)
     {

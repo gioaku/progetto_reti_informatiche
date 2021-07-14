@@ -5,7 +5,7 @@
 // Attesa dell'ack
 #define USEC 15000
 // Tentativi per inviare un messaggio
-#define SEND_TRIES 2
+#define ACK_TRIES 10
 // Lunghezza di una stringa di data
 #define DATE_LEN 10
 // Lunghezza di una stringa di orario

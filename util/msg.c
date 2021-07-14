@@ -75,7 +75,7 @@ int s_send_udp(int socket, char *buffer, int buff_l, int send_port)
 // Invio di un ack - ritorna 1 se ha successo - ritorna 0 altrimenti
 int s_send_ack_udp(int socket, char *buffer, int send_port)
 {
-    if (s_send_udp(socket, buffer, MESS_TYPE_LEN + 1, 0, send_port))
+    if (s_send_udp(socket, buffer, MESS_TYPE_LEN + 1, send_port))
     {
         printf("ACK %s inviato correttamente al destinatario %d\n", buffer, send_port);
         return 1;
@@ -141,7 +141,7 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
         return 1;
     }
 
-    printf("Il destinatario %d non risulta online");
+    printf("Il destinatario %d non risulta online", port);
     return 0;
 }
 

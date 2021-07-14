@@ -120,7 +120,7 @@ int main(int argc, char **argv)
                 if (!send_udp_wait_ack(server_socket, list_buffer, buff_len, peer_port, "LIST_ACK"))
                 {
                     remove_peer(peer_port);
-                    printf("Errrore: impossibile comunicare vicini al peer\nOperazione abortita\n");
+                    printf("Errore: impossibile comunicare vicini al peer\nOperazione abortita\n");
                     continue;
                 };
 

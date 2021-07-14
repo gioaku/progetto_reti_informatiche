@@ -11,6 +11,7 @@
 
 // Funzioni di utilita'
 #include "./util/util_c.h"
+#include "./util/util.h"
 // Gesione dei messaggi
 #include "./util/msg.h"
 // Gestione rete
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
     listener_socket = udp_socket_init(&listener_addr, &listener_addr_len, my_port);
 
     // peer non connesso
-    nbs.tot = = -1;
+    nbs.tot = -1;
 
     // inizializzo set di descrittori
     FD_SET(listener_socket, &master);
@@ -90,10 +91,11 @@ int main(int argc, char **argv)
             // start
             else if (strcmp(command, "start") == 0)
             {
-                printf("Inizio connessione...\n") char DS_addr[INET_ADDRSTRLEN]; // Indirizzo IP del server
-
+                char DS_addr[INET_ADDRSTRLEN]; // Indirizzo IP del server
                 char recv_buffer[MAX_LIST_LEN];
                 char temp_buffer[MESS_TYPE_LEN];
+
+                printf("Inizio connessione...\n");
 
                 // controllo che il peer non sia connesso
                 if (nbs.tot != -1)
@@ -115,13 +117,15 @@ int main(int argc, char **argv)
                 // invio richiesta di connessione
                 if (!send_udp_wait_ack(listener_socket, "CONN_REQ", MESS_TYPE_LEN, server_port, "CONN_ACK"))
                 {
-                    printf("Errore impossibile inviare richiesta di connessione al server. Riprovare\n") continue;
+                    printf("Errore impossibile inviare richiesta di connessione al server. Riprovare\n");
+                    continue;
                 }
 
                 // ricevo lista di vicini
                 if (!recv_udp_and_ack(listener_socket, recv_buffer, MAX_LIST_LEN, server_port, "NBR_LIST", "LIST_ACK"))
                 {
-                    printf("Errore impossibile ricevere la lista di vicini dal server. Riprovare\n") continue;
+                    printf("Errore impossibile ricevere la lista di vicini dal server. Riprovare\n");
+                    continue;
                 }
 
                 sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next);
@@ -129,7 +133,8 @@ int main(int argc, char **argv)
                 // controllo sui parametri letti
                 if (!valid_port(nbs.prev) || !valid_port(nbs.next))
                 {
-                    printf("Errore lista di vicini ricevuta non valida. Riprovare\n") continue;
+                    printf("Errore lista di vicini ricevuta non valida. Riprovare\n");
+                    continue;
                 }
 
                 if (nbs.prev != nbs.next)

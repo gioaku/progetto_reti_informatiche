@@ -109,7 +109,10 @@ int main(int argc, char **argv)
 
                 if (tmp != 3 || strcmp(DS_addr, LOCALHOST) != 0 || valid_port(server_port))
                 {
-                    printf("Errore nel passaggio dei parametri alla chiamata di start\n");
+                    printf("Errore: passaggio dei parametri alla chiamata di start\n");
+                    printf("tmp : %d", tmp);
+                    printf("localhost: %d", strcmp(DS_addr, LOCALHOST));
+                    printf("port: %d", server_port);
                     help_client(1);
                     continue;
                 }

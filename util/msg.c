@@ -107,10 +107,11 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
         recv_port = s_recv_udp(socket, buffer, buff_l);
         sscanf(buffer, "%s", temp_buffer);
         temp_buffer[buff_l] = '\0';
+
         // se messaggio giusto ritorna
         if (port == recv_port && strcmp(correct_header, temp_buffer) == 0)
         {
-            printf("Messaggio %s ricevuto correttamente dal mittente %d\n", buffer, port);
+            printf("Messaggio %s ricevuto correttamente dal mittente %d\n", temp_buffer, port);
             return 1;
         }
         // altrimenti scarta
@@ -133,7 +134,7 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
         s_send_udp(socket, buffer, buff_l, port);
 
         // fino a che non riceve l'ack
-    } while (recv_udp(socket, recv_buffer, MESS_TYPE_LEN, port, acked) || tries-- > 0);
+    } while (recv_udp(socket, recv_buffer, MESS_TYPE_LEN, port, acked) && tries-- > 0);
 
     if (tries > -1)
     {
@@ -141,7 +142,7 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
         return 1;
     }
 
-    printf("Il destinatario %d non risulta online", port);
+    printf("Il destinatario %d non risulta online\n", port);
     return 0;
 }
 

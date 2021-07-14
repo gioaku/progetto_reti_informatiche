@@ -5,12 +5,12 @@ void print_nbs(int peer, struct Neighbors nbs)
 {
     if (nbs.tot == -1)
     {
-        printf("Il peer %d non connesso alla rete", peer);
+        printf("Il peer %d non connesso alla rete\n", peer);
     }
     if(nbs.tot == 0){
-        printf("Il peer %d non ha vicini, unico peer connesso", peer);
+        printf("Il peer %d non ha vicini. Unico peer connesso\n", peer);
     }
     else{
-        printf("Vicini di %d:\nprev\tpeer\tnext \n%d -> %d -> %d", peer, nbs.prev, peer, nbs.next);
+        printf("Vicini di %d:\nprev\tpeer\tnext \n%d -> %d -> %d\n", peer, nbs.prev, peer, nbs.next);
     }
 }

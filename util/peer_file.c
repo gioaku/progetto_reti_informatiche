@@ -59,8 +59,10 @@ int get_position(int port)
     //scorre la lista per trovare il peer giusto e ne ritorna la posizione
     else
     {
-        struct PeerElement *punt = connected_peersn.list;
+        struct PeerElement *punt;
         int pos = 0;
+
+        punt = connected_peersn.list;
         while (pos < connected_peersn.peers)
         {
             if (punt->port == port)
@@ -122,7 +124,7 @@ struct Neighbors get_neighbors(int peer)
             {
                 nbs.next = head->next->port;
                 nbs.prev = tail->port;
-                return nbs
+                return nbs;
             }
             tail = head;
             head = head->next;
@@ -139,7 +141,7 @@ struct Neighbors insert_peer(int port)
     struct Neighbors nbs;
     struct PeerElement *new = (struct PeerElement *)malloc(sizeof(struct PeerElement));
 
-    if (new == null)
+    if (new == NULL)
     {
         nbs.tot = -1;
         return nbs;
@@ -315,7 +317,7 @@ void print_peers_nbs()
     }
     else
     {
-        struct PeerElem *head, *tail;
+        struct PeerElement *head, *tail;
         int first;
         printf("I peer connessi alla rete sono:");
         printf("\tprev -> peer -> next\n");

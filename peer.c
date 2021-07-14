@@ -111,7 +111,7 @@ int main(int argc, char **argv)
                 {
                     printf("Errore: passaggio dei parametri alla chiamata di start\n");
                     printf("tmp : %d\n", tmp);
-                    printf("localhost: %s\n", DS_addr);
+                    printf("localhost: %s invece di %s\n", DS_addr, LOCALHOST);
                     printf("port: %d\n", server_port);
                     help_client(1);
                     continue;

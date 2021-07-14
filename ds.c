@@ -29,8 +29,6 @@ char command_buffer[MAX_STDIN_S]; // Buffer su cui salvare i comandi provenienti
 char socket_buffer[MAX_SOCKET_RECV];
 char recv_buffer[MESS_TYPE_LEN + 1]; // Buffer su cui ricevere messaggio di richiesta connessione
 
-extern int connected_peers; // Numero di peers connessi alla rete
-
 // Gestione input da stdin oppure da socket
 fd_set master;
 fd_set readset;
@@ -231,7 +229,8 @@ int main(int argc, char **argv)
                         printf("Invio SRV_EXIT a %d\n", get_port(0));
 
                         // invio messaggio
-                        if(send_udp_wait_ack(server_socket, "SRV_EXIT", MESS_TYPE_LEN, get_port(i), "S_XT_ACK")){
+                        if (send_udp_wait_ack(server_socket, "SRV_EXIT", MESS_TYPE_LEN, get_port(i), "S_XT_ACK"))
+                        {
                             print_error("impossibile disconnettere il peer %d", get_port(0));
                             // spero bene per lui
                         }
@@ -255,3 +254,4 @@ int main(int argc, char **argv)
 
         return 0;
     }
+}

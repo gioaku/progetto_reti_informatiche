@@ -110,9 +110,9 @@ int main(int argc, char **argv)
 
                 // compongo la lista
                 if (nbs.tot == 0)
-                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", -1, -1);
+                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", htonl(-1), htonl(-1));
                 else
-                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", nbs.prev, nbs.next);
+                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", htonl(nbs.prev), htonl(nbs.next));
 
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", peer_port, list_buffer, buff_len);
 
@@ -127,11 +127,11 @@ int main(int argc, char **argv)
                 // invio aggiornamenti vicini
                 if (nbs.tot > 0)
                 {
-                    buff_len = sprintf(list_buffer, "%s %d", "PRE_UPDT", peer_port);
+                    buff_len = sprintf(list_buffer, "%s %d", "PRE_UPDT", htonl(peer_port));
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.next, list_buffer, buff_len);
                     send_udp_wait_ack(server_socket, list_buffer, buff_len, nbs.next, "PREV_ACK");
 
-                    buff_len = sprintf(list_buffer, "%s %d", "NXT_UPDT", peer_port);
+                    buff_len = sprintf(list_buffer, "%s %d", "NXT_UPDT", htonl(peer_port));
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, list_buffer, buff_len);
                     send_udp_wait_ack(server_socket, list_buffer, buff_len, nbs.prev, "NEXT_ACK");
                 }
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
             fgets(command_buffer, MAX_COMMAND_S, stdin);
             input_number = sscanf(command_buffer, "%s %d", command, &neighbor_peer);
             printf("Ricevuti %d parametri da stdin: %s, %d", input_number, command, neighbor_peer);
-            
+
             // help
             if (strcmp(command, "help\0") == 0)
             {

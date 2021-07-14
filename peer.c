@@ -129,8 +129,11 @@ int main(int argc, char **argv)
                 }
 
                 sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next);
+                nbs.prev = ntohl(nbs.prev);
+                nbs.next = ntohl(nbs.next);
+
                 printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
-                
+
                 // controllo sui parametri letti
                 if (!valid_port(nbs.prev) || !valid_port(nbs.next))
                 {
@@ -341,20 +344,22 @@ int main(int argc, char **argv)
                 if (strcmp(mess_type_buffer, "PRE_UPDT") == 0)
                 {
                     sscanf(socket_buffer, "%s %d", mess_type_buffer, &tmp);
+                    tmp = ntohl(tmp);
 
                     if (valid_port(tmp) && s_send_ack_udp(listener_socket, "PREV_ACK", server_port))
                     {
-                        printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo", nbs.prev, tmp);
+                        printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo\n", nbs.prev, tmp);
                         nbs.prev = tmp;
                     }
 
-                    printf("Errore nell'aggiornamento del vicino precedente da %d a %d\nOperazione annullata", nbs.prev, tmp);
+                    printf("Errore nell'aggiornamento del vicino precedente da %d a %d\nOperazione annullata\n", nbs.prev, tmp);
                 }
 
                 // aggiornamento vicino successivo
                 else if (strcmp(mess_type_buffer, "NXT_UPDT") == 0)
                 {
                     sscanf(socket_buffer, "%s %d", mess_type_buffer, &tmp);
+                    tmp = ntohl(tmp);
 
                     if (valid_port(tmp) && s_send_ack_udp(listener_socket, "NEXT_ACK", server_port))
                     {

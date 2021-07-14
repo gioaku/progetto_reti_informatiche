@@ -107,7 +107,7 @@ int main(int argc, char **argv)
                 // lettura e controllo dei parametri
                 tmp = sscanf(stdin_buff, "%s %s %d", command, DS_addr, &server_port);
 
-                if (tmp != 3 || strcmp(DS_addr, LOCALHOST) != 0 || valid_port(server_port))
+                if (tmp != 3 || strcmp(DS_addr, LOCALHOST) != 0 || !valid_port(server_port))
                 {
                     printf("Errore: passaggio dei parametri alla chiamata di start\n");
                     printf("tmp : %d\n", tmp);

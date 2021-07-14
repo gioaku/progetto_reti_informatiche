@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include "neighbors.h"
 // Stampa i vicini nbs di peer
 void print_nbs(int peer, struct Neighbors nbs)
 {

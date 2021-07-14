@@ -84,9 +84,9 @@ int main(int argc, char **argv)
             // richiesta di connessione
             if (strcmp(recv_buffer, "CONN_REQ") == 0)
             {
-                struct Neighbors nbs;                  // Variabile per salvare eventuali vicini
-                char list_buffer[MAX_LIST_LEN];        // Buffer per invio vicini al peer
-                int buff_len;                          // Variabile per la lunghezza del messaggio da inviare al peer
+                struct Neighbors nbs;           // Variabile per salvare eventuali vicini
+                char list_buffer[MAX_LIST_LEN]; // Buffer per invio vicini al peer
+                int buff_len;                   // Variabile per la lunghezza del messaggio da inviare al peer
 
                 // ack dell'arrivo della richiesta
                 if (!s_send_ack_udp(server_socket, "CONN_ACK", peer_port))
@@ -179,77 +179,76 @@ int main(int argc, char **argv)
                 }
             }
         }
-            // Gestione comandi da stdin
-            if (FD_ISSET(0, &readset))
+        // Gestione comandi da stdin
+        if (FD_ISSET(0, &readset))
+        {
+            // Parsing dell'input
+            int neighbor_peer;
+            int input_number;
+            char command[MAX_COMMAND_S];
+
+            fgets(command_buffer, MAX_COMMAND_S, stdin);
+            input_number = sscanf(command_buffer, "%s %d", command, &neighbor_peer);
+
+            // help
+            if (strcmp(command, "help\0") == 0)
             {
-                // Parsing dell'input
-                int neighbor_peer;
-                int input_number;
-                char command[MAX_COMMAND_S];
+                print_server_commands();
+            }
 
-                fgets(command_buffer, MAX_COMMAND_S, stdin);
-                input_number = sscanf(command_buffer, "%s %d", command, &neighbor_peer);
+            // showpeers
+            else if (strcmp(command, "showpeers\0") == 0)
+            {
+                print_peers();
+            }
 
-                // help
-                if (strcmp(command, "help\0") == 0)
+            // showneighbor
+            else if (strcmp(command, "showneighbor\0") == 0)
+            {
+
+                if (input_number == 2)
                 {
-                    print_server_commands();
+                    print_nbs(neighbor_peer, get_neighbors(neighbor_peer));
                 }
-
-                // showpeers
-                else if (strcmp(command, "showpeers\0") == 0)
-                {
-                    print_peers();
-                }
-
-                // showneighbor
-                else if (strcmp(command, "showneighbor\0") == 0)
-                {
-
-                    if (input_number == 2)
-                    {
-                        print_nbs(neighbor_peer, get_neighbors(neighbor_peer));
-                    }
-                    else
-                    {
-                        print_peers_nbs();
-                    }
-                }
-
-                // esc
-                else if (strcmp(command, "esc\0") == 0)
-                {
-                    printf("Invio ai peer i messaggi di disconnessione\n");
-
-                    // rimozione di tutti i peer previo avviso
-                    while (get_port(0) != -1)
-                    {
-                        printf("Invio SRV_EXIT a %d\n", get_port(0));
-
-                        // invio messaggio
-                        if (send_udp_wait_ack(server_socket, "SRV_EXIT", MESS_TYPE_LEN, get_port(0), "S_XT_ACK"))
-                        {
-                            printf("Errore: impossibile disconnettere il peer %d\n", get_port(0));
-                            // spero bene per lui
-                        }
-
-                        // rimozione peer
-                        remove_peer(0);
-                    }
-                    close(server_socket);
-                    _exit(0);
-                }
-
-                // errore
                 else
                 {
-                    printf("Errore, comando non esistente\n");
+                    print_peers_nbs();
                 }
-
-                FD_CLR(0, &readset);
             }
-        }
 
-        return 0;
+            // esc
+            else if (strcmp(command, "esc\0") == 0)
+            {
+                printf("Invio ai peer i messaggi di disconnessione\n");
+
+                // rimozione di tutti i peer previo avviso
+                while (get_port(0) != -1)
+                {
+                    printf("Invio SRV_EXIT a %d\n", get_port(0));
+
+                    // invio messaggio
+                    if (send_udp_wait_ack(server_socket, "SRV_EXIT", MESS_TYPE_LEN, get_port(0), "S_XT_ACK"))
+                    {
+                        printf("Errore: impossibile disconnettere il peer %d\n", get_port(0));
+                        // spero bene per lui
+                    }
+
+                    // rimozione peer
+                    remove_peer(0);
+                }
+                close(server_socket);
+                _exit(0);
+            }
+
+            // errore
+            else
+            {
+                printf("Errore, comando non esistente\n");
+            }
+
+            FD_CLR(0, &readset);
+        }
     }
+
+    return 0;
 }

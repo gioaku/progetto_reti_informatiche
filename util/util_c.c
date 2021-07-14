@@ -17,9 +17,6 @@
 #include "const.h"
 
 extern int my_port;
-extern char current_d[DATE_LEN+1];
-extern char current_t[TIME_LEN+1];
-extern int neighbor[2];
 extern int listener_socket;
 extern int server_port;
 
@@ -69,13 +66,9 @@ void help_client(int i){
             printf("Errore nella chiamata\n");
     }
 }
-
 /*
-Validazione input get
-*/
-
-/*Controllo che la seconda non sia minore della prima in caso di totale
-e sia strettamente maggiore in caso di variazione*/
+// Controllo che la seconda non sia minore della prima in caso di totale
+// e sia strettamente maggiore in caso di variazione
 int is_real_period(int *date1, int *date2, char aggr){
     return (date1[0] < date2[0] || (date1[0] == date2[0] && (date1[1] < date2[1] || (date1[1] == date2[1] && (date1[2] < date2[2] || (date1[2] == date2[2] && aggr == 't'))))));
 }
@@ -145,9 +138,9 @@ int check_dates(char *date1, char *date2, char aggr){
         printf("Non si puo' inserire due volte *.\nLasciare vuoti i campi data se si desidera l'intero periodo\n");
         return 0;
     }
-    /*Se entrambe le date sono presenti,
-    controllo che la seconda non sia minore della prima in caso di totale
-    e sia strettamente maggiore in caso di variazione*/
+    // Se entrambe le date sono presenti,
+    // controllo che la seconda non sia minore della prima in caso di totale
+    // e sia strettamente maggiore in caso di variazione
     if(ret[0] == 3 && ret[1] == 3){
         if(!is_real_period(date[0], date[1], aggr)){
             printf("Periodo scelto non coerente\n");
@@ -159,9 +152,9 @@ int check_dates(char *date1, char *date2, char aggr){
     return 1;
 }
 
-/*
-Fine validazione input get
-*/
+
+// Fine validazione input get
+
 
 // Inserisce entry nel file di entries
 void insert_entry(char type, int quantity){
@@ -332,6 +325,7 @@ int is_entry_in(char* entry){
 
     return 0;
 }
+*/
 /*
 // Riceve tutte le entrate che mancavano al momento della chiamata della get e le aggiunge al file delle entrate
 void wait_for_entries(int peer_entr, int tot_entr, char type){
@@ -370,7 +364,6 @@ void wait_for_entries(int peer_entr, int tot_entr, char type){
         }
     }
 }
-*/
 // Invia tutte le entries che mancano al peer richiedente e che sono nel suo database
 void send_missing_entries(int req_port, char type, char* header, char* ack){
     FILE *fd, *temp;
@@ -723,3 +716,4 @@ void print_results(char aggr, char type, int sum_today, char* date1, char* date2
     
     remove("temp_entries.txt");
 }
+*/

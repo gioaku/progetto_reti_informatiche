@@ -320,7 +320,7 @@ void print_peers_nbs()
         struct PeerElement *head, *tail;
         int first;
         printf("I peer connessi alla rete sono:\n");
-        printf("\tprev -> peer -> next\n");
+        printf("\tprev -- peer -- next\n");
 
         first = connected_peersn.list->port;
         head = connected_peersn.list->next;

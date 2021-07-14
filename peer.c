@@ -129,7 +129,8 @@ int main(int argc, char **argv)
                 }
 
                 sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next);
-
+                printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
+                
                 // controllo sui parametri letti
                 if (!valid_port(nbs.prev) || !valid_port(nbs.next))
                 {

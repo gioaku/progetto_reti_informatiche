@@ -149,6 +149,7 @@ int main(int argc, char **argv)
                 {
                     nbs.tot = 0;
                 }
+                printf("ho %d vicini, mi sono arrivati questi valori prev: %d, next %d\n", nbs.tot, nbs.prev, nbs.next);
                 printf("Connessione riuscita\n");
                 print_nbs(my_port, nbs);
             }

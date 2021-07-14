@@ -77,7 +77,7 @@ int s_send_ack_udp(int socket, char *buffer, int send_port)
 {
     if (s_send_udp(socket, buffer, MESS_TYPE_LEN + 1, send_port))
     {
-        printf("ACK %s inviato correttamente al destinatario %d\n", buffer, send_port);
+        printf("Messaggio %s inviato correttamente al destinatario %d\n", buffer, send_port);
         return 1;
     }
     return 0;

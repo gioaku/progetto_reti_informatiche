@@ -99,7 +99,7 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
                 printf("recv_port: %d\n", recv_port);
 
         sscanf(buffer, "%s", temp_buffer);
-        temp_buffer[buff_l] = '\0';
+        //temp_buffer[buff_l] = '\0';
 
         printf("recv_port: %d\n", recv_port);
         printf("port: %d\n", port);

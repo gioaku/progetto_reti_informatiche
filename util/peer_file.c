@@ -49,6 +49,12 @@ int get_port(int pos)
     return tmp_ptr->port;
 }
 
+int get_first_port()
+{
+    if (connected_peersn != 0)
+        return connected_peersn.list->port;
+    return -1;
+}
 // Controlla se un peer e' connesso o meno
 int get_position(int port)
 {
@@ -218,6 +224,44 @@ struct Neighbors insert_peer(int port)
     free(new);
     nbs.tot = -1;
     return nbs;
+}
+
+int remove_first_peer()
+{
+    if (connected_peersn.peers == 0)
+    {
+        return -1;
+    }
+    if (connected_peersn.peers == 1)
+    {
+        free(connected_peersn.list);
+        connected_peersn.peers = 0;
+        return -1;
+    }
+    else
+    {
+        struct PeerElement *punt;
+
+        punt = connected_peersn.list;
+        connected_peersn.list = connected_peersn.list->next;
+        connected_peersn.peers--;
+        adjust_last(punt);
+        free(punt);
+        return connected_peersn.list->port;
+    }
+}
+
+void adjust_next(struct PeerElement *ctrl)
+{
+    struct PeerElement *punt;
+
+    punt = connected_peersn.list;
+    do
+    {
+        punt = punt->next;
+    } while (punt->next != ctrl);
+
+    punt->next = connected_peersn.list;
 }
 
 // Rimuove un peer dalla lista di quelli connessi - ritorna i vicini prima della rimozione

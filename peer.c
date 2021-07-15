@@ -349,6 +349,10 @@ int main(int argc, char **argv)
                     {
                         printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo\n", nbs.prev, tmp);
                         nbs.prev = tmp;
+                        if (nbs.prev == my_port)
+                            nbs.tot = 0;
+                        else if (nbs.prev == nbs.next)
+                            nbs.tot = 1;
                     }
                     else
                     {
@@ -365,6 +369,10 @@ int main(int argc, char **argv)
                     {
                         printf("Aggiornamento vicino successivo da %d a %d avvenuto con successo\n", nbs.next, tmp);
                         nbs.next = tmp;
+                        if (nbs.next == my_port)
+                            nbs.tot = 0;
+                        else if (nbs.prev == nbs.next)
+                            nbs.tot = 1;
                     }
                     else
                     {

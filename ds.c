@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 
             fgets(command_buffer, MAX_COMMAND_S, stdin);
             input_number = sscanf(command_buffer, "%s %d", command, &neighbor_peer);
-
+            printf("%s", command);
             // help
             if (strcmp(command, "help\0") == 0)
             {
@@ -216,21 +216,22 @@ int main(int argc, char **argv)
             else if (strcmp(command, "esc\0") == 0)
             {
                 printf("Invio ai peer i messaggi di disconnessione\n");
+                int port = get_port(0);
 
                 // rimozione di tutti i peer previo avviso
-                while (get_port(0) != -1)
+                while (port != -1)
                 {
-                    printf("Invio SRV_EXIT a %d\n", get_port(0));
+                    printf("Invio SRV_EXIT a %d\n", port);
 
                     // invio messaggio
-                    if (send_udp_wait_ack(server_socket, "SRV_EXIT", MESS_TYPE_LEN, get_port(0), "S_XT_ACK"))
+                    if (!send_udp_wait_ack(server_socket, "SRV_EXIT", MESS_TYPE_LEN, port, "S_XT_ACK"))
                     {
-                        printf("Errore: impossibile disconnettere il peer %d\n", get_port(0));
+                        printf("Errore: impossibile disconnettere il peer %d\n", port);
                         // spero bene per lui
                     }
 
                     // rimozione peer
-                    remove_peer(0);
+                    port = remove_first_peer();
                 }
                 close(server_socket);
                 _exit(0);

@@ -77,10 +77,6 @@ int main(int argc, char **argv)
 
             printf("Arrivato messaggio %s da %d sul socket\n", socket_buffer, peer_port);
 
-            // Messaggi possibili:
-            // richiesta di connessione
-            // richiesta di disconnessione
-
             // richiesta di connessione
             if (strcmp(recv_buffer, "CONN_REQ") == 0)
             {
@@ -121,7 +117,7 @@ int main(int argc, char **argv)
                 {
                     remove_peer(peer_port);
                     printf("Errore: impossibile comunicare vicini al peer\nOperazione abortita\n");
-                    continue;
+                    continue; 
                 };
 
                 // invio aggiornamenti vicini

@@ -87,7 +87,11 @@ int main(int argc, char **argv)
                 for (tmp = 0; tmp < 5; tmp++)
                     help_client(tmp);
             }
-
+            // nbs
+            else if (strcmp(command, "nbs") == 0)
+            {
+                print_nbs(my_port, nbs);
+            }
             // start
             else if (strcmp(command, "start") == 0)
             {
@@ -153,7 +157,6 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                printf("ho %d vicini, mi sono arrivati questi valori prev: %d, next %d\n", nbs.tot, nbs.prev, nbs.next);
                 printf("Connessione riuscita\n");
                 print_nbs(my_port, nbs);
             }

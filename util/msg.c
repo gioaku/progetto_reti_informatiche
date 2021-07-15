@@ -60,12 +60,7 @@ int s_send_udp(int socket, char *buffer, int buff_l, int send_port)
     send_addr_len = sizeof(send_addr);
     set_address(&send_addr, &send_addr_len, send_port);
 
-    if (sendto(socket, buffer, MESS_TYPE_LEN + 1, 0, (struct sockaddr *)&send_addr, send_addr_len) > 0)
-        return 1;
-
-    // impossibile mendare il messaggio
-    printf("Errore impossibile inviare il messaggio");
-    return 0;
+    return sendto(socket, buffer, MESS_TYPE_LEN + 1, 0, (struct sockaddr *)&send_addr, send_addr_len) > 0;
 }
 
 // Invio di un ack - ritorna 1 se ha successo - ritorna 0 altrimenti
@@ -113,7 +108,7 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
         // altrimenti scarta
         else
         {
-            printf("[R] Arrivato un messaggio %s inatteso da %d mentre attendevo %s da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
+            printf("Warning: [R] Arrivato un messaggio %s inatteso da %d mentre attendevo %s da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
         }
     }
     return 0;
@@ -126,29 +121,40 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
     int tries = ACK_TRIES;
 
     // invia il messaggio
-    s_send_udp(socket, buffer, buff_l, port);
+    if (!s_send_udp(socket, buffer, buff_l, port))
+    {
+        printf("Errore: [S] Impossibile inviare messaggio %s al destinatario %d\n", buffer, port);
+    }
+    printf("Messaggio %s inviato correttamente al destinatario %d\n", buffer, port);
+
     while (recv_udp(socket, recv_buffer, MESS_TYPE_LEN, port, acked) && tries-- > 0)
     {
-    };
+    }
 
     if (tries > -1)
     {
-        printf("Messaggio %s inviato correttamente al destinatario %d\n", buffer, port);
+        printf("Messggio %s ricevuto correttamente dal destinatario %d\n", buffer, port);
         return 1;
     }
 
-    printf("Il destinatario %d non risulta online\n", port);
+    printf("Il destinatario %d non risulta raggiungibile\n", port);
     return 0;
 }
 
 // Attesa del messagio specifico e invio dell'ack - ritorna 1 se ack mandato con successo - ritorna 0 altrimenti
 int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *correct_header, char *ack_type)
 {
+    int tries = ACK_TRIES;
+
     // riceve messaggio
-    while (recv_udp(socket, buffer, buff_l, port, correct_header))
+    while (recv_udp(socket, buffer, buff_l, port, correct_header) && tries-- > 0)
     {
     }
-
-    // manda l'ack
-    return s_send_ack_udp(socket, ack_type, port);
+    if (tries > -1){
+        // manda l'ack
+        return s_send_ack_udp(socket, ack_type, port);
+    }
+    
+    prinf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d/n", correct_header, port);
+    return 0;
 }

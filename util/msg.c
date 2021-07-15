@@ -31,7 +31,7 @@ int udp_socket_init(struct sockaddr_in *addr_p, socklen_t *len_p, int port)
 
     if (bind(sock, (struct sockaddr *)addr_p, (*len_p)) != 0)
     {
-        perror("Error while binding");
+        perror("Error while binding\n");
         exit(0);
     }
 
@@ -47,7 +47,7 @@ int s_recv_udp(int socket, char *buffer, int buff_l)
     send_addr_len = sizeof(send_addr);
 
     recvfrom(socket, buffer, buff_l, 0, (struct sockaddr *)&send_addr, &send_addr_len);
-    printf("returning %d", ntohs(send_addr.sin_port));
+    printf("returning %d\n", ntohs(send_addr.sin_port));
     return ntohs(send_addr.sin_port);
 }
 
@@ -101,10 +101,13 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
         temp_buffer[buff_l] = '\0';
 
         // se messaggio diverso scarta
-        if (port != recv_port || strcmp(correct_header, temp_buffer) != 0){
-            printf("Warning: [R] Arrivato un messaggio %s inatteso da %d mentre attendevo %s da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
+        if (port != recv_port){
+            printf("Warning: [R] Arrivato un messaggio %s inatteso da %d mentre attendevo %s da %d diversa, scartato\n", temp_buffer, recv_port, correct_header, port);
+        } 
+        else if(strcmp(correct_header, temp_buffer) != 0){
+            printf("Warning: [R] Arrivato un messaggio %s inatteso da %d mentre attendevo %s diverso da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
         }
-        
+
         // se messaggio giusto ritorna 1
         else
         {

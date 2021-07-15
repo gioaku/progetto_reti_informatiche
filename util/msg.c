@@ -155,6 +155,6 @@ int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *corre
         return s_send_ack_udp(socket, ack_type, port);
     }
     
-    prinf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d/n", correct_header, port);
+    printf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d/n", correct_header, port);
     return 0;
 }

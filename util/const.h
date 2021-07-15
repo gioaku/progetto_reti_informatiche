@@ -31,7 +31,7 @@
 // Massima lunghezza di un comando per il peer
 #define MAX_COMMAND_C 6
 // Lunghezza massima messaggio legato all'update delle liste, lato client e lato server
-#define MAX_LIST_LEN 21
+#define MAX_LIST_LEN 40
 // Massima lunghezza messaggio contenente il numero di entries giornaliere (per scelta progettuale mai sopra le 7 cifre)
 #define MAX_ENTRY_REP 16
 // Lunghezza messaggio con header e carattere a identificare il tipo di entry richiesta

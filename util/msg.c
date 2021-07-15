@@ -112,7 +112,7 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
         // se messaggio giusto ritorna 1
         else
         {
-            printf("Messaggio %s ricevuto correttamente dal mittente %d\n", buffer, recv_port);
+            printf("Messaggio %s ricevuto correttamente dal mittente %d\n", temp_buffer, recv_port);
             return 1;
         }
     }

@@ -128,13 +128,21 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                
-                if (sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next) < 3){
+                tmp = sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next);
+                if (tmp == 0)
+                {
                     printf("Errore: lista dei vicini ricevuta non valida. Riprovare\n");
+                    send_udp_wait_ack(listener_socket, "CLT_EXIT", MESS_TYPE_LEN, server_port, "C_EX_ACK");
                     continue;
                 }
-
-                printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
+                if (tmp == 1)
+                {
+                    printf("Nessun vicino ricevuto. Non ci sono altri peer connessi\n");
+                }
+                if (tmp == 3)
+                {
+                    printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
+                }
 
                 nbs.prev = nbs.prev;
                 nbs.next = nbs.next;
@@ -145,6 +153,7 @@ int main(int argc, char **argv)
                 if (!valid_port(nbs.prev) || !valid_port(nbs.next))
                 {
                     printf("Errore lista di vicini ricevuta non valida. Riprovare\n");
+
                     continue;
                 }
 
@@ -357,8 +366,9 @@ int main(int argc, char **argv)
                         printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo\n", nbs.prev, tmp);
                         nbs.prev = tmp;
                     }
-                    else{
-                    printf("Errore nell'aggiornamento del vicino precedente da %d a %d\nOperazione annullata\n", nbs.prev, tmp);
+                    else
+                    {
+                        printf("Errore nell'aggiornamento del vicino precedente da %d a %d\nOperazione annullata\n", nbs.prev, tmp);
                     }
                 }
 

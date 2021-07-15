@@ -251,7 +251,7 @@ int remove_first_peer()
     }
 }
 
-void adjust_next(struct PeerElement *ctrl)
+void adjust_last(struct PeerElement *ctrl)
 {
     struct PeerElement *punt;
 

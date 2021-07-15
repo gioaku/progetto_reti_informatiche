@@ -74,11 +74,11 @@ int s_send_ack_udp(int socket, char *buffer, int send_port)
     return 0;
 }
 
-// Attesa e ricezione di un messaggio da confrontare con messaggio specifico - ritorna 1 se arriva giusto - 0 altrimenti
+// Attesa e ricezione di un messaggio con header specifico - ritorna 1 se arriva giusto - 0 altrimenti
 int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_header)
 {
     int recv_port;
-    char temp_buffer[MESS_TYPE_LEN];
+    char temp_buffer[MESS_TYPE_LEN + 1];
     struct timeval util_tv;
     fd_set readset;
 
@@ -99,7 +99,7 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
                 printf("recv_port: %d\n", recv_port);
 
         sscanf(buffer, "%s", temp_buffer);
-        //temp_buffer[buff_l] = '\0';
+        temp_buffer[buff_l] = '\0';
 
         printf("recv_port: %d\n", recv_port);
         printf("port: %d\n", port);
@@ -149,7 +149,7 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
     return 0;
 }
 
-// Attesa del messagio specifico e invio dell'ack - ritorna 1 se ack mandato con successo - ritorna 0 altrimenti
+// Attesa del messagio con header specifico e invio dell'ack - ritorna 1 se ack mandato con successo - ritorna 0 altrimenti
 int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *correct_header, char *ack_type)
 {
     int tries = ACK_TRIES;

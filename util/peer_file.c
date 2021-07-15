@@ -51,7 +51,7 @@ int get_port(int pos)
 
 int get_first_port()
 {
-    if (connected_peersn != 0)
+    if (connected_peersn.peers != 0)
         return connected_peersn.list->port;
     return -1;
 }

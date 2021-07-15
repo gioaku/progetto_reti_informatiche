@@ -128,7 +128,12 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next);
+                
+                if (sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next) < 3){
+                    printf("Errore: lista dei vicini ricevuta non valida. Riprovare\n");
+                    continue;
+                }
+
                 printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
 
                 nbs.prev = nbs.prev;

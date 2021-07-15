@@ -131,8 +131,8 @@ int main(int argc, char **argv)
                 sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next);
                 printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
 
-                nbs.prev = ntohs(nbs.prev);
-                nbs.next = ntohs(nbs.next);
+                nbs.prev = nbs.prev;
+                nbs.next = nbs.next;
 
                 printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
 
@@ -346,7 +346,6 @@ int main(int argc, char **argv)
                 if (strcmp(mess_type_buffer, "PRE_UPDT") == 0)
                 {
                     sscanf(socket_buffer, "%s %d", mess_type_buffer, &tmp);
-                    tmp = ntohs(tmp);
 
                     if (valid_port(tmp) && s_send_ack_udp(listener_socket, "PREV_ACK", server_port))
                     {
@@ -361,7 +360,6 @@ int main(int argc, char **argv)
                 else if (strcmp(mess_type_buffer, "NXT_UPDT") == 0)
                 {
                     sscanf(socket_buffer, "%s %d", mess_type_buffer, &tmp);
-                    tmp = ntohs(tmp);
 
                     if (valid_port(tmp) && s_send_ack_udp(listener_socket, "NEXT_ACK", server_port))
                     {

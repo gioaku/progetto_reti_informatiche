@@ -123,11 +123,11 @@ int main(int argc, char **argv)
                 // invio aggiornamenti vicini
                 if (nbs.tot > 0)
                 {
-                    buff_len = sprintf(list_buffer, "%s %d", "PRE_UPDT", htonl(peer_port));
+                    buff_len = sprintf(list_buffer, "%s %d", "PRE_UPDT", htons(peer_port));
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.next, list_buffer, buff_len);
                     send_udp_wait_ack(server_socket, list_buffer, buff_len, nbs.next, "PREV_ACK");
 
-                    buff_len = sprintf(list_buffer, "%s %d", "NXT_UPDT", htonl(peer_port));
+                    buff_len = sprintf(list_buffer, "%s %d", "NXT_UPDT", htons(peer_port));
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, list_buffer, buff_len);
                     send_udp_wait_ack(server_socket, list_buffer, buff_len, nbs.prev, "NEXT_ACK");
                 }

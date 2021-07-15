@@ -47,7 +47,7 @@ int s_recv_udp(int socket, char *buffer, int buff_l)
     send_addr_len = sizeof(send_addr);
 
     recvfrom(socket, buffer, buff_l, 0, (struct sockaddr *)&send_addr, &send_addr_len);
-    pritnf("returning %d", ntohs(send_addr.sin_addr));
+    pritnf("returning %d", ntohs(send_addr.sin_port));
     return ntohs(send_addr.sin_port);
 }
 

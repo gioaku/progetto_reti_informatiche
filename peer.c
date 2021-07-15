@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 
                 if (tmp != 3 || strcmp(DS_addr, LOCALHOST) != 0 || !valid_port(server_port))
                 {
-                    printf("port: %d\n", server_port);
+                    printf("Errore: passaggio dei parametri per la connessione non validi\n");
                     help_client(1);
                     continue;
                 }
@@ -117,14 +117,14 @@ int main(int argc, char **argv)
                 // invio richiesta di connessione
                 if (!send_udp_wait_ack(listener_socket, "CONN_REQ", MESS_TYPE_LEN, server_port, "CONN_ACK"))
                 {
-                    printf("Errore impossibile inviare richiesta di connessione al server. Riprovare\n");
+                    printf("Errore: impossibile inviare richiesta di connessione al server. Riprovare\n");
                     continue;
                 }
 
                 // ricevo lista di vicini
                 if (!recv_udp_and_ack(listener_socket, recv_buffer, MAX_LIST_LEN, server_port, "NBR_LIST", "LIST_ACK"))
                 {
-                    printf("Errore impossibile ricevere la lista di vicini dal server. Riprovare\n");
+                    printf("Errore: impossibile ricevere la lista di vicini dal server. Riprovare\n");
                     continue;
                 }
 

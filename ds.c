@@ -102,7 +102,6 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                print_nbs(peer_port, nbs);
 
                 // compongo la lista
                 if (nbs.tot == 0)
@@ -111,6 +110,7 @@ int main(int argc, char **argv)
                     buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", htonl(nbs.prev), htonl(nbs.next));
 
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", peer_port, list_buffer, buff_len);
+                print_nbs(peer_port, nbs);
 
                 // invio dei vicini
                 if (!send_udp_wait_ack(server_socket, list_buffer, buff_len, peer_port, "LIST_ACK"))

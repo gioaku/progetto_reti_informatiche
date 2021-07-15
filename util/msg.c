@@ -102,7 +102,7 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
         // se messaggio giusto ritorna
         if (port == recv_port && strcmp(correct_header, temp_buffer) == 0)
         {
-            printf("Messaggio %s ricevuto correttamente dal mittente %d\n", temp_buffer, port);
+            printf("Messaggio %s ricevuto correttamente dal mittente %d\n", temp_buffer, recv_port);
             return 1;
         }
         // altrimenti scarta
@@ -137,7 +137,7 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
         return 1;
     }
 
-    printf("Il destinatario %d non risulta raggiungibile\n", port);
+    printf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d\n", acked, port);
     return 0;
 }
 
@@ -155,6 +155,6 @@ int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *corre
         return s_send_ack_udp(socket, ack_type, port);
     }
     
-    printf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d/n", correct_header, port);
+    printf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d\n", correct_header, port);
     return 0;
 }

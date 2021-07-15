@@ -96,19 +96,21 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
     {
         // lettura messaggio
         recv_port = s_recv_udp(socket, buffer, buff_l);
-                printf("recv_port: %d\n", recv_port);
+        printf("recv_port: %d\n", recv_port);
 
         sscanf(buffer, "%s", temp_buffer);
-        temp_buffer[buff_l] = '\0';
+        temp_buffer[MESS_TYPE_LEN] = '\0';
 
         printf("recv_port: %d\n", recv_port);
         printf("port: %d\n", port);
-        
+
         // se messaggio diverso scarta
-        if (port != recv_port){
+        if (port != recv_port)
+        {
             printf("Warning: [R] Arrivato un messaggio %s inatteso da [err] %d mentre attendevo %s da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
-        } 
-        else if(strcmp(correct_header, temp_buffer) != 0){
+        }
+        else if (strcmp(correct_header, temp_buffer) != 0)
+        {
             printf("Warning: [R] Arrivato un messaggio [err] %s inatteso da %d mentre attendevo %s da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
         }
 
@@ -158,11 +160,12 @@ int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *corre
     while (!recv_udp(socket, buffer, buff_l, port, correct_header) && tries-- > 0)
     {
     }
-    if (tries > -1){
+    if (tries > -1)
+    {
         // manda l'ack
         return s_send_ack_udp(socket, ack_type, port);
     }
-    
+
     printf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d\n", correct_header, port);
     return 0;
 }

@@ -127,7 +127,7 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
     }
     printf("Messaggio %s inviato correttamente al destinatario %d\n", buffer, port);
 
-    while (recv_udp(socket, recv_buffer, MESS_TYPE_LEN, port, acked) && tries-- > 0)
+    while (!recv_udp(socket, recv_buffer, MESS_TYPE_LEN, port, acked) && tries-- > 0)
     {
     }
 
@@ -147,7 +147,7 @@ int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *corre
     int tries = ACK_TRIES;
 
     // riceve messaggio
-    while (recv_udp(socket, buffer, buff_l, port, correct_header) && tries-- > 0)
+    while (!recv_udp(socket, buffer, buff_l, port, correct_header) && tries-- > 0)
     {
     }
     if (tries > -1){

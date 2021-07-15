@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 
                 // compongo la lista
                 if (nbs.tot == 0)
-                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", -1, -1);
+                    buff_len = sprintf(list_buffer, "%s", "NBR_LIST");
                 else
                     buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", nbs.prev, nbs.next);
 

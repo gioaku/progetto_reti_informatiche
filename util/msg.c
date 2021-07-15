@@ -96,6 +96,8 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
     {
         // lettura messaggio
         recv_port = s_recv_udp(socket, buffer, buff_l);
+                printf("recv_port: %d\n", recv_port);
+
         sscanf(buffer, "%s", temp_buffer);
         temp_buffer[buff_l] = '\0';
 

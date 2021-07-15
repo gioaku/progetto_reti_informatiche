@@ -159,7 +159,7 @@ int main(int argc, char **argv)
                 printf("Connessione riuscita\n");
                 print_nbs(my_port, nbs);
             }
-/*
+            /*
             // add
             else if (strcmp(command, "add") == 0)
             {
@@ -352,8 +352,9 @@ int main(int argc, char **argv)
                         printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo\n", nbs.prev, tmp);
                         nbs.prev = tmp;
                     }
-
+                    else{
                     printf("Errore nell'aggiornamento del vicino precedente da %d a %d\nOperazione annullata\n", nbs.prev, tmp);
+                    }
                 }
 
                 // aggiornamento vicino successivo
@@ -363,11 +364,13 @@ int main(int argc, char **argv)
 
                     if (valid_port(tmp) && s_send_ack_udp(listener_socket, "NEXT_ACK", server_port))
                     {
-                        printf("Aggiornamento vicino successivo da %d a %d avvenuto con successo", nbs.next, tmp);
+                        printf("Aggiornamento vicino successivo da %d a %d avvenuto con successo\n", nbs.next, tmp);
                         nbs.next = tmp;
                     }
-
-                    printf("Errore nell'aggiornamento del vicino successivo da %d a %d\nOperazione annullata", nbs.next, tmp);
+                    else
+                    {
+                        printf("Errore nell'aggiornamento del vicino successivo da %d a %d\nOperazione annullata\n", nbs.next, tmp);
+                    }
                 }
 
                 // Notifica chiusura server
@@ -383,7 +386,6 @@ int main(int argc, char **argv)
                     close(listener_socket);
                     _exit(0);
                 }
-
             }
             FD_CLR(listener_socket, &readset);
         }

@@ -59,7 +59,7 @@ int s_send_udp(int socket, char *buffer, int buff_l, int send_port)
     send_addr_len = sizeof(send_addr);
     set_address(&send_addr, &send_addr_len, send_port);
 
-    return sendto(socket, buffer, MESS_TYPE_LEN + 1, 0, (struct sockaddr *)&send_addr, send_addr_len) > 0;
+    return sendto(socket, buffer, buff_l, 0, (struct sockaddr *)&send_addr, send_addr_len) > 0;
 }
 
 // Invio di un ack - ritorna 1 se ha successo - ritorna 0 altrimenti

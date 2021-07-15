@@ -137,38 +137,22 @@ int main(int argc, char **argv)
                 }
                 if (tmp == 1)
                 {
+                    nbs.tot = 0;
                     printf("Nessun vicino ricevuto. Non ci sono altri peer connessi\n");
                 }
                 if (tmp == 3)
                 {
+                    nbs.tot = (nbs.prev == nbs.next) ? 1 : 2;
                     printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
                 }
-
-                nbs.prev = nbs.prev;
-                nbs.next = nbs.next;
-
-                printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
 
                 // controllo sui parametri letti
                 if (!valid_port(nbs.prev) || !valid_port(nbs.next))
                 {
                     printf("Errore lista di vicini ricevuta non valida. Riprovare\n");
-
                     continue;
                 }
 
-                if (nbs.prev != nbs.next)
-                {
-                    nbs.tot = 2;
-                }
-                else if (nbs.prev != -1)
-                {
-                    nbs.tot = 1;
-                }
-                else
-                {
-                    nbs.tot = 0;
-                }
                 printf("ho %d vicini, mi sono arrivati questi valori prev: %d, next %d\n", nbs.tot, nbs.prev, nbs.next);
                 printf("Connessione riuscita\n");
                 print_nbs(my_port, nbs);

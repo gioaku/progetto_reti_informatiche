@@ -96,16 +96,18 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
     {
         // lettura messaggio
         recv_port = s_recv_udp(socket, buffer, buff_l);
-        printf("recv_port: %d\n", recv_port);
         sscanf(buffer, "%s", temp_buffer);
         temp_buffer[buff_l] = '\0';
 
+        printf("recv_port: %d\n", recv_port);
+        printf("port: %d\n", port);
+        
         // se messaggio diverso scarta
         if (port != recv_port){
-            printf("Warning: [R] Arrivato un messaggio %s inatteso da %d mentre attendevo %s da %d diversa, scartato\n", temp_buffer, recv_port, correct_header, port);
+            printf("Warning: [R] Arrivato un messaggio %s inatteso da [err] %d mentre attendevo %s da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
         } 
         else if(strcmp(correct_header, temp_buffer) != 0){
-            printf("Warning: [R] Arrivato un messaggio %s inatteso da %d mentre attendevo %s diverso da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
+            printf("Warning: [R] Arrivato un messaggio [err] %s inatteso da %d mentre attendevo %s da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
         }
 
         // se messaggio giusto ritorna 1

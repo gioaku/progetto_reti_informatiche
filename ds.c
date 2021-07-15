@@ -105,9 +105,9 @@ int main(int argc, char **argv)
 
                 // compongo la lista
                 if (nbs.tot == 0)
-                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", htonl(-1), htonl(-1));
+                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", htons(-1), htons(-1));
                 else
-                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", htonl(nbs.prev), htonl(nbs.next));
+                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", htons(nbs.prev), htons(nbs.next));
 
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", peer_port, list_buffer, buff_len);
                 print_nbs(peer_port, nbs);
@@ -185,7 +185,6 @@ int main(int argc, char **argv)
 
             fgets(command_buffer, MAX_COMMAND_S, stdin);
             input_number = sscanf(command_buffer, "%s %d", command, &neighbor_peer);
-            printf("Ricevuti %d parametri da stdin: %s, %d", input_number, command, neighbor_peer);
 
             // help
             if (strcmp(command, "help\0") == 0)

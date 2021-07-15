@@ -129,8 +129,10 @@ int main(int argc, char **argv)
                 }
 
                 sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next);
-                nbs.prev = ntohl(nbs.prev);
-                nbs.next = ntohl(nbs.next);
+                printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
+
+                nbs.prev = ntohs(nbs.prev);
+                nbs.next = ntohs(nbs.next);
 
                 printf("I vicini ricevuti sono prev: %d, next %d\n", nbs.prev, nbs.next);
 

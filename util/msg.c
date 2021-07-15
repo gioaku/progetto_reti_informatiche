@@ -47,7 +47,6 @@ int s_recv_udp(int socket, char *buffer, int buff_l)
     send_addr_len = sizeof(send_addr);
 
     recvfrom(socket, buffer, buff_l, 0, (struct sockaddr *)&send_addr, &send_addr_len);
-    printf("returning %d\n", ntohs(send_addr.sin_port));
     return ntohs(send_addr.sin_port);
 }
 
@@ -96,13 +95,9 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
     {
         // lettura messaggio
         recv_port = s_recv_udp(socket, buffer, buff_l);
-        printf("recv_port: %d\n", recv_port);
 
         sscanf(buffer, "%s", temp_buffer);
         temp_buffer[MESS_TYPE_LEN] = '\0';
-
-        printf("recv_port: %d\n", recv_port);
-        printf("port: %d\n", port);
 
         // se messaggio diverso scarta
         if (port != recv_port)

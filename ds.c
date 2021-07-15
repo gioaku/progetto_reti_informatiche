@@ -183,9 +183,9 @@ int main(int argc, char **argv)
             int input_number;
             char command[MAX_COMMAND_S];
 
-            fgets(command_buffer, MAX_COMMAND_S, stdin);
+            fgets(command_buffer, MAX_STDIN_S, stdin);
             input_number = sscanf(command_buffer, "%s %d", command, &neighbor_peer);
-            printf("%s", command);
+            printf("command: %s\n", command);
             // help
             if (strcmp(command, "help\0") == 0)
             {

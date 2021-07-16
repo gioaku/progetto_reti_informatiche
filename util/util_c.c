@@ -34,23 +34,23 @@ void print_client_commands(){
 void help_client(int i){
     switch(i){
         case 0: // help
-            printf("help - mostra elenco comandi e significato\n");
+            printf("\nhelp - mostra elenco comandi e significato\n");
             printf("Parametri: nessuno\n");
             break;
         case 1: // start
-            printf("start <DS_addr> <DS_port> - richiede al Discovery Server connessione alla rete\n");
+            printf("\nstart <DS_addr> <DS_port> - richiede al Discovery Server connessione alla rete\n");
             printf("Parametri:\n");
             printf(" - DS_addr : stringa con IP in formato presentazione\n");
             printf(" - DS_port : porta sulla quale gira il processo server, compresa tra 1024 e 65535\n");
             break;
         case 2:
-            printf("add <type> <quantity> - aggiunge una entry nel registro giornaliero del peer\n");
+            printf("\nadd <type> <quantity> - aggiunge una entry nel registro giornaliero del peer\n");
             printf("Parametri:\n");
             printf(" - type : carattere per indicare se tamponi o nuovi casi [t/n]\n");
             printf(" - quantity : quantita' del dato da aggiungere [intero n]\n");
             break;
         case 3:
-            printf("get <aggr> <type> [<date1> <date2>] - richiede un dato aggregato\n");
+            printf("\nget <aggr> <type> [<date1> <date2>] - richiede un dato aggregato\n");
             printf("Parametri:\n");
             printf(" - aggr : tipo di aggregazione, se totale o variazioni giornaliere [t/v]\n");
             printf(" - type : carattere per indicare se tamponi o nuovi casi [t/n]\n");
@@ -59,7 +59,7 @@ void help_client(int i){
             printf("Nota: se non si vuole nessun bound omettere le date\n");
             break;
         case 4:
-            printf("stop - richiede disconnessione dalla rete\n");
+            printf("\nstop - richiede disconnessione dalla rete\n");
             printf("Parametri: nessuno\n");
             break;
         default:

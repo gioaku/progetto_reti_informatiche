@@ -28,7 +28,7 @@ fopen, fprintf, fscanf - includes{stdio.h}
 stat(filename, struct stat &info) - includes{stdio.h, sys/stat.h}
 L 5
 includes{arpa/inet.h, sys/types.h, sys/socket.h, netinet/in.h}
-socket(int domain, int type, int protocol = 0) - domani {AF_LOCAL, AF_INET}, type {SOCK_STREAM, SOCK_DGRAM}, includes {sys/types.h, sys/socket.h}
+socket(int domain, int type, int protocol = 0) - domain {AF_LOCAL, AF_INET}, type {SOCK_STREAM, SOCK_DGRAM}, includes {sys/types.h, sys/socket.h}
 struct sockaddr_in{sa_family_t sin_family; in_port_t sin_port; struct in_addr sin_addr;}, struct in_addr{uint32_t s_addr;} - includes{sys/socket.h, netinet/in.h}
 uint32_t htonl(uint32_t hostlong), uint16_t htons(uint16_t hostshort), uint32_t ntonl(uint32_t hostlong), uint16_t ntonl(uint16_t hostshort) - includes{arpa/inet.h, stdint.h?}
 int inet_pton(int af, const char* src, void* dst), const char* inte_ntpo(int af, const void* src, char* dst, socklen_t size) - af = famiglia, void* = puntatore a in_addr, char* src = ip_addr

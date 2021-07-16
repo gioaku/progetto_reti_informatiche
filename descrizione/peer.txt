@@ -1,29 +1,62 @@
 ***PEER***
 myport
 nbs
+date
 
 ds msg - UDP msg
     close
         save registers
     update nb prev
     update nb next
+    
+    ++ DAY_RSET
+        date++
+        
+++ peer msg
+    floodforentries
+        if all keep flooding
+        else if i have all 
+            empty list
+            write myport has all
+            keep flooding
+        else    
+            if ihavedata add myport to list
+            keep flooding
+
+++ peer msg tcp
+    reqelab
+        if have tcp send
+    reqentries
+        tcp send entries
+    leaving
+        tcp recv entries to join to mines
 
 stdin msg
     help
     start addr, port
-        boot
+        reload registers
+        send udp
+        set timer
+        on ack 
+            set nb
+        on timer
+            go to send udp
+        ++ ask date
+    ++ add type qty
+        write entries(type, qty, date)
+    ++ get aggr type period
+        parameters controls
+        period controls and traduction
+        for date in period
+            if ihaveall calc and ret
+            if nbshasall get and ret
+            send floodforentries
+            for list in recv floodforentries
+                tcp reqentries
+                update entries
+                calc and ret
+
     stop
-        send openregister to nb1
-        send closed registers to nb1
+        ++ share registers
         send exit udp to ds
 
-***fun***
-
-boot
-    reload registers
-    send udp
-    set timer
-    on ack 
-        set nb
-    on timer
-        go to send udp

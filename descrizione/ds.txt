@@ -5,12 +5,11 @@ peer msg
         insert peer
         send ack and nbs
         update nbs for others
-        peer#++
+        ++ send date
     exit
         remove peer 
         send ack
         update nbs
-        peer#--
 stdin msg
     help
         print help
@@ -23,3 +22,6 @@ stdin msg
         send exit udp to all peers
         wait for acks
         exit
+
+++ timer 18
+    send_udp_wait_ack DAY_RSET

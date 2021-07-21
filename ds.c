@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     my_port = atoi(argv[1]);
 
     // creazione socket di ascolto
-    if (udp_socket_init(&sock.id, my_port) == -1)
+    if (udp_socket_init(&sock, my_port) == -1)
     {
         printf("Error: udp init gone wrong");
         exit(0);

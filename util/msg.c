@@ -21,24 +21,20 @@ void set_address(struct sockaddr_in *addr_p, socklen_t *len_p, int port)
 }
 
 // Inizializzazione del socket UDP - restituisce il descrittore di socket
-int udp_socket_init(struct UdpSocket &sock, int port)
+int udp_socket_init(struct UdpSocket *sock, int port)
 {
-    sock.id = socket(AF_INET, SOCK_DGRAM, 0);
-    set_address(sock.addr, sock.addr_len, port);
+    sock->id = socket(AF_INET, SOCK_DGRAM, 0);
+    set_address(&(sock->addr), (socklen_t*)&(sock->addr_len), port);
 
-    if (bind(sock.id, (struct sockaddr *)sock.addr, sock.addr_len) != 0)
+    if (bind(sock->id, (struct sockaddr *)&(sock->addr), sock->addr_len) != 0)
     {
         perror("Error: binding gone wrong\n");
         exit(0);
     }
 
-    return sock.id;
+    return sock->id;
 }
 
-int tcp_socket_init(struct TcpSocket &sock)
-{
-
-}
 
 // Ricezione bloccante di un messaggio - ritorna la porta del mittente
 int s_recv_udp(int socket, char *buffer, int buff_l)

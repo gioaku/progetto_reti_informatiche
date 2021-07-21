@@ -17,8 +17,7 @@ struct TcpSocket{
 };
 
 void set_address(struct sockaddr_in*, socklen_t*, int);
-int udp_socket_init(struct UdpSocket, int);
-int tcp_socket_init(struct TcpSocket);
+int udp_socket_init(struct UdpSocket*, int);
 int s_recv_udp(int, char*, int);
 int s_send_udp(int, char*, int, int);
 int s_send_ack_udp(int, char*, int);

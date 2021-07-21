@@ -108,6 +108,7 @@ int main(int argc, char **argv)
             {
                 char DS_addr[INET_ADDRSTRLEN]; // Indirizzo IP del server
                 char msg_type_buffer[MESS_TYPE_LEN + 1];
+                int tmp;
                 
                 printf("Inizio connessione...\n");
 

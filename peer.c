@@ -19,21 +19,27 @@
 // Costanti
 #include "./util/const.h"
 
-// Variabili
+// Variabili di stato
 int my_port;
-int listener_socket;              // Descrittore del socket di ascolto
-struct sockaddr_in listener_addr; // Struttura per gestire il socket di ascolto
-socklen_t listener_addr_len;
+char today[DATE_LEN];
 
-int tmp;                      // Variabile di servizio
-char stdin_buff[MAX_STDIN_C]; // Buffer per i comandi da standard input
-char socket_buffer[MAX_ENTRY_UPDATE];
+// Buffer stdin
+char command_buffer[MAX_STDIN_C]; 
 
-// Identifica il server
-int server_port;
+// Server socket
+struct UdpSocket server_s;
+
+// Listener socket
+struct TcpSocket listener_s;
 
 // Struttura per mantenere lo stato dei vicini
 struct Neighbors nbs;
+
+// Precedente
+struct TcpSocket prev_s;
+
+// Successivo
+struct TcpSocket next_s;
 
 // Variabili per gestire input da socket oppure da stdin
 fd_set master;
@@ -49,16 +55,20 @@ int main(int argc, char **argv)
 
     my_port = atoi(argv[1]);
 
-    // creazione socket di ascolto
-    listener_socket = udp_socket_init(&listener_addr, &listener_addr_len, my_port);
+    // creazione server socket
+    if (udp_socket_init(&server_s, my_port) == -1)
+    {
+        printf("Error: udp init gone wrong");
+        exit(0);
+    }
 
     // peer non connesso
     nbs.tot = -1;
 
     // inizializzo set di descrittori
-    FD_SET(listener_socket, &master);
+    FD_SET(server_s.id, &master);
     FD_SET(0, &master);
-    fdmax = listener_socket;
+    fdmax = server_s.id;
 
     // stampa elenco comandi
     print_client_commands();
@@ -78,14 +88,15 @@ int main(int argc, char **argv)
         {
             char command[MAX_COMMAND_C];
 
-            fgets(stdin_buff, MAX_STDIN_C, stdin);
-            sscanf(stdin_buff, "%s", command);
+            fgets(command_buffer, MAX_STDIN_C, stdin);
+            sscanf(command_buffer, "%s", command);
 
             // help
             if (strcmp(command, "help") == 0)
             {
-                for (tmp = 0; tmp < 5; tmp++)
-                    help_client(tmp);
+                int i;
+                for (i = 0; i < 5; i++)
+                    help_client(i);
             }
             // nbs
             else if (strcmp(command, "nbs") == 0)
@@ -96,9 +107,8 @@ int main(int argc, char **argv)
             else if (strcmp(command, "start") == 0)
             {
                 char DS_addr[INET_ADDRSTRLEN]; // Indirizzo IP del server
-                char recv_buffer[MAX_LIST_LEN];
-                char temp_buffer[MESS_TYPE_LEN];
-
+                char msg_type_buffer[MESS_TYPE_LEN + 1];
+                
                 printf("Inizio connessione...\n");
 
                 // controllo che il peer non sia connesso
@@ -109,9 +119,9 @@ int main(int argc, char **argv)
                 }
 
                 // lettura e controllo dei parametri
-                tmp = sscanf(stdin_buff, "%s %s %d", command, DS_addr, &server_port);
+                tmp = sscanf(command_buffer, "%s %s %d", command, DS_addr, &server_s.port);
 
-                if (tmp != 3 || strcmp(DS_addr, LOCALHOST) != 0 || !valid_port(server_port))
+                if (tmp != 3 || strcmp(DS_addr, LOCALHOST) != 0 || !valid_port(server_s.port))
                 {
                     printf("Errore: passaggio dei parametri per la connessione non validi\n");
                     help_client(1);
@@ -119,24 +129,24 @@ int main(int argc, char **argv)
                 }
 
                 // invio richiesta di connessione
-                if (!send_udp_wait_ack(listener_socket, "CONN_REQ", MESS_TYPE_LEN, server_port, "CONN_ACK"))
+                if (!send_udp_wait_ack(server_s.id, "CONN_REQ", MESS_TYPE_LEN, server_s.port, "CONN_ACK"))
                 {
                     printf("Errore: impossibile inviare richiesta di connessione al server. Riprovare\n");
                     continue;
                 }
 
                 // ricevo lista di vicini
-                if (!recv_udp_and_ack(listener_socket, recv_buffer, MAX_LIST_LEN, server_port, "NBR_LIST", "LIST_ACK"))
+                if (!recv_udp_and_ack(server_s.id, server_s.buffer, MAX_LIST_LEN, server_s.port, "NBR_LIST", "LIST_ACK"))
                 {
                     printf("Errore: impossibile ricevere la lista di vicini dal server. Riprovare\n");
                     continue;
                 }
 
-                tmp = sscanf(recv_buffer, "%s %d %d", temp_buffer, &nbs.prev, &nbs.next);
+                tmp = sscanf(server_s.buffer, "%s %d %d", msg_type_buffer, &nbs.prev, &nbs.next);
                 if (tmp == 0)
                 {
                     printf("Errore: lista dei vicini ricevuta non valida. Riprovare\n");
-                    send_udp_wait_ack(listener_socket, "CLT_EXIT", MESS_TYPE_LEN, server_port, "C_EX_ACK");
+                    send_udp_wait_ack(server_s.id, "CLT_EXIT", MESS_TYPE_LEN, server_s.port, "C_EX_ACK");
                     continue;
                 }
                 if (tmp == 1)
@@ -307,7 +317,7 @@ int main(int argc, char **argv)
                     // send_entries_to_next();
 
                     // tentativo di disconnessione
-                    if (!send_udp_wait_ack(listener_socket, "CLT_EXIT", MESS_TYPE_LEN, server_port, "C_EX_ACK"))
+                    if (!send_udp_wait_ack(server_s.id, "CLT_EXIT", MESS_TYPE_LEN, server_s.port, "C_EX_ACK"))
                     {
                         printf("Errore disconnessione non riuscita\n");
                         continue;
@@ -317,7 +327,7 @@ int main(int argc, char **argv)
                 }
 
                 // chiusura socket e terminazione
-                close(listener_socket);
+                close(server_s.id);
                 _exit(0);
             }
 
@@ -327,31 +337,33 @@ int main(int argc, char **argv)
             FD_CLR(0, &readset);
         }
 
-        // messaggio sul socket
-        if (FD_ISSET(listener_socket, &readset))
+        // messaggio sul server socket
+        if (FD_ISSET(server_s.id, &readset))
         {
             int src_port;
-            char mess_type_buffer[MESS_TYPE_LEN + 1];
+            char msg_type_buffer[MESS_TYPE_LEN + 1];
 
-            src_port = s_recv_udp(listener_socket, socket_buffer, MAX_ENTRY_UPDATE);
+            src_port = s_recv_udp(server_s.id, server_s.buffer, MAX_UDP_MSG);
 
-            sscanf(socket_buffer, "%s", mess_type_buffer);
-            mess_type_buffer[MESS_TYPE_LEN] = '\0';
+            sscanf(server_s.buffer, "%s", msg_type_buffer);
+            msg_type_buffer[MESS_TYPE_LEN] = '\0';
 
             // server
-            if (src_port == server_port)
+            if (src_port == server_s.port)
             {
-                printf("Messaggio ricevuto dal server: %s\n", socket_buffer);
+                printf("Messaggio ricevuto dal server: %s\n", server_s.buffer);
 
                 // aggiornamento vicino precedente
-                if (strcmp(mess_type_buffer, "PRE_UPDT") == 0)
+                if (strcmp(msg_type_buffer, "PRE_UPDT") == 0)
                 {
-                    sscanf(socket_buffer, "%s %d", mess_type_buffer, &tmp);
+                    int port;
+                    
+                    sscanf(server_s.buffer, "%s %d", msg_type_buffer, &port);
 
-                    if (valid_port(tmp) && s_send_ack_udp(listener_socket, "PREV_ACK", server_port))
+                    if (valid_port(port) && s_send_ack_udp(server_s.id, "PREV_ACK", server_s.port))
                     {
-                        printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo\n", nbs.prev, tmp);
-                        nbs.prev = tmp;
+                        printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo\n", nbs.prev, port);
+                        nbs.prev = port;
                         if (nbs.prev == my_port)
                             nbs.tot = 0;
                         else if (nbs.prev == nbs.next)
@@ -359,19 +371,21 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        printf("Errore nell'aggiornamento del vicino precedente da %d a %d\nOperazione annullata\n", nbs.prev, tmp);
+                        printf("Errore nell'aggiornamento del vicino precedente da %d a %d\nOperazione annullata\n", nbs.prev, port);
                     }
                 }
 
                 // aggiornamento vicino successivo
-                else if (strcmp(mess_type_buffer, "NXT_UPDT") == 0)
+                else if (strcmp(msg_type_buffer, "NXT_UPDT") == 0)
                 {
-                    sscanf(socket_buffer, "%s %d", mess_type_buffer, &tmp);
+                    int port;
 
-                    if (valid_port(tmp) && s_send_ack_udp(listener_socket, "NEXT_ACK", server_port))
+                    sscanf(server_s.buffer, "%s %d", msg_type_buffer, &port);
+
+                    if (valid_port(port) && s_send_ack_udp(server_s.id, "NEXT_ACK", server_s.port))
                     {
-                        printf("Aggiornamento vicino successivo da %d a %d avvenuto con successo\n", nbs.next, tmp);
-                        nbs.next = tmp;
+                        printf("Aggiornamento vicino successivo da %d a %d avvenuto con successo\n", nbs.next, port);
+                        nbs.next = port;
                         if (nbs.next == my_port)
                             nbs.tot = 0;
                         else if (nbs.prev == nbs.next)
@@ -379,25 +393,26 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        printf("Errore nell'aggiornamento del vicino successivo da %d a %d\nOperazione annullata\n", nbs.next, tmp);
+                        printf("Errore nell'aggiornamento del vicino successivo da %d a %d\nOperazione annullata\n", nbs.next, port);
                     }
                 }
 
                 // Notifica chiusura server
-                else if (strcmp(mess_type_buffer, "SRV_EXIT") == 0)
+                else if (strcmp(msg_type_buffer, "SRV_EXIT") == 0)
                 {
                     printf("Il server sta per chiudere\nDisconnessione in corso...\n");
 
                     // Invia ACK
-                    s_send_ack_udp(listener_socket, "S_XT_ACK", server_port);
+                    s_send_ack_udp(server_s.id, "S_XT_ACK", server_s.port);
 
                     printf("Disconnessione riuscita");
-                    // Chiude
-                    close(listener_socket);
+                    
+                    // Chiude tutti i socket
+                    close(server_s.id);
                     _exit(0);
                 }
             }
-            FD_CLR(listener_socket, &readset);
+            FD_CLR(server_s.id, &readset);
         }
     }
     return 0;

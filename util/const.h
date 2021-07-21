@@ -1,4 +1,6 @@
 // File contenente tutte le costanti da includere
+#ifndef CONSTH
+#define CONSTH
 
 // Lunghezza header messaggio
 #define MESS_TYPE_LEN 8
@@ -42,3 +44,9 @@
 #define MAX_PAST_AGGR 30
 // Massima ricezione per un socket (uguale a MAX_ENTRY_UPDATE)
 #define MAX_SOCKET_RECV 630
+// Massima lunghezza messaggio udp
+#define MAX_UDP_MSG 630
+// Massima lunghezza messaggio tcp
+#define MAX_TCP_MSG 630
+
+#endif

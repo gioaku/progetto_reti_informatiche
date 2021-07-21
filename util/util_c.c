@@ -17,7 +17,7 @@
 #include "const.h"
 
 extern int my_port;
-extern int listener_socket;
+extern int server_socket;
 extern int server_port;
 
 // Elenco dei comandi disponibili lato client

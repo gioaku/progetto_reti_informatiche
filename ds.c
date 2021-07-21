@@ -19,16 +19,16 @@
 // Costanti
 #include "./util/const.h"
 
-// Variabili
-int server_socket;              // Socket su cui il server riceve messaggi dai peer
-struct sockaddr_in server_addr; // Struttura per gestire il socket
-socklen_t server_len;
+int my_port;
+char today[DATE_LEN];
 
-char command_buffer[MAX_STDIN_S]; // Buffer su cui salvare i comandi provenienti da stdin
-char socket_buffer[MAX_SOCKET_RECV];
-char recv_buffer[MESS_TYPE_LEN + 1]; // Buffer su cui ricevere messaggio di richiesta connessione
+// Udp socket
+struct UdpSocket sock;
 
-// Gestione input da stdin oppure da socket
+// Buffer stdin
+char command_buffer[MAX_STDIN_S];
+
+// Gestione input 
 fd_set master;
 fd_set readset;
 int fdmax;
@@ -43,13 +43,19 @@ int main(int argc, char **argv)
     FD_ZERO(&master);
     FD_ZERO(&readset);
 
+    my_port = atoi(argv[1]);
+
     // creazione socket di ascolto
-    server_socket = udp_socket_init(&server_addr, &server_len, atoi(argv[1]));
+    if (udp_socket_init(&sock.id, my_port) == -1)
+    {
+        printf("Error: udp init gone wrong");
+        exit(0);
+    }
 
     // inizializzo set di descrittori
-    FD_SET(server_socket, &master);
+    FD_SET(sock.id, &master);
     FD_SET(0, &master);
-    fdmax = server_socket;
+    fdmax = sock.id;
 
     // stapa elenco comandi
     print_server_commands();
@@ -65,97 +71,96 @@ int main(int argc, char **argv)
         select(fdmax + 1, &readset, NULL, NULL, NULL);
 
         // messaggio da un peer
-        if (FD_ISSET(server_socket, &readset))
+        if (FD_ISSET(sock.id, &readset))
         {
             // porta del peer mittente
-            int peer_port;
+            int src_port;
+            // Buffer su cui ricevere messaggio di richiesta connessione
+            char msg_type_buffer[MESS_TYPE_LEN + 1];
 
             // ricezione messaggio
-            peer_port = s_recv_udp(server_socket, socket_buffer, MESS_TYPE_LEN);
-            sscanf(socket_buffer, "%s", recv_buffer);
-            recv_buffer[MESS_TYPE_LEN] = '\0';
+            src_port = s_recv_udp(sock.id, sock.buffer, MESS_TYPE_LEN);
+            sscanf(sock.buffer, "%s", msg_type_buffer);
+            msg_type_buffer[MESS_TYPE_LEN] = '\0';
 
-            printf("Arrivato messaggio %s da %d sul socket\n", socket_buffer, peer_port);
+            printf("Arrivato messaggio %s da %d sul socket\n", msg_type_buffer, src_port);
 
             // richiesta di connessione
-            if (strcmp(recv_buffer, "CONN_REQ") == 0)
+            if (strcmp(msg_type_buffer, "CONN_REQ") == 0)
             {
-                struct Neighbors nbs;           // Variabile per salvare eventuali vicini
-                char list_buffer[MAX_LIST_LEN]; // Buffer per invio vicini al peer
-                int buff_len;                   // Variabile per la lunghezza del messaggio da inviare al peer
+                struct Neighbors nbs; // Variabile per salvare eventuali vicini
+                int msg_len;          // Variabile per la lunghezza del messaggio da inviare al peer
 
                 // ack dell'arrivo della richiesta
-                if (!s_send_ack_udp(server_socket, "CONN_ACK", peer_port))
+                if (!s_send_ack_udp(sock.id, "CONN_ACK", src_port))
                 {
                     printf("Errore: impossibile inviare ack per la richiesta di connessione\n");
                     continue;
                 }
 
                 // inserisco il peer nella lista
-                nbs = insert_peer(peer_port);
+                nbs = insert_peer(src_port);
 
                 if (nbs.tot == -1)
                 {
                     printf("Impossibile connettere il peer\n");
                     // Uscita
-                    FD_CLR(server_socket, &readset);
+                    FD_CLR(sock.id, &readset);
                     continue;
                 }
 
-
                 // compongo la lista
                 if (nbs.tot == 0)
-                    buff_len = sprintf(list_buffer, "%s", "NBR_LIST");
+                    msg_len = sprintf(sock.buffer, "%s", "NBR_LIST");
                 else
-                    buff_len = sprintf(list_buffer, "%s %d %d", "NBR_LIST", nbs.prev, nbs.next);
+                    msg_len = sprintf(sock.buffer, "%s %d %d", "NBR_LIST", nbs.prev, nbs.next);
 
-                printf("Lista da inviare a %d: %s (lunga %d byte)\n", peer_port, list_buffer, buff_len);
-                print_nbs(peer_port, nbs);
+                printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
+                print_nbs(src_port, nbs);
 
                 // invio dei vicini
-                if (!send_udp_wait_ack(server_socket, list_buffer, buff_len, peer_port, "LIST_ACK"))
+                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "LIST_ACK"))
                 {
-                    remove_peer(peer_port);
+                    remove_peer(src_port);
                     printf("Errore: impossibile comunicare vicini al peer\nOperazione abortita\n");
-                    continue; 
+                    continue;
                 };
 
                 // invio aggiornamenti vicini
                 if (nbs.tot > 0)
                 {
-                    buff_len = sprintf(list_buffer, "%s %d", "PRE_UPDT", peer_port);
-                    printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.next, list_buffer, buff_len);
-                    send_udp_wait_ack(server_socket, list_buffer, buff_len, nbs.next, "PREV_ACK");
+                    msg_len = sprintf(sock.buffer, "%s %d", "PRE_UPDT", src_port);
+                    printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.next, sock.buffer, msg_len);
+                    send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.next, "PREV_ACK");
 
-                    buff_len = sprintf(list_buffer, "%s %d", "NXT_UPDT", peer_port);
-                    printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, list_buffer, buff_len);
-                    send_udp_wait_ack(server_socket, list_buffer, buff_len, nbs.prev, "NEXT_ACK");
+                    msg_len = sprintf(sock.buffer, "%s %d", "NXT_UPDT", src_port);
+                    printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, sock.buffer, msg_len);
+                    send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.prev, "NEXT_ACK");
                 }
                 print_peers_number();
             }
 
             // Richiesta di uscita
-            if (strcmp(recv_buffer, "CLT_EXIT") == 0)
+            if (strcmp(msg_type_buffer, "CLT_EXIT") == 0)
             {
                 // Variabili per salvare informazioni temporanee
                 struct Neighbors nbs;
-                char list_buffer[MAX_LIST_LEN];
-                int buff_len;
+                int msg_len;
 
-                printf("Ricevuto messaggio di richiesta di uscita da %d\n", peer_port);
-                s_send_ack_udp(server_socket, "C_EX_ACK", peer_port);
+                printf("Ricevuto messaggio di richiesta di uscita da %d\n", src_port);
+                s_send_ack_udp(sock.id, "C_EX_ACK", src_port);
 
                 // Se il peer per qualche motivo non e' in lista non faccio nulla
-                if (get_position(peer_port) == -1)
+                if (get_position(src_port) == -1)
                 {
-                    printf("Errore: peer %d non presente nella lista dei peer connessi.\nOperazione abortita\n", peer_port);
-                    FD_CLR(server_socket, &readset);
+                    printf("Errore: peer %d non presente nella lista dei peer connessi.\nOperazione abortita\n", src_port);
+                    FD_CLR(sock.id, &readset);
                     continue;
                 }
 
-                nbs = remove_peer(peer_port);
+                nbs = remove_peer(src_port);
 
-                printf("Disconnesso il peer %d dalla rete\n", peer_port);
+                printf("Disconnesso il peer %d dalla rete\n", src_port);
 
                 if (nbs.tot == 0)
                 {
@@ -163,13 +168,13 @@ int main(int argc, char **argv)
                 }
                 else
                 {
-                    buff_len = sprintf(list_buffer, "%s %d", "PRE_UPDT", nbs.prev);
-                    printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.next, list_buffer, buff_len);
-                    send_udp_wait_ack(server_socket, list_buffer, buff_len, nbs.next, "PREV_ACK");
+                    msg_len = sprintf(sock.buffer, "%s %d", "PRE_UPDT", nbs.prev);
+                    printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.next, sock.buffer, msg_len);
+                    send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.next, "PREV_ACK");
 
-                    buff_len = sprintf(list_buffer, "%s %d", "NXT_UPDT", nbs.next);
-                    printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, list_buffer, buff_len);
-                    send_udp_wait_ack(server_socket, list_buffer, buff_len, nbs.prev, "NEXT_ACK");
+                    msg_len = sprintf(sock.buffer, "%s %d", "NXT_UPDT", nbs.next);
+                    printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, sock.buffer, msg_len);
+                    send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.prev, "NEXT_ACK");
 
                     print_peers_number();
                 }
@@ -179,8 +184,8 @@ int main(int argc, char **argv)
         if (FD_ISSET(0, &readset))
         {
             // Parsing dell'input
-            int neighbor_peer;
             int input_number;
+            int neighbor_peer;
             char command[MAX_COMMAND_S];
 
             fgets(command_buffer, MAX_STDIN_S, stdin);
@@ -223,7 +228,7 @@ int main(int argc, char **argv)
                     printf("Invio SRV_EXIT a %d\n", port);
 
                     // invio messaggio
-                    if (!send_udp_wait_ack(server_socket, "SRV_EXIT", MESS_TYPE_LEN, port, "S_XT_ACK"))
+                    if (!send_udp_wait_ack(sock.id, "SRV_EXIT", MESS_TYPE_LEN, port, "S_XT_ACK"))
                     {
                         printf("Errore: impossibile disconnettere il peer %d\n", port);
                         // spero bene per lui
@@ -232,7 +237,7 @@ int main(int argc, char **argv)
                     // rimozione peer
                     port = remove_first_peer();
                 }
-                close(server_socket);
+                close(sock.id);
                 _exit(0);
             }
 

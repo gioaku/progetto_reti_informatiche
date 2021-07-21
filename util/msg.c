@@ -8,9 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-
-// Costanti
-#include "const.h"
+#include "msg.h"
 
 // Pulizia delle variabili per l'indirizzo del socket
 void set_address(struct sockaddr_in *addr_p, socklen_t *len_p, int port)
@@ -23,19 +21,23 @@ void set_address(struct sockaddr_in *addr_p, socklen_t *len_p, int port)
 }
 
 // Inizializzazione del socket UDP - restituisce il descrittore di socket
-int udp_socket_init(struct sockaddr_in *addr_p, socklen_t *len_p, int port)
+int udp_socket_init(struct UdpSocket &sock, int port)
 {
-    int sock;
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-    set_address(addr_p, len_p, port);
+    sock.id = socket(AF_INET, SOCK_DGRAM, 0);
+    set_address(sock.addr, sock.addr_len, port);
 
-    if (bind(sock, (struct sockaddr *)addr_p, (*len_p)) != 0)
+    if (bind(sock.id, (struct sockaddr *)sock.addr, sock.addr_len) != 0)
     {
-        perror("Error while binding\n");
+        perror("Error: binding gone wrong\n");
         exit(0);
     }
 
-    return sock;
+    return sock.id;
+}
+
+int tcp_socket_init(struct TcpSocket &sock)
+{
+
 }
 
 // Ricezione bloccante di un messaggio - ritorna la porta del mittente
@@ -133,8 +135,7 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
     printf("Messaggio %s inviato correttamente al destinatario %d\n", buffer, port);
 
     while (!recv_udp(socket, recv_buffer, MESS_TYPE_LEN, port, acked) && tries-- > 0)
-    {
-    }
+        ;
 
     if (tries > -1)
     {
@@ -153,8 +154,7 @@ int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *corre
 
     // riceve messaggio
     while (!recv_udp(socket, buffer, buff_l, port, correct_header) && tries-- > 0)
-    {
-    }
+        ;
     if (tries > -1)
     {
         // manda l'ack

@@ -3,6 +3,7 @@
     "files.associations": {
         "const.h": "c",
         "util_s.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "msg.h": "c"
     }
 }

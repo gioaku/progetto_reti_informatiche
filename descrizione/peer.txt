@@ -1,4 +1,38 @@
 ***PEER***
+struct {
+    //me
+    int port
+
+    //date
+    char* date[DATE_LEN]
+
+    //server
+    int port
+        // udp socket
+        int socket
+        struct sockaddr_in addr
+        socklen_t addr_len
+        char buffer[MAX_UDP_MSG]
+    
+    //vicini
+    struct Neighbors nbs
+        // prev tcp socket
+        int socket
+        struct sockaddr_in addr
+        socklen_t addr_len
+        char buffer[MAX_TCP_MSG]
+        
+        // next
+        int socket, new_socket
+        struct sockaddr_in myaddr, nextaddr
+        struct socklen_t myaddr_len, netxaddr_len
+        char buffer[MAX_TCP_MSG]
+
+    //sets
+    fd_set master
+    fd_set readset
+    int fdmax
+}
 myport
 nbs
 date

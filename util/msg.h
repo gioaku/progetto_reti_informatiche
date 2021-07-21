@@ -6,7 +6,7 @@ struct UdpSocket{
     int addr_len;
     struct sockaddr_in addr;
     char buffer[MAX_UDP_MSG];
-}
+};
 
 struct TcpSocket{
     int id;
@@ -14,7 +14,7 @@ struct TcpSocket{
     int addr_len;
     struct sockaddr_in addr;
     char buffer[MAX_TCP_MSG];    
-}
+};
 
 void set_address(struct sockaddr_in*, socklen_t*, int);
 int udp_socket_init(struct UdpSocket, int);

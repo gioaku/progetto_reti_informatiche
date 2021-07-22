@@ -68,30 +68,32 @@ int accept_nb_connection(int listener, struct Neighbors nbs, struct TcpSocket *p
         return -1;
     }
     printf("ACCEPT addr.sin_port %d, htons(addr.sin_port) %d, ntohs(addr.sin_port) %d\n", tmp.addr.sin_port, htons(tmp.addr.sin_port), ntohs(tmp.addr.sin_port));
+    printf("ACCEPT addr.sin_port %d, htonl(addr.sin_port) %d, ntohl(addr.sin_port) %d\n", tmp.addr.sin_port, htonl(tmp.addr.sin_port), ntohl(tmp.addr.sin_port));
     tmp.port = ntohs(tmp.addr.sin_port);
-
-    if (tmp.port == nbs.next)
-    {
-        printf("Accettata connessione tcp con il vicino successivo %d", tmp.port);
+    
+    
+    // if (tmp.port == nbs.next)
+    // {
+        printf("Accettata connessione tcp con il vicino successivo %d\n", tmp.port);
         next->port = tmp.port;
         next->id = tmp.id;
         next->addr = tmp.addr;
         next->addr_len = tmp.addr_len;
         return next->id;
-    }
-    if (tmp.port == nbs.prev)
-    {
-        printf("Accettata connessione tcp con il vicino successivo %d", tmp.port);
-        prev->port = tmp.port;
-        prev->id = tmp.id;
-        prev->addr = tmp.addr;
-        prev->addr_len = tmp.addr_len;
-        return prev->id;
-    }
+    // }
+    // if (tmp.port == nbs.prev)
+    // {
+    //     printf("Accettata connessione tcp con il vicino precendente %d\n", tmp.port);
+    //     prev->port = tmp.port;
+    //     prev->id = tmp.id;
+    //     prev->addr = tmp.addr;
+    //     prev->addr_len = tmp.addr_len;
+    //     return prev->id;
+    // }
 
-    printf("Chiusa connessione con peer %d sconosciuto\n", tmp.port);
-    close(tmp.id);
-    return -1;
+    // printf("Chiusa connessione con peer %d sconosciuto\n", tmp.port);
+    // close(tmp.id);
+    // return -1;
 }
 
 // Ricezione bloccante di un messaggio - ritorna la porta del mittente

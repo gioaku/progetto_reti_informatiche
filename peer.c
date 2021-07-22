@@ -3,7 +3,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
@@ -11,13 +10,11 @@
 
 // Funzioni di utilita'
 #include "./util/util_c.h"
-#include "./util/util.h"
 // Gesione dei messaggi
 #include "./util/msg.h"
 // Gestione rete
 #include "./util/neighbors.h"
 // Costanti
-#include "./util/const.h"
 
 // Variabili di stato
 int my_port;

@@ -7,6 +7,7 @@
         "msg.h": "c",
         "peer_file.h": "c",
         "random": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "inet.h": "c"
     }
 }

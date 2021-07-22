@@ -11,13 +11,10 @@
 
 // Funzioni di utilita'
 #include "./util/util_s.h"
-#include "./util/util.h"
 // Gestione del file con i peer connessi alla rete
 #include "./util/peer_file.h"
 // Gesione dei messaggi
 #include "./util/msg.h"
-// Costanti
-#include "./util/const.h"
 
 int my_port;
 char today[DATE_LEN + 1];

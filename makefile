@@ -12,8 +12,8 @@ all: ./ds ./peer
 ./ds.o: ./ds.c ./util/msg.h ./util/peer_file.h ./util/util_s.h ./util/const.h
 	gcc -Wall -c ./ds.c -o ./ds.o
 
-./util/peer_file.o: ./util/peer_file.c ./util/peer_file.h ./util/const.h ./util/neighbors.o
-	gcc -Wall -c ./util/peer_file.c ./util/neighbors.o -o ./util/peer_file.o
+./util/peer_file.o: ./util/peer_file.c ./util/peer_file.h ./util/const.h 
+	gcc -Wall -c ./util/peer_file.c -o ./util/peer_file.o
 
 ./util/util.o: ./util/util.c ./util/util.h 
 	gcc -Wall -c ./util/util.c -o ./util/util.o

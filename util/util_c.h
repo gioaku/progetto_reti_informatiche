@@ -1,3 +1,5 @@
+#include "util.h"
+
 void print_client_commands();
 void help_client(int);
 int check_dates(char*,char*,char);

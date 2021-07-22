@@ -13,7 +13,8 @@ int is_between(int x, int a, int b)
 int valid_data(char *buff)
 {
     int d, m, y;
-    if (sscanf(buff, "%d:%d:%d", &d, &m, &y) != 3)
+    if (sscanf(buff, "%d:%d:%d", &y, &m, &d) != 3)
+    
     {
         printf("scanf diverso da 3");
         return 0;

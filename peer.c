@@ -130,7 +130,7 @@ int main(int argc, char **argv)
                 if (tcp_listener_init(&listener_s, my_port) == -1)
                 {
                     printf("Errore: Impossibile creare listener\n");
-                    exit(0);
+                    exit(1);
                 }
 
                 printf("Creato socket di ascolto in attesa di connessione dai vicini\n");

@@ -187,6 +187,11 @@ int main(int argc, char **argv)
                 }
 
                 tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
+                if (tmp != 2 || !valid_data(today))
+                {
+                    printf("Errore nella ricezione della data odierna");
+                    continue;
+                }
                 printf("Data ricevuta dal server : %s\n", today);
 
                 printf("Connessione riuscita\n");
@@ -407,29 +412,32 @@ int main(int argc, char **argv)
                     {
                         printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo\n", nbs.prev, port);
 
-                        printf("Connessione con vecchio vicino precendente %d avvenuta con successo\n", nbs.prev);
-
                         nbs.prev = port;
 
                         if (nbs.prev == my_port)
                             nbs.tot = 0;
-                        else
-                        {
-                            if (nbs.prev == nbs.next)
-                                nbs.tot = 1;
-                            if (tcp_connect_init(nbs.prev, &prev_s) == -1)
-                            {
-                                printf("Errore: impossibile connettersi al nuovo vicino precedente %d\n", nbs.prev);
-                                continue;
-                            }
-
-                            printf("Connessione con nuovo vicino precendente %d avvenuta con successo\n", nbs.prev);
-                        }
+                        else if (nbs.prev == nbs.next)
+                            nbs.tot = 1;
                     }
                     else
                     {
                         printf("Errore nell'aggiornamento del vicino precedente da %d a %d\nOperazione annullata\n", nbs.prev, port);
                     }
+                }
+
+                // connessione con vicino precendete
+                else if (strcmp(msg_type_buffer, "PRE_CONN") == 0)
+                {
+                    if (tcp_connect_init(nbs.prev, &prev_s) == -1)
+                    {
+                        printf("Errore: impossibile connettersi al nuovo vicino precedente %d\n", nbs.prev);
+                        continue;
+                    }
+
+                    printf("Connessione con nuovo vicino precendente %d avvenuta con successo\n", nbs.prev);
+
+                    FD_SET(prev_s.id, &master);
+                    fdmax = fdmax > prev_s.id ? fdmax : prev_s.id;
                 }
 
                 // aggiornamento vicino successivo
@@ -442,36 +450,31 @@ int main(int argc, char **argv)
                     if (valid_port(port) && s_send_ack_udp(server_s.id, "NEXT_ACK", server_s.port))
                     {
                         printf("Aggiornamento vicino successivo da %d a %d avvenuto con successo\n", nbs.next, port);
-                        if (close(next_s.id) == -1)
-                        {
-                            printf("Errore: impossibile chiudere connessione con il vecchio vicino successivo\n");
-                        }
-
-                        printf("Connessione con vecchio vicino successivo %d avvenuta con successo\n", nbs.next);
 
                         nbs.next = port;
 
                         if (nbs.next == my_port)
                             nbs.tot = 0;
-                        else
-                        {
-
-                            if (nbs.prev == nbs.next)
-                                nbs.tot = 1;
-                            if (tcp_connect_init(nbs.next, &next_s) == -1)
-                            {
-                                printf("Errore: impossibile connettersi al nuovo vicino successivo %d\n", nbs.next);
-                                continue;
-                            }
-                            printf("Connessione con nuovo vicino precendente %d avvenuta con successo\n", nbs.next);
-                        }
+                        else if (nbs.prev == nbs.next)
+                            nbs.tot = 1;
                     }
                     else
                     {
                         printf("Errore nell'aggiornamento del vicino successivo da %d a %d\nOperazione annullata\n", nbs.next, port);
                     }
                 }
-                
+                // connessione con vicino successivo
+                else if (strcmp(msg_type_buffer, "NXT_CONN") == 0)
+                {
+                    if (tcp_connect_init(nbs.next, &next_s) == -1)
+                    {
+                        printf("Errore: impossibile connettersi al vicino successivo %d\n", nbs.next);
+                        continue;
+                    }
+                    printf("Connessione con nuovo vicino successivo %d avvenuta con successo\n", nbs.next);
+                    FD_SET(next_s.id, &master);
+                    fdmax = fdmax > next_s.id ? fdmax : next_s.id;
+                }
                 // Notifica cambiamento data
                 else if (strcmp(msg_type_buffer, "SET_DATE") == 0)
                 {
@@ -481,6 +484,12 @@ int main(int argc, char **argv)
                     tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
                     printf("Data ricevuta dal server : %s\n", today);
 
+                    if (tmp != 2 || !valid_data(today))
+                    {
+                        printf("Errore nella ricezione della data odierna");
+                        FD_CLR(server_s.id, &readset);
+                        continue;
+                    }
                     // invia ack
                     s_send_ack_udp(server_s.id, "DATE_ACK", server_s.port);
                 }

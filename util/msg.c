@@ -53,7 +53,7 @@ int tcp_connect_init(int port, struct TcpSocket *sock)
     set_address(&(sock->addr), (socklen_t *)&(sock->addr_len), port);
     if (connect(sock->id, (struct sockaddr *)&(sock->addr), sock->addr_len))
         return -1;
-    sock->port = port;
+    sock->port = port; 
     return sock->id;
 }
 
@@ -65,8 +65,8 @@ int accept_nb_connection(int listener, struct Neighbors nbs, struct TcpSocket *p
     {
         return -1;
     }
-
-    tmp.port = htons(tmp.addr.sin_port);
+    printf("ACCEPT addr.sin_port %d, htons(addr.sin_port) %d, ntohs(addr.sin_port) %d\n", tmp.addr.sin_port, htons(tmp.addr.sin_port), ntohs(tmp.addr.sin_port));
+    tmp.port = ntohs(tmp.addr.sin_port);
 
     if (tmp.port == nbs.next)
     {

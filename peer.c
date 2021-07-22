@@ -24,7 +24,7 @@ int my_port;
 char today[DATE_LEN];
 
 // Buffer stdin
-char command_buffer[MAX_STDIN_C]; 
+char command_buffer[MAX_STDIN_C];
 
 // Server socket
 struct UdpSocket server_s;
@@ -55,19 +55,19 @@ int main(int argc, char **argv)
 
     my_port = atoi(argv[1]);
 
-    // creazione server socket
-    if (udp_socket_init(&server_s, my_port) == -1)
-    {
-        printf("Error: udp init gone wrong");
-        exit(0);
-    }
-
     // peer non connesso
     nbs.tot = -1;
 
+    // creazione server socket
+    if (udp_socket_init(&server_s, my_port) == -1)
+    {
+        printf("Error: cannot create server socket\n");
+        exit(0);
+    }
+
     // inizializzo set di descrittori
-    FD_SET(server_s.id, &master);
     FD_SET(0, &master);
+    FD_SET(server_s.id, &master);
     fdmax = server_s.id;
 
     // stampa elenco comandi
@@ -82,6 +82,23 @@ int main(int argc, char **argv)
 
         // controllo se c'e' qualcosa pronto
         select(fdmax + 1, &readset, NULL, NULL, NULL);
+
+        // richiesta di connessione sul socket listener
+        if (FD_ISSET(listener_s.id, &readset))
+        {
+            int new_sd;
+
+            if ((new_sd = accept_nb_connection(listener_s.id, nbs, &prev_s, &next_s)) == -1)
+            {
+                printf("Errore: impossibile accettare richiesta di connessione\n");
+                FD_CLR(listener_s.id, &readset);
+                continue;
+            }
+
+            fdmax = new_sd > fdmax ? new_sd : fdmax;
+            FD_SET(new_sd, &master);
+            FD_CLR(listener_s.id, &readset);
+        }
 
         // messaggio da stdin
         if (FD_ISSET(0, &readset))
@@ -109,7 +126,7 @@ int main(int argc, char **argv)
                 char DS_addr[INET_ADDRSTRLEN]; // Indirizzo IP del server
                 char msg_type_buffer[MESS_TYPE_LEN + 1];
                 int tmp;
-                
+
                 printf("Inizio connessione...\n");
 
                 // controllo che il peer non sia connesso
@@ -129,15 +146,23 @@ int main(int argc, char **argv)
                     continue;
                 }
 
+                if (tcp_listener_init(&listener_s, my_port) == -1)
+                {
+                    printf("Errore: Impossibile creare listener\n");
+                    exit(0);
+                }
+
+                printf("Creato socket di ascolto in attesa di connessione dai vicini\n");
+
                 // invio richiesta di connessione
-                if (!send_udp_wait_ack(server_s.id, "CONN_REQ", MESS_TYPE_LEN, server_s.port, "CONN_ACK"))
+                while (!send_udp_wait_ack(server_s.id, "CONN_REQ", MESS_TYPE_LEN, server_s.port, "CONN_ACK"))
                 {
                     printf("Errore: impossibile inviare richiesta di connessione al server. Riprovare\n");
                     continue;
                 }
 
                 // ricevo lista di vicini
-                if (!recv_udp_and_ack(server_s.id, server_s.buffer, MAX_LIST_LEN, server_s.port, "NBR_LIST", "LIST_ACK"))
+                if (!recv_udp_and_ack(server_s.id, server_s.buffer, MAX_UDP_MSG, server_s.port, "NBR_LIST", "LIST_ACK"))
                 {
                     printf("Errore: impossibile ricevere la lista di vicini dal server. Riprovare\n");
                     continue;
@@ -164,11 +189,25 @@ int main(int argc, char **argv)
                 // controllo sui parametri letti
                 if (!valid_port(nbs.prev) || !valid_port(nbs.next))
                 {
-                    printf("Errore lista di vicini ricevuta non valida. Riprovare\n");
+                    printf("Errore: lista di vicini ricevuta non valida. Riprovare\n");
+                    nbs.tot = -1;
                     continue;
                 }
 
+                // ricevo la data di oggi
+                if (!recv_udp_and_ack(server_s.id, server_s.buffer, MAX_UDP_MSG, server_s.port, "SET_DATE", "DATE_ACK"))
+                {
+                    printf("Errore: impossibile ricevere la di oggi dal server. Riprovare\n");
+                    continue;
+                }
+                
+                tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
+
                 printf("Connessione riuscita\n");
+
+                FD_SET(listener_s.id, &master);
+                fdmax = fdmax > listener_s.id ? fdmax : listener_s.id;
+
                 print_nbs(my_port, nbs);
             }
             /*
@@ -358,17 +397,31 @@ int main(int argc, char **argv)
                 if (strcmp(msg_type_buffer, "PRE_UPDT") == 0)
                 {
                     int port;
-                    
+
                     sscanf(server_s.buffer, "%s %d", msg_type_buffer, &port);
 
                     if (valid_port(port) && s_send_ack_udp(server_s.id, "PREV_ACK", server_s.port))
                     {
                         printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo\n", nbs.prev, port);
+
+                        printf("Connessione con vecchio vicino precendente %d avvenuta con successo\n", nbs.prev);
+
                         nbs.prev = port;
+
                         if (nbs.prev == my_port)
                             nbs.tot = 0;
-                        else if (nbs.prev == nbs.next)
-                            nbs.tot = 1;
+                        else
+                        {
+                            if (nbs.prev == nbs.next)
+                                nbs.tot = 1;
+                            if (tcp_connect_init(nbs.prev, &prev_s) == -1)
+                            {
+                                printf("Errore: impossibile connettersi al nuovo vicino precedente %d\n", nbs.prev);
+                                continue;
+                            }
+
+                            printf("Connessione con nuovo vicino precendente %d avvenuta con successo\n", nbs.prev);
+                        }
                     }
                     else
                     {
@@ -386,11 +439,29 @@ int main(int argc, char **argv)
                     if (valid_port(port) && s_send_ack_udp(server_s.id, "NEXT_ACK", server_s.port))
                     {
                         printf("Aggiornamento vicino successivo da %d a %d avvenuto con successo\n", nbs.next, port);
+                        if (close(next_s.id) == -1)
+                        {
+                            printf("Errore: impossibile chiudere connessione con il vecchio vicino successivo");
+                        }
+
+                        printf("Connessione con vecchio vicino successivo %d avvenuta con successo\n", nbs.next);
+
                         nbs.next = port;
+
                         if (nbs.next == my_port)
                             nbs.tot = 0;
-                        else if (nbs.prev == nbs.next)
-                            nbs.tot = 1;
+                        else
+                        {
+
+                            if (nbs.prev == nbs.next)
+                                nbs.tot = 1;
+                            if (tcp_connect_init(nbs.next, &next_s) == -1)
+                            {
+                                printf("Errore: impossibile connettersi al nuovo vicino successivo %d\n", nbs.next);
+                                continue;
+                            }
+                            printf("Connessione con nuovo vicino precendente %d avvenuta con successo\n", nbs.next);
+                        }
                     }
                     else
                     {
@@ -407,7 +478,7 @@ int main(int argc, char **argv)
                     s_send_ack_udp(server_s.id, "S_XT_ACK", server_s.port);
 
                     printf("Disconnessione riuscita");
-                    
+
                     // Chiude tutti i socket
                     close(server_s.id);
                     _exit(0);

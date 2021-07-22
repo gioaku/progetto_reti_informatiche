@@ -1,3 +1,6 @@
+#ifndef NEIGHBORS
+#define NEIGHBORS
+
 struct Neighbors
 {
     // vicino precedente
@@ -9,3 +12,5 @@ struct Neighbors
 };
 
 void print_nbs(int, struct Neighbors);
+
+#endif

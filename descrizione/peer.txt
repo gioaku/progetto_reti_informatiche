@@ -16,6 +16,7 @@ struct {
     
     //vicini
     struct Neighbors nbs
+
         // prev tcp socket
         int socket
         struct sockaddr_in addr
@@ -33,11 +34,42 @@ struct {
     fd_set readset
     int fdmax
 }
-myport
-nbs
-date
+stdin msg
+    help
+    start addr, port
+        init listener
+        CONN_REQ CONN_ACK
+        NBR_LIST LIST_ACK
+        SET_DATE DATE_ACK
+        update sets
 
-ds msg - UDP msg
+        reload registers
+        
+    ++ add type qty
+        write entries(type, qty, date)
+    ++ get aggr type period
+        parameters controls
+        period controls and traduction
+        for date in period
+            if ihaveall calc and ret
+            if nbshasall get and ret
+            send floodforentries
+            for list in recv floodforentries
+                tcp reqentries
+                update entries
+                calc and ret
+
+    stop
+        ++ share registers
+        send exit udp to ds
+
+listener msg
+
+next msg
+
+prev msg
+
+UDP msg
     close
         save registers
     update nb prev
@@ -64,33 +96,4 @@ ds msg - UDP msg
         tcp send entries
     leaving
         tcp recv entries to join to mines
-
-stdin msg
-    help
-    start addr, port
-        reload registers
-        send udp
-        set timer
-        on ack 
-            set nb
-        on timer
-            go to send udp
-        ++ ask date
-    ++ add type qty
-        write entries(type, qty, date)
-    ++ get aggr type period
-        parameters controls
-        period controls and traduction
-        for date in period
-            if ihaveall calc and ret
-            if nbshasall get and ret
-            send floodforentries
-            for list in recv floodforentries
-                tcp reqentries
-                update entries
-                calc and ret
-
-    stop
-        ++ share registers
-        send exit udp to ds
 

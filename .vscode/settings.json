@@ -4,6 +4,9 @@
         "const.h": "c",
         "util_s.h": "c",
         "unistd.h": "c",
-        "msg.h": "c"
+        "msg.h": "c",
+        "peer_file.h": "c",
+        "random": "c",
+        "stdio.h": "c"
     }
 }

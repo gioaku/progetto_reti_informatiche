@@ -14,7 +14,6 @@
 #include "./util/msg.h"
 // Gestione rete
 #include "./util/neighbors.h"
-// Costanti
 
 // Variabili di stato
 int my_port;
@@ -186,7 +185,7 @@ int main(int argc, char **argv)
                 tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
                 if (tmp != 2 || !valid_data(today))
                 {
-                    printf("Errore nella ricezione della data odierna");
+                    printf("Errore nella ricezione della data odierna %s\n", today);
                     continue;
                 }
                 printf("Data ricevuta dal server : %s\n", today);

@@ -112,8 +112,11 @@ int main(int argc, char **argv)
                 // compongo la lista
                 if (nbs.tot == 0)
                     msg_len = sprintf(sock.buffer, "%s", "NBR_LIST");
+
                 else
                     msg_len = sprintf(sock.buffer, "%s %d %d", "NBR_LIST", nbs.prev, nbs.next);
+
+                sock.buffer[msg_len] = '\0';
 
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
                 print_nbs(src_port, nbs);
@@ -127,6 +130,7 @@ int main(int argc, char **argv)
                 };
 
                 msg_len = sprintf(sock.buffer, "%s %s", "SET_DATE", today);
+                sock.buffer[msg_len] = '\0';
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
 
                 if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "DATE_ACK"))
@@ -141,6 +145,7 @@ int main(int argc, char **argv)
                 {
                     // comunica modifica a next
                     msg_len = sprintf(sock.buffer, "%s %d", "PRE_UPDT", src_port);
+                    sock.buffer[msg_len] = '\0';
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.next, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.next, "PREV_ACK");
 
@@ -149,6 +154,7 @@ int main(int argc, char **argv)
 
                     // comunica modifica a prev
                     msg_len = sprintf(sock.buffer, "%s %d", "NXT_UPDT", src_port);
+                    sock.buffer[msg_len] = '\0';
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.prev, "NEXT_ACK");
 
@@ -188,11 +194,13 @@ int main(int argc, char **argv)
                 {
                     // comunica modifica a next
                     msg_len = sprintf(sock.buffer, "%s %d", "PRE_UPDT", nbs.prev);
+                    sock.buffer[msg_len] = '\0';
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.next, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.next, "PREV_ACK");
 
                     // comunica modifica a prev
                     msg_len = sprintf(sock.buffer, "%s %d", "NXT_UPDT", nbs.next);
+                    sock.buffer[msg_len] = '\0';
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.prev, "NEXT_ACK");
 
@@ -277,6 +285,7 @@ int main(int argc, char **argv)
         {
             int msg_len;
             msg_len = sprintf(sock.buffer, "%s %s", "SET_DATE", today);
+            sock.buffer[msg_len] = '\0';
             printf("Lista da inviare a tutti: %s (lunga %d byte)\n", sock.buffer, msg_len);
 
             int i;

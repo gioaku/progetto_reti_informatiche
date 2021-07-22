@@ -46,54 +46,29 @@ int tcp_listener_init(struct TcpSocket *sock, int port)
     return sock->id;
 }
 
-// Inizializzazione del socket connesso con un vicino - ritorna socket id
-int tcp_connect_init(int port, struct TcpSocket *sock)
+// Inizializzazione del socket connesso - ritorna socket id
+int tcp_connect_init(int port)
 {
-    sock->id = socket(AF_INET, SOCK_STREAM, 0);
-    set_address(&(sock->addr), (socklen_t *)&(sock->addr_len), port);
-    if (connect(sock->id, (struct sockaddr *)&(sock->addr), sizeof(sock->addr)))
+    struct sockaddr_in addr;
+    socklen_t addr_len;
+    int sock;
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    set_address(&(addr), (socklen_t *)&(addr_len), port);
+    if (connect(sock, (struct sockaddr *)&(addr), sizeof(addr)) == 0)
         return -1;
-    sock->port = port; 
-    return sock->id;
+    return sock;
 }
 
 // Accept della connessione tcp con i vicini - ritorna descrittore del nuovo socket - ritorna -1 in caso di errore
-int accept_nb_connection(int listener, struct Neighbors nbs, struct TcpSocket *prev, struct TcpSocket *next)
+int accept_connection(int listener)
 {
-    struct TcpSocket tmp;
-    set_address(&(tmp.addr), (socklen_t *)&(tmp.addr_len), 0);
+    struct sockaddr_in addr;
+    socklen_t addr_len;
 
-    if ((tmp.id = accept(listener, (struct sockaddr *)&tmp.addr, &tmp.addr_len)) == -1)
-    {
-        return -1;
-    }
-    printf("ACCEPT addr.sin_port %d, htons(addr.sin_port) %d, ntohs(addr.sin_port) %d\n", tmp.addr.sin_port, htons(tmp.addr.sin_port), ntohs(tmp.addr.sin_port));
-    printf("ACCEPT addr.sin_port %d, htonl(addr.sin_port) %d, ntohl(addr.sin_port) %d\n", tmp.addr.sin_port, htonl(tmp.addr.sin_port), ntohl(tmp.addr.sin_port));
-    tmp.port = ntohs(tmp.addr.sin_port);
-    
-    
-    // if (tmp.port == nbs.next)
-    // {
-        printf("Accettata connessione tcp con il vicino successivo %d\n", tmp.port);
-        next->port = tmp.port;
-        next->id = tmp.id;
-        next->addr = tmp.addr;
-        next->addr_len = tmp.addr_len;
-        return next->id;
-    // }
-    // if (tmp.port == nbs.prev)
-    // {
-    //     printf("Accettata connessione tcp con il vicino precendente %d\n", tmp.port);
-    //     prev->port = tmp.port;
-    //     prev->id = tmp.id;
-    //     prev->addr = tmp.addr;
-    //     prev->addr_len = tmp.addr_len;
-    //     return prev->id;
-    // }
+    addr_len = sizeof(addr);
 
-    // printf("Chiusa connessione con peer %d sconosciuto\n", tmp.port);
-    // close(tmp.id);
-    // return -1;
+    return accept(listener, (struct sockaddr *)&addr, &addr_len);
 }
 
 // Ricezione bloccante di un messaggio - ritorna la porta del mittente
@@ -219,4 +194,27 @@ int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *corre
 
     printf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d\n", correct_header, port);
     return 0;
+}
+
+int handle_tcp_socket(int sock)
+{
+    char buffer[MAX_TCP_MSG + 1];
+    char msg_type_buffer[MESS_TYPE_LEN + 1];
+    int ret;
+
+    while (1)
+    {
+        ret = recv(sock, (void *)buffer, MAX_TCP_MSG, 0);
+
+        if (ret == 0)
+            return 0;
+        
+        buffer[ret] = '\0';
+
+        strncpy(msg_type_buffer, buffer, MESS_TYPE_LEN);
+        msg_type_buffer[MESS_TYPE_LEN] = '\0';
+
+        printf("TCP [%d] : Ricevuto messaggio %s\n", sock, msg_type_buffer);
+        if (strcmp(msg_type_buffer, ""));
+    }
 }

@@ -19,8 +19,6 @@ server to peer
 NBR_LIST LIST_ACK   Invio lista di vicini a un peer appena entrato
 PRE_UPDT PREV_ACK   Aggiornamento vicino precedente
 NXT_UPDT NEXT_ACK   Aggiornamento vicino successivo
-PRE_CONN PR_C_ACK   Connessione tcp con vicino precendente
-NXT_CONN NX_C_ACK   Connessione tcp con vicino successivo
 
 /*
 TMR_PORT TPRT_ACK   Invio numero di porta del time server

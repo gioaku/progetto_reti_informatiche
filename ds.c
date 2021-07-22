@@ -149,17 +149,12 @@ int main(int argc, char **argv)
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.next, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.next, "PREV_ACK");
 
-                    // connette next al nuovo peer
-                    send_udp_wait_ack(sock.id, "PRE_CONN", MESS_TYPE_LEN, nbs.next, "PR_C_ACK");
-
                     // comunica modifica a prev
                     msg_len = sprintf(sock.buffer, "%s %d", "NXT_UPDT", src_port);
                     sock.buffer[msg_len] = '\0';
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.prev, "NEXT_ACK");
 
-                    // connette prev al nuovo peer
-                    send_udp_wait_ack(sock.id, "NXT_CONN", MESS_TYPE_LEN, nbs.prev, "NX_C_ACK");
                 }
                 print_peers_number();
             }
@@ -203,9 +198,6 @@ int main(int argc, char **argv)
                     sock.buffer[msg_len] = '\0';
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.prev, "NEXT_ACK");
-
-                    // connette i peer
-                    send_udp_wait_ack(sock.id, "NXT_CONN", MESS_TYPE_LEN, nbs.prev, "NX_C_ACK");
 
                     print_peers_number();
                 }

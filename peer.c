@@ -17,25 +17,20 @@
 
 // Variabili di stato
 int my_port;
+int server_port;
 char today[DATE_LEN + 1];
 
 // Buffer stdin
 char command_buffer[MAX_STDIN_C];
 
-// Server socket
-struct UdpSocket server_s;
+// Udp socket
+struct UdpSocket udp_s;
 
 // Listener socket
 struct TcpSocket listener_s;
 
 // Struttura per mantenere lo stato dei vicini
 struct Neighbors nbs;
-
-// Precedente
-struct TcpSocket prev_s;
-
-// Successivo
-struct TcpSocket next_s;
 
 // Variabili per gestire input da socket oppure da stdin
 fd_set master;
@@ -55,18 +50,18 @@ int main(int argc, char **argv)
     nbs.tot = -1;
 
     // creazione server socket
-    if (udp_socket_init(&server_s, my_port) == -1)
+    if (udp_socket_init(&udp_s, my_port) == -1)
     {
         printf("Error: cannot create server socket\n");
         exit(0);
     }
     // inizializzo listener, next e prev non attivi
-    listener_s.id = prev_s.id = next_s.id = -1;
+    listener_s.id = -1;
 
     // inizializzo set di descrittori
     FD_SET(0, &master);
-    FD_SET(server_s.id, &master);
-    fdmax = server_s.id;
+    FD_SET(udp_s.id, &master);
+    fdmax = udp_s.id;
 
     // stampa elenco comandi
     print_client_commands();
@@ -118,9 +113,9 @@ int main(int argc, char **argv)
                 }
 
                 // lettura e controllo dei parametri
-                tmp = sscanf(command_buffer, "%s %s %d", command, DS_addr, &server_s.port);
+                tmp = sscanf(command_buffer, "%s %s %d", command, DS_addr, &server_port);
 
-                if (tmp != 3 || strcmp(DS_addr, LOCALHOST) != 0 || !valid_port(server_s.port))
+                if (tmp != 3 || strcmp(DS_addr, LOCALHOST) != 0 || !valid_port(server_port))
                 {
                     printf("Errore: passaggio dei parametri per la connessione non validi\n");
                     help_client(1);
@@ -136,24 +131,24 @@ int main(int argc, char **argv)
                 printf("Creato socket di ascolto in attesa di connessione dai vicini\n");
 
                 // invio richiesta di connessione
-                while (!send_udp_wait_ack(server_s.id, "CONN_REQ", MESS_TYPE_LEN, server_s.port, "CONN_ACK"))
+                while (!send_udp_wait_ack(udp_s.id, "CONN_REQ", MESS_TYPE_LEN, server_port, "CONN_ACK"))
                 {
                     printf("Errore: impossibile inviare richiesta di connessione al server. Riprovare\n");
                     continue;
                 }
 
                 // ricevo lista di vicini
-                if (!recv_udp_and_ack(server_s.id, server_s.buffer, MAX_UDP_MSG, server_s.port, "NBR_LIST", "LIST_ACK"))
+                if (!recv_udp_and_ack(udp_s.id, udp_s.buffer, MAX_UDP_MSG, server_port, "NBR_LIST", "LIST_ACK"))
                 {
                     printf("Errore: impossibile ricevere la lista di vicini dal server. Riprovare\n");
                     continue;
                 }
 
-                tmp = sscanf(server_s.buffer, "%s %d %d", msg_type_buffer, &nbs.prev, &nbs.next);
+                tmp = sscanf(udp_s.buffer, "%s %d %d", msg_type_buffer, &nbs.prev, &nbs.next);
                 if (tmp == 0)
                 {
                     printf("Errore: lista dei vicini ricevuta non valida. Riprovare\n");
-                    send_udp_wait_ack(server_s.id, "CLT_EXIT", MESS_TYPE_LEN, server_s.port, "C_EX_ACK");
+                    send_udp_wait_ack(udp_s.id, "CLT_EXIT", MESS_TYPE_LEN, server_port, "C_EX_ACK");
                     continue;
                 }
                 if (tmp == 1)
@@ -176,13 +171,13 @@ int main(int argc, char **argv)
                 }
 
                 // ricevo la data di oggi
-                if (!recv_udp_and_ack(server_s.id, server_s.buffer, MAX_UDP_MSG, server_s.port, "SET_DATE", "DATE_ACK"))
+                if (!recv_udp_and_ack(udp_s.id, udp_s.buffer, MAX_UDP_MSG, server_port, "SET_DATE", "DATE_ACK"))
                 {
                     printf("Errore: impossibile ricevere la di oggi dal server. Riprovare\n");
                     continue;
                 }
 
-                tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
+                tmp = sscanf(udp_s.buffer, "%s %s", msg_type_buffer, today);
                 if (tmp != 2 || !valid_data(today))
                 {
                     printf("Errore nella ricezione della data odierna %s\n", today);
@@ -344,7 +339,7 @@ int main(int argc, char **argv)
                     // send_entries_to_next();
 
                     // tentativo di disconnessione
-                    if (!send_udp_wait_ack(server_s.id, "CLT_EXIT", MESS_TYPE_LEN, server_s.port, "C_EX_ACK"))
+                    if (!send_udp_wait_ack(udp_s.id, "CLT_EXIT", MESS_TYPE_LEN, server_port, "C_EX_ACK"))
                     {
                         printf("Errore disconnessione non riuscita\n");
                         continue;
@@ -354,7 +349,8 @@ int main(int argc, char **argv)
                 }
 
                 // chiusura socket e terminazione
-                close(server_s.id);
+                close(listener_s.id);
+                close(udp_s.id);
                 _exit(0);
             }
 
@@ -368,47 +364,57 @@ int main(int argc, char **argv)
         if (FD_ISSET(listener_s.id, &readset))
         {
             int new_sd;
-
-            if ((new_sd = accept_nb_connection(listener_s.id, nbs, &prev_s, &next_s)) == -1)
+            pid_t pid;
+            
+            if ((new_sd = accept_connection(listener_s.id)) == -1)
             {
-                printf("Errore: impossibile accettare richiesta di connessione\n");
-                FD_CLR(listener_s.id, &readset);
-                continue;
+                printf("Errore: impossibile accettare connessione sul listener\n");
             }
-            if (new_sd == 0)
-            {
-                printf("Errore, socket id ritornato uguale a 0\n");
+            else {
+                printf("Richiesta di connessione accettata sul socket %d\n", new_sd);
+            }
+            
+            // fork per gestire la connessione tcp
+            pid = fork();
+            if (pid == 0){
+                int ret;
+                
+                close(listener_s.id);
+
+                ret = handle_tcp_socket(new_sd);
+
+                close(new_sd);
+                exit(ret);
             }
 
-            fdmax = new_sd > fdmax ? new_sd : fdmax;
-            FD_SET(new_sd, &master);
+            close(new_sd);
             FD_CLR(listener_s.id, &readset);
         }
 
-        // messaggio sul server socket
-        if (FD_ISSET(server_s.id, &readset))
+        // messaggio sul socket udp
+        if (FD_ISSET(udp_s.id, &readset))
         {
             int src_port;
             char msg_type_buffer[MESS_TYPE_LEN + 1];
 
-            src_port = s_recv_udp(server_s.id, server_s.buffer, MAX_UDP_MSG);
+            src_port = s_recv_udp(udp_s.id, udp_s.buffer, MAX_UDP_MSG);
 
-            sscanf(server_s.buffer, "%s", msg_type_buffer);
+            sscanf(udp_s.buffer, "%s", msg_type_buffer);
             msg_type_buffer[MESS_TYPE_LEN] = '\0';
 
             // server
-            if (src_port == server_s.port)
+            if (src_port == server_port)
             {
-                printf("Messaggio ricevuto dal server: %s\n", server_s.buffer);
+                printf("Messaggio ricevuto dal server: %s\n", udp_s.buffer);
 
                 // aggiornamento vicino precedente
                 if (strcmp(msg_type_buffer, "PRE_UPDT") == 0)
                 {
                     int port;
 
-                    sscanf(server_s.buffer, "%s %d", msg_type_buffer, &port);
+                    sscanf(udp_s.buffer, "%s %d", msg_type_buffer, &port);
 
-                    if (valid_port(port) && s_send_ack_udp(server_s.id, "PREV_ACK", server_s.port))
+                    if (valid_port(port) && s_send_ack_udp(udp_s.id, "PREV_ACK", server_port))
                     {
                         printf("Aggiornamento vicino precedente da %d a %d avvenuto con successo\n", nbs.prev, port);
 
@@ -425,29 +431,14 @@ int main(int argc, char **argv)
                     }
                 }
 
-                // connessione con vicino precendete
-                else if (strcmp(msg_type_buffer, "PRE_CONN") == 0)
-                {
-                    if (tcp_connect_init(nbs.prev, &prev_s) == -1)
-                    {
-                        printf("Errore: impossibile connettersi al nuovo vicino precedente %d\n", nbs.prev);
-                        continue;
-                    }
-
-                    printf("Connessione con nuovo vicino precendente %d avvenuta con successo\n", nbs.prev);
-                    s_send_ack_udp(server_s.id, "PR_C_ACK", server_s.port);
-                    // FD_SET(prev_s.id, &master);
-                    // fdmax = fdmax > prev_s.id ? fdmax : prev_s.id;
-                }
-
                 // aggiornamento vicino successivo
                 else if (strcmp(msg_type_buffer, "NXT_UPDT") == 0)
                 {
                     int port;
 
-                    sscanf(server_s.buffer, "%s %d", msg_type_buffer, &port);
+                    sscanf(udp_s.buffer, "%s %d", msg_type_buffer, &port);
 
-                    if (valid_port(port) && s_send_ack_udp(server_s.id, "NEXT_ACK", server_s.port))
+                    if (valid_port(port) && s_send_ack_udp(udp_s.id, "NEXT_ACK", server_port))
                     {
                         printf("Aggiornamento vicino successivo da %d a %d avvenuto con successo\n", nbs.next, port);
 
@@ -463,37 +454,24 @@ int main(int argc, char **argv)
                         printf("Errore nell'aggiornamento del vicino successivo da %d a %d\nOperazione annullata\n", nbs.next, port);
                     }
                 }
-                // connessione con vicino successivo
-                else if (strcmp(msg_type_buffer, "NXT_CONN") == 0)
-                {
-                    if (tcp_connect_init(nbs.next, &next_s) == -1)
-                    {
-                        printf("Errore: impossibile connettersi al vicino successivo %d\n", nbs.next);
-                        continue;
-                    }
-                    printf("Connessione con nuovo vicino successivo %d avvenuta con successo\n", nbs.next);
-
-                    s_send_ack_udp(server_s.id, "NX_C_ACK", server_s.port);
-                    // FD_SET(next_s.id, &master);
-                    // fdmax = fdmax > next_s.id ? fdmax : next_s.id;
-                }
+                
                 // Notifica cambiamento data
                 else if (strcmp(msg_type_buffer, "SET_DATE") == 0)
                 {
                     int tmp;
 
                     // legge data
-                    tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
+                    tmp = sscanf(udp_s.buffer, "%s %s", msg_type_buffer, today);
                     printf("Data ricevuta dal server : %s\n", today);
 
                     if (tmp != 2 || !valid_data(today))
                     {
                         printf("Errore nella ricezione della data odierna");
-                        FD_CLR(server_s.id, &readset);
+                        FD_CLR(udp_s.id, &readset);
                         continue;
                     }
                     // invia ack
-                    s_send_ack_udp(server_s.id, "DATE_ACK", server_s.port);
+                    s_send_ack_udp(udp_s.id, "DATE_ACK", server_port);
                 }
 
                 // Notifica chiusura server
@@ -502,17 +480,24 @@ int main(int argc, char **argv)
                     printf("Il server sta per chiudere\nDisconnessione in corso...\n");
 
                     // Invia ACK
-                    s_send_ack_udp(server_s.id, "S_XT_ACK", server_s.port);
+                    s_send_ack_udp(udp_s.id, "S_XT_ACK", server_port);
 
                     printf("Disconnessione riuscita\n");
 
                     // Chiude tutti i socket
-                    close(server_s.id);
+                    close(udp_s.id);
                     _exit(0);
                 }
             }
-            FD_CLR(server_s.id, &readset);
+            
+            // altro peer sul socket udp
+            else{
+
+            }
+            FD_CLR(udp_s.id, &readset);
         }
+        
+
     }
     return 0;
 }

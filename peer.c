@@ -375,7 +375,8 @@ int main(int argc, char **argv)
                 FD_CLR(listener_s.id, &readset);
                 continue;
             }
-            if (new_sd == 0){
+            if (new_sd == 0)
+            {
                 printf("Errore, socket id ritornato uguale a 0\n");
             }
 
@@ -434,6 +435,7 @@ int main(int argc, char **argv)
                     }
 
                     printf("Connessione con nuovo vicino precendente %d avvenuta con successo\n", nbs.prev);
+                    s_send_ack_udp(server_s.id, "PR_C_ACK", server_s.port);
                     // FD_SET(prev_s.id, &master);
                     // fdmax = fdmax > prev_s.id ? fdmax : prev_s.id;
                 }
@@ -470,6 +472,8 @@ int main(int argc, char **argv)
                         continue;
                     }
                     printf("Connessione con nuovo vicino successivo %d avvenuta con successo\n", nbs.next);
+
+                    s_send_ack_udp(server_s.id, "NX_C_ACK", server_s.port);
                     // FD_SET(next_s.id, &master);
                     // fdmax = fdmax > next_s.id ? fdmax : next_s.id;
                 }

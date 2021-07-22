@@ -17,7 +17,7 @@ void set_address(struct sockaddr_in *addr_p, socklen_t *len_p, int port)
     addr_p->sin_family = AF_INET;
     addr_p->sin_port = htons(port);
     inet_pton(AF_INET, LOCALHOST, &addr_p->sin_addr);
-    (*len_p) = sizeof((*addr_p
+    (*len_p) = sizeof((*addr_p));
 }
 
 // Inizializzazione del socket udp - restituisce il descrittore di socket

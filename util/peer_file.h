@@ -11,6 +11,7 @@ struct PeerList
     struct PeerElement *list; 
 };
 
+int get_n_peers();
 void peer_file_signal();
 int peer_file_wait();
 int get_port(int);

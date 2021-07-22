@@ -21,14 +21,14 @@ all: ./ds ./peer
 ./util/msg.o: ./util/msg.c ./util/msg.h ./util/const.h
 	gcc -Wall -c ./util/msg.c -o ./util/msg.o
 
-./util/util_c.o: ./util/util_c.c ./util/util_c.h ./util/retr_time.h ./util/msg.h ./util/const.h
+./util/util_c.o: ./util/util_c.c ./util/util_c.h ./util/msg.h ./util/const.h
 	gcc -Wall -c ./util/util_c.c -o ./util/util_c.o
 
-./util/util_s.o: ./util/util_s.c ./util/util_s.h ./util/retr_time.h ./util/const.h
+./util/util_s.o: ./util/util_s.c ./util/util_s.h ./util/const.h
 	gcc -Wall -c ./util/util_s.c -o ./util/util_s.o
 
 clean:
-	-rm ./*.o ./ds ./peer ./time ./util/*.o
+	-rm ./*.o ./ds ./peer ./util/*.o
 	-mv ./ds_dir/2021* ./logs
 	-rm ./ds_dir/*.txt
 	-mv ./peer_dir/*.txt ./logs

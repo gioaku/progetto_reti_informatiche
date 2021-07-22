@@ -10,7 +10,6 @@
 #include "const.h"
 
 // Numero di peer connessi alla rete
-int connected_peers;
 struct PeerList connected_peersn;
 
 // Gestione del semaforo di mutua esclusione sulla struttura
@@ -31,6 +30,12 @@ struct PeerList connected_peersn;
 
 // Inizializza la struttura come libera
 // peer_file_signal();
+
+// Ritorna connected_peersn.peers
+int get_n_peers(){
+    return connected_peersn.peers;
+}
+
 
 // Ritorna la porta del peer in posizione pos
 int get_port(int pos)

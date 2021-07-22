@@ -9,8 +9,6 @@
 #include <unistd.h>
 #include <time.h>
 
-// Gestione data e ora correnti
-#include "retr_time.h"
 // Scambio di messaggi
 #include "msg.h"
 // Costanti

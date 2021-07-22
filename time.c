@@ -11,8 +11,6 @@
 
 // Funzioni di utilita'
 #include "./util/util_t.h"
-// Gestione data e ora correnti
-#include "./util/retr_time.h"
 // Gestione peer connessi alla rete
 #include "./util/peer_file.h"
 // Gesione dei messaggi

@@ -20,7 +20,7 @@
 #include "./util/const.h"
 
 int my_port;
-char today[DATE_LEN];
+char today[DATE_LEN + 1];
 
 // Udp socket
 struct UdpSocket sock;
@@ -44,6 +44,8 @@ int main(int argc, char **argv)
     FD_ZERO(&readset);
 
     my_port = atoi(argv[1]);
+    // inizializzazione data
+    update_date(today);
 
     // creazione socket di ascolto
     if (udp_socket_init(&sock, my_port) == -1)
@@ -125,7 +127,7 @@ int main(int argc, char **argv)
                     printf("Errore: impossibile comunicare vicini al peer\nOperazione abortita\n");
                     continue;
                 };
-                
+
                 msg_len = sprintf(sock.buffer, "%s %s", "SET_DATE", today);
 
                 if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "DATE_ACK"))
@@ -257,6 +259,21 @@ int main(int argc, char **argv)
             }
 
             FD_CLR(0, &readset);
+        }
+
+        if (update_date(today))
+        {
+            int msg_len;
+            msg_len = sprintf(sock.buffer, "%s %s", "SET_DATE", today);
+
+            int i;
+            for (i = 0; i < get_n_peers(); i++)
+            {
+                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, get_port(i), "DATE_ACK"))
+                {
+                    printf("Errore: impossibile comunicare data al peer %d\n", get_port(i));
+                }
+            }
         }
     }
 

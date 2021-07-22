@@ -21,7 +21,7 @@
 
 // Variabili di stato
 int my_port;
-char today[DATE_LEN];
+char today[DATE_LEN + 1];
 
 // Buffer stdin
 char command_buffer[MAX_STDIN_C];
@@ -187,6 +187,7 @@ int main(int argc, char **argv)
                 }
 
                 tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
+                printf("Data ricevuta dal server : %s", today);
 
                 printf("Connessione riuscita\n");
 
@@ -469,6 +470,19 @@ int main(int argc, char **argv)
                     {
                         printf("Errore nell'aggiornamento del vicino successivo da %d a %d\nOperazione annullata\n", nbs.next, port);
                     }
+                }
+                
+                // Notifica cambiamento data
+                else if (strcmp(msg_type_buffer, "SET_DATE") == 0)
+                {
+                    int tmp;
+
+                    // legge data
+                    tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
+                    printf("Data ricevuta dal server : %s", today);
+                    
+                    // invia ack
+                    s_send_ack_udp(server_s.id, "DATE_ACK", server_s.port);
                 }
 
                 // Notifica chiusura server

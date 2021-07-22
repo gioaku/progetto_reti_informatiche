@@ -28,7 +28,7 @@ struct UdpSocket sock;
 // Buffer stdin
 char command_buffer[MAX_STDIN_S];
 
-// Gestione input 
+// Gestione input
 fd_set master;
 fd_set readset;
 int fdmax;
@@ -125,6 +125,15 @@ int main(int argc, char **argv)
                     printf("Errore: impossibile comunicare vicini al peer\nOperazione abortita\n");
                     continue;
                 };
+                
+                msg_len = sprintf(sock.buffer, "%s %s", "SET_DATE", today);
+
+                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "DATE_ACK"))
+                {
+                    remove_peer(src_port);
+                    printf("Errore: impossibile comunicare data al peer\nOperazione abortita\n");
+                    continue;
+                }
 
                 // invio aggiornamenti vicini
                 if (nbs.tot > 0)

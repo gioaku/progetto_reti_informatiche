@@ -66,7 +66,7 @@ int accept_nb_connection(int listener, struct Neighbors nbs, struct TcpSocket *p
         return -1;
     }
 
-    tmp.port = ntohs(tmp.addr.sin_port);
+    tmp.port = htons(tmp.addr.sin_port);
 
     if (tmp.port == nbs.next)
     {

@@ -129,6 +129,7 @@ int main(int argc, char **argv)
                 };
 
                 msg_len = sprintf(sock.buffer, "%s %s", "SET_DATE", today);
+                printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
 
                 if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "DATE_ACK"))
                 {
@@ -265,6 +266,7 @@ int main(int argc, char **argv)
         {
             int msg_len;
             msg_len = sprintf(sock.buffer, "%s %s", "SET_DATE", today);
+            printf("Lista da inviare a tutti: %s (lunga %d byte)\n", sock.buffer, msg_len);
 
             int i;
             for (i = 0; i < get_n_peers(); i++)

@@ -38,7 +38,7 @@ int tcp_listener_init(struct TcpSocket *sock, int port)
     sock->id = socket(AF_INET, SOCK_STREAM, 0);
     set_address(&(sock->addr), (socklen_t *)&(sock->addr_len), port);
 
-    if (bind(sock->id, (struct sockaddr *)&(sock->addr), sock->addr_len) != 0)
+    if (bind(sock->id, (struct sockaddr *)&(sock->addr), sizeof(sock->addr)) != 0)
         return -1;
     if (listen(sock->id, 2) != 0)
         return -1;
@@ -51,7 +51,7 @@ int tcp_connect_init(int port, struct TcpSocket *sock)
 {
     sock->id = socket(AF_INET, SOCK_STREAM, 0);
     set_address(&(sock->addr), (socklen_t *)&(sock->addr_len), port);
-    if (connect(sock->id, (struct sockaddr *)&(sock->addr), sock->addr_len))
+    if (connect(sock->id, (struct sockaddr *)&(sock->addr), sizeof(sock->addr)))
         return -1;
     sock->port = port; 
     return sock->id;
@@ -63,7 +63,7 @@ int accept_nb_connection(int listener, struct Neighbors nbs, struct TcpSocket *p
     struct TcpSocket tmp;
     tmp.addr_len = sizeof(tmp.addr);
 
-    if ((tmp.id = accept(listener, (struct sockaddr *)&tmp.addr, tmp.addr_len)) == -1)
+    if ((tmp.id = accept(listener, (struct sockaddr *)&tmp.addr, &tmp.addr_len)) == -1)
     {
         return -1;
     }

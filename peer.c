@@ -375,6 +375,9 @@ int main(int argc, char **argv)
                 FD_CLR(listener_s.id, &readset);
                 continue;
             }
+            if (new_sd == 0){
+                printf("Errore, socket id ritornato uguale a 0\n");
+            }
 
             fdmax = new_sd > fdmax ? new_sd : fdmax;
             FD_SET(new_sd, &master);
@@ -431,9 +434,8 @@ int main(int argc, char **argv)
                     }
 
                     printf("Connessione con nuovo vicino precendente %d avvenuta con successo\n", nbs.prev);
-
-                    FD_SET(prev_s.id, &master);
-                    fdmax = fdmax > prev_s.id ? fdmax : prev_s.id;
+                    // FD_SET(prev_s.id, &master);
+                    // fdmax = fdmax > prev_s.id ? fdmax : prev_s.id;
                 }
 
                 // aggiornamento vicino successivo
@@ -468,8 +470,8 @@ int main(int argc, char **argv)
                         continue;
                     }
                     printf("Connessione con nuovo vicino successivo %d avvenuta con successo\n", nbs.next);
-                    FD_SET(next_s.id, &master);
-                    fdmax = fdmax > next_s.id ? fdmax : next_s.id;
+                    // FD_SET(next_s.id, &master);
+                    // fdmax = fdmax > next_s.id ? fdmax : next_s.id;
                 }
                 // Notifica cambiamento data
                 else if (strcmp(msg_type_buffer, "SET_DATE") == 0)

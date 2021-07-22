@@ -187,7 +187,7 @@ int main(int argc, char **argv)
                 }
 
                 tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
-                printf("Data ricevuta dal server : %s", today);
+                printf("Data ricevuta dal server : %s\n", today);
 
                 printf("Connessione riuscita\n");
 
@@ -444,7 +444,7 @@ int main(int argc, char **argv)
                         printf("Aggiornamento vicino successivo da %d a %d avvenuto con successo\n", nbs.next, port);
                         if (close(next_s.id) == -1)
                         {
-                            printf("Errore: impossibile chiudere connessione con il vecchio vicino successivo");
+                            printf("Errore: impossibile chiudere connessione con il vecchio vicino successivo\n");
                         }
 
                         printf("Connessione con vecchio vicino successivo %d avvenuta con successo\n", nbs.next);
@@ -479,8 +479,8 @@ int main(int argc, char **argv)
 
                     // legge data
                     tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
-                    printf("Data ricevuta dal server : %s", today);
-                    
+                    printf("Data ricevuta dal server : %s\n", today);
+
                     // invia ack
                     s_send_ack_udp(server_s.id, "DATE_ACK", server_s.port);
                 }
@@ -493,7 +493,7 @@ int main(int argc, char **argv)
                     // Invia ACK
                     s_send_ack_udp(server_s.id, "S_XT_ACK", server_s.port);
 
-                    printf("Disconnessione riuscita");
+                    printf("Disconnessione riuscita\n");
 
                     // Chiude tutti i socket
                     close(server_s.id);

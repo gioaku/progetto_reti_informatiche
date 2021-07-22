@@ -31,12 +31,28 @@ int update_date(char* buff){
     now_time = time(NULL);
     now_tm = gmtime(&now_time);
 
-    sprintf(current_d, "%04d:%02d:%02d", now_tm->tm_year+1900, now_tm->tm_mon+1, now_tm->tm_mday);
-    current_d[DATE_LEN] = '\0';
+    if(now_tm->tm_hour < 18)
+        sprintf(current_d, "%04d:%02d:%02d", now_tm->tm_year+1900, now_tm->tm_mon+1, now_tm->tm_mday);
+    else {
+        now_tm->tm_mday += 1;
+        now_time = mktime(now_tm);
+        now_tm = gmtime(&now_time);
+        sprintf(current_d, "%04d:%02d:%02d", now_tm->tm_year+1900, now_tm->tm_mon+1, now_tm->tm_mday);
+    }
     sprintf(current_t, "%02d:%02d:%02d", now_tm->tm_hour, now_tm->tm_min, now_tm->tm_sec);
+
+    current_d[DATE_LEN] = '\0';
+    current_t[DATE_LEN] = '\0';
+    
     if (strcmp(buff, current_d) == 0 && strcmp("18:00", current_t) < 0){
-        strncpy(buff, current_d, DATE_LEN + 1);
+        now_tm->tm_mday += 1;
+        now_time = mktime(now_tm);
+        now_tm = gmtime(&now_time);
+        sprintf(buff, "%04d:%02d:%02d", now_tm->tm_year+1900, now_tm->tm_mon+1, now_tm->tm_mday);
+        buff[DATE_LEN] = '\0';
         return 1;
     }
+
+    strncpy(buff, current_d, DATE_LEN + 1);
     return 0;
 }

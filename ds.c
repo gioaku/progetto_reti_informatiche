@@ -46,11 +46,12 @@ int main(int argc, char **argv)
     my_port = atoi(argv[1]);
     // inizializzazione data
     update_date(today);
+    printf("Inizializzata la data di oggi a %s\n", today);
 
     // creazione socket di ascolto
     if (udp_socket_init(&sock, my_port) == -1)
     {
-        printf("Error: udp init gone wrong");
+        printf("Error: udp init gone wrong\n");
         exit(0);
     }
 

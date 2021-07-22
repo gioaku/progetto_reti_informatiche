@@ -43,7 +43,7 @@ int update_date(char* buff){
     current_d[DATE_LEN] = '\0';
     current_t[DATE_LEN] = '\0';
     
-    if (strcmp(buff, current_d) == 0 && strcmp("18:00", current_t) < 0){
+    if (strcmp(buff, current_d) != 0 && strcmp("18:00", current_t) < 0){
         now_tm->tm_mday += 1;
         now_time = mktime(now_tm);
         now_tm = gmtime(&now_time);

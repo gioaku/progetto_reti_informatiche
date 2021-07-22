@@ -17,7 +17,7 @@ void set_address(struct sockaddr_in *addr_p, socklen_t *len_p, int port)
     addr_p->sin_family = AF_INET;
     addr_p->sin_port = htons(port);
     inet_pton(AF_INET, LOCALHOST, &addr_p->sin_addr);
-    (*len_p) = sizeof((*addr_p));
+    (*len_p) = sizeof((*addr_p
 }
 
 // Inizializzazione del socket udp - restituisce il descrittore di socket
@@ -61,7 +61,7 @@ int tcp_connect_init(int port, struct TcpSocket *sock)
 int accept_nb_connection(int listener, struct Neighbors nbs, struct TcpSocket *prev, struct TcpSocket *next)
 {
     struct TcpSocket tmp;
-    tmp.addr_len = sizeof(tmp.addr);
+    set_address(&(tmp.addr), (socklen_t *)&(tmp.addr_len), 0);
 
     if ((tmp.id = accept(listener, (struct sockaddr *)&tmp.addr, &tmp.addr_len)) == -1)
     {
@@ -195,7 +195,7 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
 
     if (tries > -1)
     {
-        printf("Messggio %s ricevuto correttamente dal destinatario %d\n", buffer, port);
+        printf("Messaggio %s ricevuto correttamente dal destinatario %d\n", buffer, port);
         return 1;
     }
 

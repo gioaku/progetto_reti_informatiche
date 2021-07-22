@@ -61,6 +61,8 @@ int tcp_connect_init(int port, struct TcpSocket *sock)
 int accept_nb_connection(int listener, struct Neighbors nbs, struct TcpSocket *prev, struct TcpSocket *next)
 {
     struct TcpSocket tmp;
+    tmp.addr_len = sizeof(tmp.addr);
+    
     if ((tmp.id = accept(listener, (struct sockaddr *)&tmp.addr, &tmp.addr_len)) == -1)
     {
         return -1;

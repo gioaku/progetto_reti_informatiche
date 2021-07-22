@@ -64,6 +64,8 @@ int main(int argc, char **argv)
         printf("Error: cannot create server socket\n");
         exit(0);
     }
+    // inizializzo listener, next e prev non attivi
+    listener_s.id = prev_s.id = next_s.id = -1;
 
     // inizializzo set di descrittori
     FD_SET(0, &master);
@@ -82,23 +84,6 @@ int main(int argc, char **argv)
 
         // controllo se c'e' qualcosa pronto
         select(fdmax + 1, &readset, NULL, NULL, NULL);
-
-        // richiesta di connessione sul socket listener
-        if (FD_ISSET(listener_s.id, &readset))
-        {
-            int new_sd;
-
-            if ((new_sd = accept_nb_connection(listener_s.id, nbs, &prev_s, &next_s)) == -1)
-            {
-                printf("Errore: impossibile accettare richiesta di connessione\n");
-                FD_CLR(listener_s.id, &readset);
-                continue;
-            }
-
-            fdmax = new_sd > fdmax ? new_sd : fdmax;
-            FD_SET(new_sd, &master);
-            FD_CLR(listener_s.id, &readset);
-        }
 
         // messaggio da stdin
         if (FD_ISSET(0, &readset))
@@ -200,7 +185,7 @@ int main(int argc, char **argv)
                     printf("Errore: impossibile ricevere la di oggi dal server. Riprovare\n");
                     continue;
                 }
-                
+
                 tmp = sscanf(server_s.buffer, "%s %s", msg_type_buffer, today);
 
                 printf("Connessione riuscita\n");
@@ -375,6 +360,23 @@ int main(int argc, char **argv)
                 printf("Errore, comando non esistente\n");
 
             FD_CLR(0, &readset);
+        }
+
+        // richiesta di connessione sul socket listener
+        if (FD_ISSET(listener_s.id, &readset))
+        {
+            int new_sd;
+
+            if ((new_sd = accept_nb_connection(listener_s.id, nbs, &prev_s, &next_s)) == -1)
+            {
+                printf("Errore: impossibile accettare richiesta di connessione\n");
+                FD_CLR(listener_s.id, &readset);
+                continue;
+            }
+
+            fdmax = new_sd > fdmax ? new_sd : fdmax;
+            FD_SET(new_sd, &master);
+            FD_CLR(listener_s.id, &readset);
         }
 
         // messaggio sul server socket

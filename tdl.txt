@@ -7,3 +7,4 @@ check function parameters correspondence between .h and .c
 check return values correspondence
 #ifndef * #define * ... #endif 
 check extreeme cases (1 peer, 2 peers, neighbors)
+check continue closes reset operations

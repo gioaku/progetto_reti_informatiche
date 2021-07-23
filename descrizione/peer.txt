@@ -40,7 +40,7 @@ stdin msg
         init listener
         CONN_REQ CONN_ACK
         NBR_LIST LIST_ACK
-        SET_DATE DATE_ACK
+        SET_TDAY TDAY_ACK
         update sets
 
         reload registers

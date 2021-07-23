@@ -18,6 +18,7 @@
 
 int my_port;
 char today[DATE_LEN + 1];
+char first_day[DATE_LEN + 1];
 
 // Udp socket
 struct UdpSocket sock;
@@ -41,9 +42,28 @@ int main(int argc, char **argv)
     FD_ZERO(&readset);
 
     my_port = atoi(argv[1]);
+    
     // inizializzazione data
     update_date(today);
-    printf("Inizializzata la data di oggi a %s\n", today);
+    if (!file_exists("./data/ds/first_day.txt"))
+    {
+        FILE *fd;
+
+        strcpy(first_day, today);
+        create_path("./data/ds/");
+        fd = fopen("./data/ds/first_day.txt", "w");
+        fprintf(fd, "%s", first_day);
+        fclose(fd);
+    }
+    else {
+        FILE *fd;
+
+        fd = fopen("./data/ds/first_day.txt", "r");
+        fscanf(fd, "%s", first_day);
+        fclose(fd);
+    }
+
+    printf("Inizializzata prima data a %s e la data di oggi a %s\n", first_day, today);
 
     // creazione socket di ascolto
     if (udp_socket_init(&sock, my_port) == -1)
@@ -129,17 +149,28 @@ int main(int argc, char **argv)
                     continue;
                 };
 
-                msg_len = sprintf(sock.buffer, "%s %s", "SET_DATE", today);
+                msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", today);
                 sock.buffer[msg_len] = '\0';
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
 
-                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "DATE_ACK"))
+                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "TDAY_ACK"))
                 {
                     remove_peer(src_port);
                     printf("Errore: impossibile comunicare data al peer\nOperazione abortita\n");
                     continue;
                 }
 
+                msg_len = sprintf(sock.buffer, "%s %s", "SET_FDAY", first_day);
+                sock.buffer[msg_len] = '\0';
+                printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
+
+                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "FDAY_ACK"))
+                {
+                    remove_peer(src_port);
+                    printf("Errore: impossibile comunicare data al peer\nOperazione abortita\n");
+                    continue;
+                }
+                
                 // invio aggiornamenti vicini
                 if (nbs.tot > 0)
                 {
@@ -275,14 +306,14 @@ int main(int argc, char **argv)
         if (update_date(today))
         {
             int msg_len;
-            msg_len = sprintf(sock.buffer, "%s %s", "SET_DATE", today);
+            msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", today);
             sock.buffer[msg_len] = '\0';
             printf("Lista da inviare a tutti: %s (lunga %d byte)\n", sock.buffer, msg_len);
 
             int i;
             for (i = 0; i < get_n_peers(); i++)
             {
-                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, get_port(i), "DATE_ACK"))
+                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, get_port(i), "TDAY_ACK"))
                 {
                     printf("Errore: impossibile comunicare data al peer %d\n", get_port(i));
                 }

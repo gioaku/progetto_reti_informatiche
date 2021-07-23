@@ -7,9 +7,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#define __USE_XOPEN
 #include <time.h>
 
-// Scambio di messaggi
 #include "util_c.h"
 
 extern int my_port;
@@ -17,64 +17,59 @@ extern int server_socket;
 extern int server_port;
 
 // Elenco dei comandi disponibili lato client
-void print_client_commands(){
+void print_client_commands()
+{
     printf("Elenco dei comandi disponibili:\n");
     printf("$ help                                - mostra elenco comandi e significato\n");
     printf("$ start <DS_addr> <DS_port>           - richiede al Discovery Server connessione alla rete\n");
     printf("$ add <type> <quantity>               - aggiunge una entry nel registro del peer\n");
-    printf("$ get <aggr> <type> [<date1> <date2>] - richiede un dato aggregato\n");
+    printf("$ get <aggr> <type> [<date1>-<date2>] - richiede un dato aggregato\n");
     printf("$ stop                                - richiede disconnessione dalla rete\n");
 }
 
 // Ulteriore ausilio per comprendere i comandi
-void help_client(int i){
-    switch(i){
-        case 0: // help
-            printf("\nhelp - mostra elenco comandi e significato\n");
-            printf("Parametri: nessuno\n");
-            break;
-        case 1: // start
-            printf("\nstart <DS_addr> <DS_port> - richiede al Discovery Server connessione alla rete\n");
-            printf("Parametri:\n");
-            printf(" - DS_addr : stringa con IP in formato presentazione\n");
-            printf(" - DS_port : porta sulla quale gira il processo server, compresa tra 1024 e 65535\n");
-            break;
-        case 2:
-            printf("\nadd <type> <quantity> - aggiunge una entry nel registro giornaliero del peer\n");
-            printf("Parametri:\n");
-            printf(" - type : carattere per indicare se tamponi o nuovi casi [t/n]\n");
-            printf(" - quantity : quantita' del dato da aggiungere [intero n]\n");
-            break;
-        case 3:
-            printf("\nget <aggr> <type> [<date1> <date2>] - richiede un dato aggregato\n");
-            printf("Parametri:\n");
-            printf(" - aggr : tipo di aggregazione, se totale o variazioni giornaliere [t/v]\n");
-            printf(" - type : carattere per indicare se tamponi o nuovi casi [t/n]\n");
-            printf(" - date1 : lower bound della ricerca, '*' per lower bound minimo\n");
-            printf(" - date2 : upper bound della ricerca, '*' per upper bound massimo\n");
-            printf("Nota: se non si vuole nessun bound omettere le date\n");
-            break;
-        case 4:
-            printf("\nstop - richiede disconnessione dalla rete\n");
-            printf("Parametri: nessuno\n");
-            break;
-        default:
-            printf("Errore nella chiamata\n");
+void help_client(int i)
+{
+    switch (i)
+    {
+    case 0: // help
+        printf("\nhelp - mostra elenco comandi e significato\n");
+        printf("Parametri: nessuno\n");
+        break;
+    case 1: // start
+        printf("\nstart <DS_addr> <DS_port> - richiede al Discovery Server connessione alla rete\n");
+        printf("Parametri:\n");
+        printf(" - DS_addr : stringa con IP in formato presentazione\n");
+        printf(" - DS_port : porta sulla quale gira il processo server, compresa tra 1024 e 65535\n");
+        break;
+    case 2:
+        printf("\nadd <type> <quantity> - aggiunge una entry nel registro giornaliero del peer\n");
+        printf("Parametri:\n");
+        printf(" - type : carattere per indicare se tamponi o nuovi casi [t/n]\n");
+        printf(" - quantity : quantita' del dato da aggiungere [intero n]\n");
+        break;
+    case 3:
+        printf("\nget <aggr> <type> [<date1>-<date2>] - richiede un dato aggregato\n");
+        printf("Parametri:\n");
+        printf(" - aggr : tipo di aggregazione, se totale o variazioni giornaliere [t/v]\n");
+        printf(" - type : carattere per indicare se tamponi o nuovi casi [t/n]\n");
+        printf(" - date1 : lower bound della ricerca, '*' per lower bound minimo\n");
+        printf(" - date2 : upper bound della ricerca, '*' per upper bound massimo\n");
+        printf("Nota: se non si vuole nessun bound omettere le date\n");
+        break;
+    case 4:
+        printf("\nstop - richiede disconnessione dalla rete\n");
+        printf("Parametri: nessuno\n");
+        break;
+    default:
+        printf("Errore nella chiamata\n");
     }
 }
 
-int file_exists(char *file){
-    struct stat buff;
-    return (stat(file, &buff) == 0);
-}
 
-int create_path(char *path){
-    char command[MAX_PATH_LEN + 10];
-    sprintf(command, "mkdir -p %s", path);
-    return system(command);
-} 
 
-void insert_entry(char *date, char type, int quantity){
+void insert_entry(char *date, char type, int quantity)
+{
     FILE *fd;
     char path[MAX_PATH_LEN + MAX_FILENAME_LEN + 1];
     char filename[MAX_FILENAME_LEN + 1];
@@ -87,7 +82,8 @@ void insert_entry(char *date, char type, int quantity){
 
     printf("File : %s%s\n", path, filename);
 
-    if (!file_exists(path)){
+    if (!file_exists(path))
+    {
         printf("Creating path : %s\n", path);
         create_path(path);
     }
@@ -99,130 +95,89 @@ void insert_entry(char *date, char type, int quantity){
     printf("Entry %d inserita nel file: %s\n", quantity, path);
 }
 
-/*
-// Controllo che la seconda non sia minore della prima in caso di totale
-// e sia strettamente maggiore in caso di variazione
-int is_real_period(int *date1, int *date2, char aggr){
-    return (date1[0] < date2[0] || (date1[0] == date2[0] && (date1[1] < date2[1] || (date1[1] == date2[1] && (date1[2] < date2[2] || (date1[2] == date2[2] && aggr == 't'))))));
-}
+// Controlla che il periodo fornito sia valido
+int check_period(char *period, char *first_day, char *today, struct tm *from, struct tm *to)
+{
 
-// Controllo la validita' della data
-int is_valid_date(int y, int m, int d){
-    int c_date[3];
-    int this_date[3];
-    this_date[0] = y;
-    this_date[1] = m;
-    this_date[2] = d;
-    // Basic
-    if(y < MIN_YEAR || m < 1 || m > 12 || d < 1 || d > 31){
-        printf("E1\n");
+    char date1[DATE_IN_LEN + 1], date2[DATE_IN_LEN + 1];
+    int fd, fm, fy, td, tm, ty;
+
+    if (sscanf(period, "%s-%s", date1, date2) != 2)
+    {
         return 0;
     }
 
-    retrieve_time();
-    sscanf(current_d, "%d:%d:%d", &c_date[0], &c_date[1], &c_date[2]);
-    // Sfrutto la funzione is_real_period
-    if(!is_real_period(this_date, c_date, 't')){
-        printf("E2\n");
-        return 0;
-    }
-    // Advanced
-    if(m == 4 || m == 6 || m == 9 || m == 11)
-        return (d <= 30);
-    // Extreme
-    if(m == 2){
-        if(((y%4 == 0) && (y%100 != 0)) || (y%400 == 0))
-            return (d <= 29);
-        else
-            return (d <= 28); 
-    }
+    // possibilita * -> date 2
+    if (strcmp(date1, "*") == 0)
+    {
 
-    return 1;
-}
-
-// Controllo che le date input della get siano valide
-int check_dates(char *date1, char *date2, char aggr){
-    int date[2][3];
-    int ret[2];
-    // Controllo sulla prima data
-    // Conversione da dd:mm:yyyy a yyyy:mm:dd
-    ret[0] = sscanf(date1, "%d:%d:%d", &date[0][2], &date[0][1], &date[0][0]);
-    if(!(ret[0] == 3 || strcmp(date1, "*") == 0)){
-        printf("Data 1 non conforme al tipo di input richiesto");
-        return 0;
-    }
-    if(ret[0] == 3 && !is_valid_date(date[0][0], date[0][1], date[0][2])){
-        printf("Errore nell'inserimento della prima data\n");
-        return 0;
-    }
-    // Controllo sulla seconda data
-    // Conversione da dd:mm:yyyy a yyyy:mm:dd
-    ret[1] = sscanf(date2, "%d:%d:%d", &date[1][2], &date[1][1], &date[1][0]);
-    if(!(ret[1] == 3 || strcmp(date2, "*") == 0)){
-        printf("Data 2 non conforme al tipo di input richiesto");
-        return 0;
-    }
-    if(ret[1] == 3 && !is_valid_date(date[1][0], date[1][1], date[1][2])){
-        printf("Errore nell'inserimento della seconda data\n");
-        return 0;
-    }
-    // Se entrambe le date sono * non va bene
-    if(strcmp(date1, "*") == 0 && strcmp(date2, "*") == 0){
-        printf("Non si puo' inserire due volte *.\nLasciare vuoti i campi data se si desidera l'intero periodo\n");
-        return 0;
-    }
-    // Se entrambe le date sono presenti,
-    // controllo che la seconda non sia minore della prima in caso di totale
-    // e sia strettamente maggiore in caso di variazione
-    if(ret[0] == 3 && ret[1] == 3){
-        if(!is_real_period(date[0], date[1], aggr)){
-            printf("Periodo scelto non coerente\n");
+        if (sscanf(date2, DATE_IN_FORMAT, &td, &tm, &ty) != 3)
             return 0;
+        if (!valid_date_i(td, tm, ty))
+            return 0;
+        if (!in_time_interval(td, tm, ty, first_day, today))
+            return 0;
+
+        strptime(first_day, "%Y_%m_%d", from);
+        strptime(date2, "%d:%m:%Y", to);
+        return 1;
+    }
+
+    else
+    {
+        if (sscanf(date1, DATE_IN_FORMAT, &fd, &fm, &fy) != 3)
+            return 0;
+        if (!valid_date_i(fd, fm, fy))
+            return 0;
+        if (!in_time_interval(fd, fm, fy, first_day, today))
+            return 0;
+
+        if (strcmp(date2, "*") == 0)
+        {
+            strptime(date1, "%d:%m:%Y", from);
+            strptime(today, "%Y_%m_%d", to);
+            to->tm_mday--;
+            mktime(to);
+            return 1;
+        }
+        else
+        {
+            if (sscanf(date2, DATE_IN_FORMAT, &td, &tm, &ty) != 3)
+                return 0;
+            if (!valid_date_i(td, tm, ty))
+                return 0;
+            if (!in_time_interval(td, tm, ty, first_day, today))
+                return 0;
+            if (!sooner_or_eq(fd, fm, fy, td, tm, ty))
+                return 0;
+            strptime(date1, "%d:%m:%Y", from);
+            strptime(date2, "%d:%m:%Y", to);
+            return 1;
         }
     }
-
-    // Tutto ok
-    return 1;
 }
 
+// Restituisce totale di tipo type in data d/m/y - ritorna -1 altrimenti
+int get_saved_elab(char type, int d, int m, int y)
+{
+    char file[MAX_PATH_LEN + MAX_FILENAME_LEN + 1];
+    int ret;
 
-// Fine validazione input get
+    sprintf(file, ".data/%d/%c/elabs/%04d_%02d_%02d.txt", my_port, type, y, m, d);
 
+    if (file_exists(file))
+    {
+        FILE *fd;
 
-// Inserisce entry nel file di entries
-void insert_entry(char type, int quantity){
-    FILE *fd;
-    char filename[MAX_FILENAME_LEN];
-
-    retrieve_time();
-
-    sprintf(filename, "%s%s_%d.txt", "./peer_dir/", current_d, my_port);
-
-    printf("Filename: %s\n", filename);
-
-    fd = fopen(filename, "a");
-    fprintf(fd, "%s %c %d %d;\n", current_t, type, quantity, my_port);
-    fclose(fd);
-
-    printf("Entry inserita!\n");
+        fd = fopen(fd, "r");
+        fscanf(fd, "%d", &ret);
+        fclose(fd);
+        return ret;
+    }
+    return -1;
 }
-
-// Inserisce una intera entry passata come stringa nel file di entries
-void insert_entry_string(char* entry){
-    FILE *fd;
-    char filename[MAX_FILENAME_LEN];
-
-    retrieve_time();
-
-    sprintf(filename, "%s%s_%d.txt", "./peer_dir/", current_d, my_port);
-
-    fd = fopen(filename, "a");
-    fprintf(fd, "%s\n", entry);
-    fclose(fd);
-
-    printf("Entry inserita!\n");
-}
-
+/*
+/
 // Conta il numero di entries presente nel proprio database di un certo tipo ('a': le conta tutte)
 int count_entries(char type){
     FILE *fd;

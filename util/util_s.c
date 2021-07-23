@@ -46,9 +46,8 @@ int update_date(char *buff)
     {
         if (strcmp(buff, current_d) == 0)
             ret = 1;
-        now_tm->tm_mday += 1;
-        now_time = mktime(now_tm);
-        now_tm = gmtime(&now_time);
+        now_tm->tm_mday ++;
+        mktime(now_tm);
         sprintf(buff, DATE_FORMAT, now_tm->tm_year + 1900, now_tm->tm_mon + 1, now_tm->tm_mday);
         buff[DATE_LEN] = '\0';
     }

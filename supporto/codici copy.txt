@@ -2,7 +2,6 @@ peer  to server
 
 CONN_REQ CONN_ACK   Richiesta di connessione
 CLT_EXIT C_EX_ACK   Uscita del peer
-SET_DATE DATE_ACK   Comunicazione data odierna
 
 /*
 NEW_ENTR ENEW_ACK   Nuovo dato giornaliero aggiunto con add
@@ -19,6 +18,8 @@ server to peer
 NBR_LIST LIST_ACK   Invio lista di vicini a un peer appena entrato
 PRE_UPDT PREV_ACK   Aggiornamento vicino precedente
 NXT_UPDT NEXT_ACK   Aggiornamento vicino successivo
+SET_TDAY TDAY_ACK   Comunicazione data odierna
+SET_FDAY FDAY_ACK   Comunicazione data inizio raccolta dati
 
 /*
 TMR_PORT TPRT_ACK   Invio numero di porta del time server

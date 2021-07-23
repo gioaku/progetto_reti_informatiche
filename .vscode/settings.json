@@ -9,6 +9,8 @@
         "random": "c",
         "stdio.h": "c",
         "inet.h": "c",
-        "util_c.h": "c"
+        "util_c.h": "c",
+        "stdlib.h": "c",
+        "time.h": "c"
     }
 }

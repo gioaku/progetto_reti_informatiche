@@ -208,13 +208,22 @@ int handle_tcp_socket(int sock)
 
         if (ret == 0)
             return 0;
-        
+
         buffer[ret] = '\0';
 
         strncpy(msg_type_buffer, buffer, MESS_TYPE_LEN);
         msg_type_buffer[MESS_TYPE_LEN] = '\0';
 
         printf("TCP [%d] : Ricevuto messaggio %s\n", sock, msg_type_buffer);
-        //if (strcmp(msg_type_buffer, ""));
+        if (strcmp(msg_type_buffer, "ELAB_REQ"))
+        {
+            char type;
+            int d, m, y;
+
+            ret = sscanf(buffer, "%s %c %04d_%02d_%02d", msg_type_buffer, &type, &y, &m, &d);
+            if (ret != 5)
+                continue;
+            
+        }
     }
 }

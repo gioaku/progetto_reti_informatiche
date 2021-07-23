@@ -19,6 +19,7 @@
 int my_port;
 int server_port;
 char today[DATE_LEN + 1];
+char first_day[DATE_LEN + 1];
 
 // Buffer stdin
 char command_buffer[MAX_STDIN_C];
@@ -171,19 +172,34 @@ int main(int argc, char **argv)
                 }
 
                 // ricevo la data di oggi
-                if (!recv_udp_and_ack(udp_s.id, udp_s.buffer, MAX_UDP_MSG, server_port, "SET_DATE", "DATE_ACK"))
+                if (!recv_udp_and_ack(udp_s.id, udp_s.buffer, MAX_UDP_MSG, server_port, "SET_TDAY", "TDAY_ACK"))
                 {
                     printf("Errore: impossibile ricevere la di oggi dal server. Riprovare\n");
                     continue;
                 }
 
                 tmp = sscanf(udp_s.buffer, "%s %s", msg_type_buffer, today);
-                if (tmp != 2 || !valid_data(today))
+                if (tmp != 2 || !valid_date_s(today))
                 {
                     printf("Errore nella ricezione della data odierna %s\n", today);
                     continue;
                 }
-                printf("Data ricevuta dal server : %s\n", today);
+                printf("Data di oggi ricevuta dal server : %s\n", today);
+
+                // ricevo la prima data
+                if (!recv_udp_and_ack(udp_s.id, udp_s.buffer, MAX_UDP_MSG, server_port, "SET_FDAY", "FDAY_ACK"))
+                {
+                    printf("Errore: impossibile ricevere la di oggi dal server. Riprovare\n");
+                    continue;
+                }
+
+                tmp = sscanf(udp_s.buffer, "%s %s", msg_type_buffer, first_day);
+                if (tmp != 2 || !valid_date_s(first_day))
+                {
+                    printf("Errore nella ricezione della prima data %s\n", first_day);
+                    continue;
+                }
+                printf("Prima data ricevuta dal server : %s\n", first_day);
 
                 printf("Connessione riuscita\n");
 
@@ -192,7 +208,7 @@ int main(int argc, char **argv)
 
                 print_nbs(my_port, nbs);
             }
-            
+
             // add
             else if (strcmp(command, "add") == 0)
             {
@@ -216,17 +232,18 @@ int main(int argc, char **argv)
                 printf("Calling insert_entry(%s, %c, %d)\n", today, type, quantity);
                 insert_entry(today, type, quantity);
             }
-/*
+
             // get
             else if (strcmp(command, "get") == 0)
             {
                 char aggr;
                 char type;
-                char bound[2][DATE_LEN + 1];
-                int tot_entr;
-                int peer_entr;
-                int sum_entr;
-                char get_buffer[MAX_SUM_ENTRIES]; // Ricevere il messaggio
+                char period[DATE_IN_LEN * 2 + 2];
+
+                struct tm *from = {0};
+                struct tm *to = {0};
+                time_t from_time = time(NULL);
+                time_t to_time = time(NULL);
 
                 // Se peer non connesso non faccio nulla
                 if (server_port == -1)
@@ -235,12 +252,10 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                tmp = sscanf(command_buffer, "%s %c %c %s %s", command, &aggr, &type, bound[0], bound[1]);
+                tmp = sscanf(command_buffer, "%s %c %c %s", command, &aggr, &type, period);
                 // Numero di parametri
-                bound[0][DATE_LEN] = '\0';
-                bound[1][DATE_LEN] = '\0';
 
-                if (!(tmp == 3 || tmp == 5))
+                if (!(tmp == 3 || tmp == 4))
                 {
                     printf("Errore nel numero di parametri passati\n");
                     continue;
@@ -252,69 +267,87 @@ int main(int argc, char **argv)
                     continue;
                 }
                 // Controllo sulle date
-                if (tmp == 5)
+                if (tmp == 4)
                 {
-                    if (!check_dates(bound[0], bound[1], aggr))
+                    period[DATE_LEN * 2 + 1] = '\0';
+                    if (!check_period(period, first_day, today, from, to))
                         continue;
                 }
 
-                printf("Controlli superati!\n");
+                printf("GET : aggr %c, type %c, between %02d:%02d:%04d and %02d:%02d:%04d\n", aggr, type,from->tm_mday, from->tm_mon, from->tm_year + 1900, to->tm_mday, to->tm_mon, to->tm_year + 1900));
 
-                // Se c'e' qualche altro peer che sta eseguendo la get, mi fermo
-                if(get_lock()){
-                    printf("Comando get non eseguibile in questo momento, riprova piu' tardi\n");
-                    continue;
-                }
-                tot_entr = -1;
-                peer_entr = -1;
-                sum_entr = -1;
+                to_time = mktime(to);
 
-                // Riempio i buffer delle date nel caso non siano state inserite dall'utente
-                if (tmp == 3)
+                if (aggr == 't')
                 {
-                    strcpy(bound[0], "*");
-                    strcpy(bound[1], "*");
-                }
+                    int tmp;
+                    int sum;
 
-                // Se la data di fine e' oggi va bene l'asterisco
-                if (is_today(bound[1]))
-                    strcpy(bound[1], "*");
-
-
-                // Se la data di inizio e' oggi, ho finito perche' veniva solo richiesto il totale di oggi
-                if (!is_today(bound[0]))
-                {
-                    char get_past_aggr[MAX_PAST_AGGR];
-                    int aggr_entries;
-
-                    printf("Mi serve lo storico dei dati\n");
-                    tmp = sprintf(get_past_aggr, "%s %s %s", "AGGR_GET", bound[0], bound[1]);
-                    get_past_aggr[tmp] = '\0';
-                    send_UDP(listener_socket, get_past_aggr, tmp, time_port, "AGET_ACK");
-
-                    printf("Aspetto i dati dal time server\n");
-                    // Sfrutto get_past_aggr
-                    recv_UDP(listener_socket, get_past_aggr, MAX_PAST_AGGR, time_port, "AGGR_CNT", "ACNT_ACK");
-                    sscanf(get_past_aggr + 9, "%d", &aggr_entries);
-                    printf("Entrate da ricevere: %d\n", aggr_entries);
-
-                    while (aggr_entries--)
+                    sum = 0;
+                    while (from_time <= to_time)
                     {
-                        // Sfrutto stdin_buffer che e' della lunghezza giusta
-                        recv_UDP(listener_socket, stdin_buff, 40, time_port, "AGGR_ENT", "AENT_ACK");
-                        printf("Ricevuta stringa %s\n", stdin_buff + 9);
-                        // Memorizzo le entrate in un buffer temporaneo
-                        insert_temp(stdin_buff + 9);
+
+                        if (tmp = get_saved_elab(type, from->tm_mday, from->tm_mon, from->tm_year) != -1)
+                        {
+                            sum += tmp;
+                            from->tm_mday++;
+                            from_time = mktime(from);
+                            continue;
+                        }
+                        if (nbs.tot == 0)
+                        {
+                            from->tm_mday++;
+                            from_time = mktime(from);
+                            continue;
+                        }
+                        else if (nbs.tot == 1)
+                        {
+                            char buffer[MAX_TCP_MSG + 1];
+                            int msg_len;
+                            int sock;
+                            
+                            // connect con vicino precedente
+                            sock = tcp_connect_init(nbs.prev);
+                            msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, from->tm_year from->tm_mon, from->tm_mday);
+                            
+                            // send elab req
+                            send(sock, buffer, msg_len, 0);
+                            recv(sock, buffer, MAX_TCP_MSG, 0);
+
+                            
+                        }
+
+                        sum += tmp;
+                        from->tm_mday++;
+                        from_time = mktime(from);
+                    }
+                    printf("Totale di %c nel periodo %s: %d\n", type, period, sum);
+                }
+                if (aggr == 'v')
+                {
+                    int old, new;
+
+                    from->tm_day--;
+                    from_time = mktime(from);
+
+                    if (!get_saved_elab(type, from->tm_mday, from->tm_mon, from->tm_year, &old))
+                    {
                     }
 
-                    // Eseguo l'operazione di stampa finale
-                    print_results(aggr, type, sum_entr, bound[0], bound[1]);
-                }
+                    while (from_time <= to_time)
+                    {
+                        if (!get_saved_elab(type, from->tm_mday, from->tm_mon, from->tm_year, &new))
+                        {
+                        }
 
-                // Rilascio risorsa per la get
-                send_UDP(listener_socket, "GET_UNLK", MESS_TYPE_LEN, server_port, "GNLK_ACK");
+                        printf("Variazioni di %c in data %02d:%02d:%04d : %d\n", type, from->tm_mday, from->tm_mon, from->tm_year, new - old);
+                        old = new;
+
+                        from->tm_mday++;
+                        from_time = mktime(from);
+                    }
+                }
             }
-*/
 
             // stop
             else if (strcmp(command, "stop") == 0)
@@ -355,20 +388,22 @@ int main(int argc, char **argv)
         {
             int new_sd;
             pid_t pid;
-            
+
             if ((new_sd = accept_connection(listener_s.id)) == -1)
             {
                 printf("Errore: impossibile accettare connessione sul listener\n");
             }
-            else {
+            else
+            {
                 printf("Richiesta di connessione accettata sul socket %d\n", new_sd);
             }
-            
+
             // fork per gestire la connessione tcp
             pid = fork();
-            if (pid == 0){
+            if (pid == 0)
+            {
                 int ret;
-                
+
                 close(listener_s.id);
 
                 ret = handle_tcp_socket(new_sd);
@@ -444,9 +479,9 @@ int main(int argc, char **argv)
                         printf("Errore nell'aggiornamento del vicino successivo da %d a %d\nOperazione annullata\n", nbs.next, port);
                     }
                 }
-                
+
                 // Notifica cambiamento data
-                else if (strcmp(msg_type_buffer, "SET_DATE") == 0)
+                else if (strcmp(msg_type_buffer, "SET_TDAY") == 0)
                 {
                     int tmp;
 
@@ -454,14 +489,14 @@ int main(int argc, char **argv)
                     tmp = sscanf(udp_s.buffer, "%s %s", msg_type_buffer, today);
                     printf("Data ricevuta dal server : %s\n", today);
 
-                    if (tmp != 2 || !valid_data(today))
+                    if (tmp != 2 || !valid_date_s(today))
                     {
                         printf("Errore nella ricezione della data odierna");
                         FD_CLR(udp_s.id, &readset);
                         continue;
                     }
                     // invia ack
-                    s_send_ack_udp(udp_s.id, "DATE_ACK", server_port);
+                    s_send_ack_udp(udp_s.id, "TDAY_ACK", server_port);
                 }
 
                 // Notifica chiusura server
@@ -479,15 +514,14 @@ int main(int argc, char **argv)
                     _exit(0);
                 }
             }
-            
+
             // altro peer sul socket udp
-            else{
-
+            else
+            {
+                
+                }
+                FD_CLR(udp_s.id, &readset);
             }
-            FD_CLR(udp_s.id, &readset);
         }
-        
-
+        return 0;
     }
-    return 0;
-}

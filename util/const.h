@@ -11,11 +11,15 @@
 // Lunghezza di una stringa di data
 #define DATE_LEN 10
 // Formato di una stringa di data
-#define DATE_FORMAT "%04d-%02d-%02d"
+#define DATE_FORMAT "%04d_%02d_%02d"
 // Lunghezza di una stringa di orario
 #define TIME_LEN 8
 // Formato di una stringa di orario
 #define TIME_FORMAT "%02d:%02d:%02d"
+// Lunghezza di una stringa di data in input
+#define DATE_IN_LEN 10
+// Formato di una stringa di data
+#define DATE_IN_FORMAT "%02d:%02d:%04d"
 // Massimo numero di peer connessi (scelta di progettazione)
 #define MAX_CONNECTED_PEERS 100
 // Massima lunghezza di un'entry di aggiornamento con header (deriva dal massimo numero di peer connessi)

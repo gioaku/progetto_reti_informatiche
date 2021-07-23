@@ -2,9 +2,9 @@
 
 void print_client_commands();
 void help_client(int);
-int file_exists(char*);
-int create_file(char*);
 void insert_entry(char*, char, int);
+int check_period(char*, char*, char*, struct tm*, struct tm*);
+int get_saved_elab(char, int, int, int, int*);
 
 int check_dates(char*,char*,char);
 // void insert_entry(char,int);

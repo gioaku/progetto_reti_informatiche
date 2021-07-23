@@ -267,7 +267,7 @@ int main(int argc, char **argv)
                     printf("Errore nell'inserimento della richiesta\n");
                     continue;
                 }
-                printf('pre check period\n');
+                printf("pre check period\n");
                 // Controllo sulle date
                 if (ret == 4)
                 {

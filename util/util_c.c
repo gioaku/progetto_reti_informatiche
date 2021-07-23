@@ -61,6 +61,7 @@ void help_client(int i){
             printf("Errore nella chiamata\n");
     }
 }
+
 /*
 // Controllo che la seconda non sia minore della prima in caso di totale
 // e sia strettamente maggiore in caso di variazione
@@ -322,6 +323,7 @@ int is_entry_in(char* entry){
 }
 */
 /*
+
 // Riceve tutte le entrate che mancavano al momento della chiamata della get e le aggiunge al file delle entrate
 void wait_for_entries(int peer_entr, int tot_entr, char type){
     int ret;

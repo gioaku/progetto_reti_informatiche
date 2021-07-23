@@ -36,6 +36,16 @@ int fdmax;
 
 int main(int argc, char **argv)
 {
+    int ret, n;
+    FILE* fd;
+
+    fd = fopen("./ciao.txt", "r");
+    ret = fscanf(fd, "%d", &n);
+    printf("%d", n);
+    fclose(fd);
+    
+    
+    
     // pulizia set
     FD_ZERO(&master);
     FD_ZERO(&readset);
@@ -60,6 +70,7 @@ int main(int argc, char **argv)
     // stapa elenco comandi
     print_server_commands();
 
+    
     // ciclo infinito di funzionamento ds
     while (1)
     {

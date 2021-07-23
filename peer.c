@@ -192,13 +192,14 @@ int main(int argc, char **argv)
 
                 print_nbs(my_port, nbs);
             }
-            /*
+            
             // add
             else if (strcmp(command, "add") == 0)
             {
                 char type;
                 int quantity;
                 char new_entry[ENTR_W_TYPE + 1];
+                int ret;
 
                 // Se peer non connesso non faccio nulla
                 if (server_port == -1)
@@ -207,26 +208,21 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                tmp = sscanf(stdin_buff, "%s %c %d", command, &type, &quantity);
-                if (!(type == 't' || type == 'n') || tmp != 3 || quantity < 1)
+                ret = sscanf(command_buffer, "%s %c %d", command, &type, &quantity);
+                if (!(type == 't' || type == 'n') || ret != 3 || quantity < 1)
                 {
                     printf("Errore nell'inserimento dei dati\n");
                     continue;
                 }
                 
-                // Controllo che nessuno stia eseguendo una get
-                if(check_g_lock()){
-                    printf("Comando %s non eseguibile, riprova piu' tardi\n", command);
-                    continue;
-                }
                 ret = sprintf(new_entry, "%s %c", "NEW_ENTR", type);
                 new_entry[ret] = '\0';
 
-                send_UDP(listener_socket, new_entry, ret, server_port, "ENEW_ACK");
+                //send_UDP(listener_socket, new_entry, ret, server_port, "ENEW_ACK");
 
-                insert_entry(type, quantity);
+                //insert_entry(type, quantity);
             }
-
+/*
             // get
             else if (strcmp(command, "get") == 0)
             {
@@ -245,7 +241,7 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                tmp = sscanf(stdin_buff, "%s %c %c %s %s", command, &aggr, &type, bound[0], bound[1]);
+                tmp = sscanf(command_buffer, "%s %c %c %s %s", command, &aggr, &type, bound[0], bound[1]);
                 // Numero di parametri
                 bound[0][DATE_LEN] = '\0';
                 bound[1][DATE_LEN] = '\0';

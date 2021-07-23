@@ -16,7 +16,7 @@ int valid_data(char *buff)
     if (sscanf(buff, "%d:%d:%d", &y, &m, &d) != 3)
     
     {
-        printf("scanf diverso da 3");
+        printf("sscanf diverso da 3");
         return 0;
     }
 

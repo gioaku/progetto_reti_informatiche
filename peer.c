@@ -240,9 +240,9 @@ int main(int argc, char **argv)
                 char type;
                 char period[DATE_IN_LEN * 2 + 2];
                 int ret;
-
-                struct tm *from;
-                struct tm *to;
+                struct tm a, b;
+                struct tm *from = &a;
+                struct tm *to = &b;
                 time_t from_time = time(NULL);
                 time_t to_time = time(NULL);
 

@@ -26,33 +26,32 @@ int update_date(char* buff){
     struct tm* now_tm;
     char current_d[DATE_LEN+1];
     char current_t[TIME_LEN+1];
+    int ret;
 
+    ret = 0;
     now_time = time(NULL);
     now_tm = gmtime(&now_time);
 
-    if(now_tm->tm_hour < 18)
-        sprintf(current_d, "%04d:%02d:%02d", now_tm->tm_year+1900, now_tm->tm_mon+1, now_tm->tm_mday);
-    else {
-        now_tm->tm_mday += 1;
-        now_time = mktime(now_tm);
-        now_tm = gmtime(&now_time);
-        sprintf(current_d, "%04d:%02d:%02d", now_tm->tm_year+1900, now_tm->tm_mon+1, now_tm->tm_mday);
-    }
+    sprintf(current_d, "%04d:%02d:%02d", now_tm->tm_year+1900, now_tm->tm_mon+1, now_tm->tm_mday);
     sprintf(current_t, "%02d:%02d:%02d", now_tm->tm_hour, now_tm->tm_min, now_tm->tm_sec);
 
+    // data e ora effettiva di oggi
     current_d[DATE_LEN] = '\0';
     current_t[DATE_LEN] = '\0';
     
-    if (strcmp(buff, current_d) != 0 && strcmp("18:00", current_t) < 0){
-        printf("TIME : changing date from %s to %s given that it's %s", buff, current_d, current_t);
+    // se le date coincidono e sono passate le 18 ritorna la data di domani e segnala la modifica
+    if (strcmp("18:00", current_t) <= 0){
+        if(strcmp(buff, current_d) == 0)
+            ret = 1;
         now_tm->tm_mday += 1;
         now_time = mktime(now_tm);
         now_tm = gmtime(&now_time);
         sprintf(buff, "%04d:%02d:%02d", now_tm->tm_year+1900, now_tm->tm_mon+1, now_tm->tm_mday);
+        printf("TIME : changing date from %s to %s given that it's %s\n", current_d, buff , current_t);
         buff[DATE_LEN] = '\0';
-        return 1;
+        return ret;
     }
 
     strncpy(buff, current_d, DATE_LEN + 1);
-    return 0;
+    return ret;
 }

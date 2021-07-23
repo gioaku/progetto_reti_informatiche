@@ -215,6 +215,6 @@ int handle_tcp_socket(int sock)
         msg_type_buffer[MESS_TYPE_LEN] = '\0';
 
         printf("TCP [%d] : Ricevuto messaggio %s\n", sock, msg_type_buffer);
-        if (strcmp(msg_type_buffer, ""));
+        //if (strcmp(msg_type_buffer, ""));
     }
 }

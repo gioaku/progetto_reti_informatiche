@@ -79,9 +79,10 @@ void insert_entry(char *date, char type, int quantity){
     
     sprintf(path, "./data/%d/%c/entries/", my_port, type);
     sprintf(filename, "%s.txt", date);
-    printf("New entry file : %s%s", path);
+    printf("New entry file : %s%s\n", path);
 
     if (!path_exists(path)){
+        printf("Creating path %s\n", path);
         create_path(path);
     }
 

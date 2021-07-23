@@ -213,7 +213,7 @@ int main(int argc, char **argv)
                     printf("Errore nell'inserimento dei dati\n");
                     continue;
                 }
-
+                printf("Calling insert_entry(%s, %c, %d)\n", today, type, quantity);
                 insert_entry(today, type, quantity);
             }
 /*

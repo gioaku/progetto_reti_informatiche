@@ -35,10 +35,12 @@ int in_time_interval(int d, int m, int y, char *from, char *to)
     sscanf(to, DATE_FORMAT, &ty, &tm, &td);
     return (sooner(d, m, y, td, tm, ty) && sooner_or_eq(fd, fm, fy, d, m, y));
 }
+
 int sooner_or_eq(int d1, int m1, int y1, int d2, int m2, int y2)
 {
     return (y1 < y2 || (y1 == y2 && (m1 < m2 || (m1 == m2 && (d1 <= d2)))));
 }
+
 int sooner(int d1, int m1, int y1, int d2, int m2, int y2)
 {
     return (y1 < y2 || (y1 == y2 && (m1 < m2 || (m1 == m2 && (d1 < d2)))));
@@ -56,10 +58,9 @@ int file_exists_i(int port, char type, char *dir, int d, int m, int y){
     return file_exists(file);
 }
 
-char* file_name(char *file, int port, char type, char *dir, int d, int m, int y)
+int file_name(char *file, int port, char type, char *dir, int d, int m, int y)
 {
-    sprintf(file, FILE_FORMAT, REGISTERS, port, type, dir, y, m, d);
-    return file;
+    return sprintf(file, FILE_FORMAT, REGISTERS, port, type, dir, y, m, d);
 }
 
 int create_path(char *path)

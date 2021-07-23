@@ -371,7 +371,7 @@ int main(int argc, char **argv)
                             send_udp_wait_ack(udp_s.id, udp_s.buffer, msg_len, nbs.next, "FL_A_ACK");
                             recv_udp_and_ack(udp_s.id, udp_s.buffer, MAX_UDP_MSG, ALL_PORT, "PROP_ALL", "PR_A_ACK");
 
-                            ret = sscanf(udp_s.buffer, "%s %d", msg_type_buffer, peer_port);
+                            ret = sscanf(udp_s.buffer, "%s %d", msg_type_buffer, &peer_port);
                             if (ret != 2)
                             {
                                 printf("Errore nella ricezione della PROP_ALL %d\n", peer_port);
@@ -400,7 +400,7 @@ int main(int argc, char **argv)
                                     {
                                         printf("Ricevuta nuova entry %d\n", qty);
                                         fprintf(fd, "%d\n", qty);
-                                        tmp += quantity;
+                                        tmp += qty;
                                         send(sock, "NW_E_ACK", MESS_TYPE_LEN, 0);
                                     }
                                 }
@@ -631,7 +631,7 @@ int main(int argc, char **argv)
                     // manda ack
                     s_send_ack_udp(udp_s.id, "FL_A_ACK", src_port);
 
-                    ret = sscanf(udp_s.buffer, "%s %d %c %04d_%02d_%02d", msg_type_buffer, req_port, type, y, m, d);
+                    ret = sscanf(udp_s.buffer, "%s %d %c %04d_%02d_%02d", msg_type_buffer, &req_port, &type, &y, &m, &d);
                     if (ret != 6 || !valid_port(req_port) || (type != 't' && type != 'n') || !valid_date_i(d, m, y) || !in_time_interval(d, m, y, first_day, today))
                     {
                         printf("Errore nella ricezione dei parametri della FloodAll\n");
@@ -672,7 +672,7 @@ int main(int argc, char **argv)
                     // manda ack
                     s_send_ack_udp(udp_s.id, "FL_S_ACK", src_port);
 
-                    ret = sscanf(udp_s.buffer, "%s %d %c %04d_%02d_%02d", msg_type_buffer, req_port, type, y, m, d);
+                    ret = sscanf(udp_s.buffer, "%s %d %c %04d_%02d_%02d", msg_type_buffer, &req_port, &type, &y, &m, &d);
                     if (ret != 6 || !valid_port(req_port) || (type != 't' && type != 'n') || !valid_date_i(d, m, y) || !in_time_interval(d, m, y, first_day, today))
                     {
                         printf("Errore nella ricezione dei parametri della FloodAll\n");
@@ -680,7 +680,7 @@ int main(int argc, char **argv)
                         continue;
                     }
 
-                    if (file_exists_i(my_port, type, ENTRIES, d, m, y);)
+                    if (file_exists_i(my_port, type, ENTRIES, d, m, y))
                     {
                         msg_len = sprintf(udp_s.buffer, "PROP_SME %d", my_port);
                         udp_s.buffer[msg_len] = '\0';

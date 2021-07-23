@@ -91,6 +91,7 @@ void append_entry(char *date, char type, int qty)
 
     printf("Entry %d inserita nel file: %s\n", qty, path);
 }
+
 void create_elab(char type, int d, int m, int y, int qty)
 {
     FILE *fd;
@@ -117,6 +118,7 @@ void create_elab(char type, int d, int m, int y, int qty)
 
     printf("Elab %d inserita nel file: %s\n", qty, path);
 }
+
 // Ritorna la somma di tutte le entri nel file
 int get_entries_sum(char type, int d, int m, int y)
 {
@@ -125,8 +127,8 @@ int get_entries_sum(char type, int d, int m, int y)
     int file_len;
     int qty, tot;
 
-    file_len = sprintf(path, FILE_FORMAT, REGISTERS, my_port, type, ENTRIES, y, m, d);
-    path[file_len] = '\0';
+    file_len = sprintf(file, FILE_FORMAT, REGISTERS, my_port, type, ENTRIES, y, m, d);
+    file[file_len] = '\0';
 
     printf("File : %s\n", file);
 
@@ -135,18 +137,18 @@ int get_entries_sum(char type, int d, int m, int y)
         return 0;
     }
     tot = 0;
-    fd = fopen(strcat(path, filename), "r");
-    while (fscanf(fd, "%d\n", qty) != EOF)
+    fd = fopen(file, "r");
+    while (fscanf(fd, "%d\n", &qty) != EOF)
     {
         tot += qty;
     }
     fclose(fd);
     return tot;
 }
+
 // Apre un registro in scrittura
 FILE *open_reg_w(char type, int d, int m, int y)
 {
-    FILE *fd;
     char path[MAX_PATH_LEN + MAX_FILENAME_LEN + 1];
     char filename[MAX_FILENAME_LEN + 1];
     int path_len, filename_len;
@@ -237,6 +239,7 @@ void no_period(char *first_day, char *today, struct tm *from, struct tm *to)
     to->tm_mday--;
     mktime(to);
 }
+
 // Restituisce totale di tipo type in data d/m/y - ritorna -1 altrimenti
 int get_saved_elab(char type, int d, int m, int y)
 {
@@ -295,19 +298,23 @@ int handle_tcp_socket(int sock)
             FILE *fd;
             char file[MAX_PATH_LEN + MAX_FILENAME_LEN + 1];
             int file_len;
-            int qty, tot;
+            int qty;
 
-            file_len = sprintf(path, FILE_FORMAT, REGISTERS, my_port, type, ENTRIES, y, m, d);
-            path[file_len] = '\0';
+            ret = sscanf(buffer, "%s %c %04d_%02d_%02d", msg_type_buffer, &type, &y, &m, &d);
+            if (ret != 5)
+                continue;
+    
+            file_len = sprintf(file, FILE_FORMAT, REGISTERS, my_port, type, ENTRIES, y, m, d);
+            file[file_len] = '\0';
 
             if (!file_exists(file))
             {
                 close(sock);
                 return 0;
             }
-            
-            fd = fopen(file, 'r');
-            while (fscanf(fd, "%d\n", qty) != EOF)
+
+            fd = fopen(file, "r");
+            while (fscanf(fd, "%d\n", &qty) != EOF)
             {
                 msg_len = sprintf(buffer, "NW_ENTRY %d", qty);
                 buffer[msg_len] = '\0';
@@ -345,12 +352,12 @@ int collect_entries_waiting_flood(int udp, char type, int d, int m, int y)
         if (FD_ISSET(udp, &readset))
         {
             s_recv_udp(udp, buffer, MAX_UDP_MSG);
-            sscanf(buffer, "%s %d", msg_type_buffer, recv_port);
+            sscanf(buffer, "%s %d", msg_type_buffer, &recv_port);
             msg_type_buffer[MESS_TYPE_LEN] = '\0';
 
             if (strcmp(msg_type_buffer, "PROP_SME") == 0)
             {
-                s_send_ack_udp(udp, "PR_S_ACK");
+                s_send_ack_udp(udp, "PR_S_ACK", MESS_TYPE_LEN);
 
                 if (valid_port(recv_port))
                 {
@@ -360,6 +367,7 @@ int collect_entries_waiting_flood(int udp, char type, int d, int m, int y)
                     send(sock, buffer, msg_len, 0);
                     while (recv(sock, buffer, MAX_TCP_MSG, 0))
                     {
+                        int ret;
                         ret = sscanf(buffer, "%s %d", msg_type_buffer, &qty);
                         msg_type_buffer[MESS_TYPE_LEN] = '\0';
                         if (ret == 2 && strcmp("NW_ENTRY", msg_type_buffer) == 0)
@@ -379,521 +387,3 @@ int collect_entries_waiting_flood(int udp, char type, int d, int m, int y)
         }
     }
 }
-/*
-/
-// Conta il numero di entries presente nel proprio database di un certo tipo ('a': le conta tutte)
-int count_entries(char type){
-    FILE *fd;
-    char filename[MAX_FILENAME_LEN];
-    int tot;
-    char entry_type;
-    char u_time[TIME_LEN];
-    int num;
-    char tot_peers[6*MAX_CONNECTED_PEERS];
-
-    tot = 0;
-
-    retrieve_time();
-
-    sprintf(filename, "%s%s_%d.txt", "./peer_dir/", current_d, my_port);
-
-    // printf("Filename: %s\n", filename);
-
-    fd = fopen(filename, "r");
-    if(fd == NULL)
-        return 0;
-    else {
-        while(fscanf(fd, "%s %c %d %s\n", u_time, &entry_type, &num, tot_peers) == 4)
-            tot += (type == entry_type || type == 'a');
-    }
-    fclose(fd);
-    return tot;
-}
-
-// Somma le entries in un file 
-int sum_entries(char type){
-    FILE *fd;
-    char filename[MAX_FILENAME_LEN];
-    int tot;
-    char entry_type;
-    char u_time[TIME_LEN];
-    int num;
-    char tot_peers[6*MAX_CONNECTED_PEERS];
-
-    tot = 0;
-
-    retrieve_time();
-
-    sprintf(filename, "%s%s_%d.txt", "./peer_dir/", current_d, my_port);
-
-    // printf("Filename: %s\n", filename);
-
-    fd = fopen(filename, "r");
-    if(fd == NULL)
-        return 0;
-    else {
-        while(fscanf(fd, "%s %c %d %s\n", u_time, &entry_type, &num, tot_peers) == 4)
-            if(entry_type == type)
-                tot += num;
-    }
-    fclose(fd);
-    return tot;
-}
-
-// Scrive l'aggregato su un file
-void write_aggr(int count, int sum, char type){
-    FILE *fd;
-    char filename[MAX_FILENAME_LEN];
-
-    printf("Numero di ");
-    if(type == 't')
-        printf("tamponi");
-    else
-        printf("nuovi casi");
-    printf(" odierni: %d\n", sum);
-
-    retrieve_time();
-
-    sprintf(filename, "%s%c_%s_%d.txt", "./peer_dir/aggr_", type, current_d, my_port);
-
-    // printf("Filename: %s\n", filename);
-
-    fd = fopen(filename, "w");
-    fprintf(fd, "%d %d", count, sum);
-    fclose(fd);
-}
-
-// Controlla se il peer ha a disposizione un aggregato gia' pronto: se si' ritorna il dato richiesto
-int check_aggr(int entries, char type){
-    FILE *fd;
-    char filename[MAX_FILENAME_LEN];
-    int count;
-    int sum;
-
-    retrieve_time();
-
-    sprintf(filename, "%s%c_%s_%d.txt", "./peer_dir/aggr_", type, current_d, my_port);
-
-    // printf("Filename: %s\n", filename);
-
-    fd = fopen(filename, "r");
-    if(fd == NULL)
-        return 0;
-
-    fscanf(fd, "%d %d", &count, &sum);
-    fclose(fd);
-    return (count == entries) ? sum : 0;
-}
-
-// Controllo che un'entry non sia gia' nel file
-int is_entry_in(char* entry){
-    FILE *fd;
-    char filename[MAX_FILENAME_LEN];
-    char tm[TIME_LEN];
-    char t;
-    int q;
-    char p[6*MAX_CONNECTED_PEERS];
-    char e[MAX_ENTRY_UPDATE];
-    int ret;
-
-    retrieve_time();
-
-    sprintf(filename, "%s%s_%d.txt", "./peer_dir/", current_d, my_port);
-
-    fd = fopen(filename, "r");
-    if(fd == NULL)
-        return 0;
-    // Scorro tutto il file per vedere se la trovo
-    while(fscanf(fd, "%s %c %d %s", tm, &t, &q, p) != EOF){
-        ret = sprintf(e, "%s %c %d %s", tm, t, q, p);
-        e[ret] = '\0';
-        if(strcmp(entry, e) == 0){
-            printf("Entry gia' presente, da non inserire\n");
-            return 1;
-        }
-    }
-    // Se arrivo qui non c'e'
-
-    return 0;
-}
-*/
-/*
-
-// Riceve tutte le entrate che mancavano al momento della chiamata della get e le aggiunge al file delle entrate
-void wait_for_entries(int peer_entr, int tot_entr, char type){
-    int ret;
-    char get_buffer[MAX_ENTRY_UPDATE];
-    char command[MESS_TYPE_LEN];
-    char util_buffer[TIME_LEN];
-    char r_type;
-    int r_quantity;
-    char entry_ins_buffer[MAX_ENTRY_UPDATE];
-    char control_buffer[7];
-    char* isIn;
-
-    while(peer_entr < tot_entr){
-        // Nuove entries: possono arrivare da tutti
-        ret = (neighbor[1] != -1) ? 1 : 0;
-        recv_UDP(listener_socket, get_buffer, MAX_ENTRY_UPDATE, ALL_PEERS, "EP2P_REP", "2REP_ACK");
-
-        printf("Ricevuta entry %s\n", get_buffer);
-        
-        sscanf(get_buffer, "%s %s %c %d %s", command, util_buffer, &r_type, &r_quantity, entry_ins_buffer);
-        // Controlli: non dovrebbero mai fallire
-        ret = sprintf(control_buffer, "%d;", my_port);
-        control_buffer[ret] = '\0';
-        printf("Stringa di controllo: %s\n", control_buffer);
-        isIn = strstr(entry_ins_buffer, control_buffer);
-        if(!(r_type == type && isIn != NULL)){
-            printf("Errore insolubile nella ricezione, arrivato pacchetto corrotto\n");
-            continue;
-        }
-        ret = sprintf(get_buffer, "%s %c %d %s", util_buffer, r_type, r_quantity, entry_ins_buffer);
-        get_buffer[ret] = 0;
-        if(!is_entry_in(get_buffer)){
-            insert_entry_string(get_buffer);
-            peer_entr++;
-        }
-    }
-}
-// Invia tutte le entries che mancano al peer richiedente e che sono nel suo database
-void send_missing_entries(int req_port, char type, char* header, char* ack){
-    FILE *fd, *temp;
-    char filename[MAX_FILENAME_LEN];
-    char e_time[TIME_LEN];
-    char e_type;
-    int e_quantity;
-    char e_peers[6*MAX_CONNECTED_PEERS];
-    char whole_entry[MAX_ENTRY_UPDATE];
-    char check[7];
-    int ret;
-
-    ret = sprintf(check, "%d;", req_port);
-    check[ret] = '\0';
-
-    retrieve_time();
-
-    sprintf(filename, "%s%s_%d.txt", "./peer_dir/", current_d, my_port);
-
-    printf("Scorro tutte le entries\n");
-
-    fd = fopen(filename, "r");
-    if(fd == NULL){
-        printf("Nessuna entry\n");
-        return;
-    }
-    // Quando trovo un'entry devo aggiornarla e riscriverla
-    temp = fopen("./peer_dir/temp.txt", "w");
-    // Scorro tutte le entries
-    while(fscanf(fd, "%s %c %d %s", e_time, &e_type, &e_quantity, e_peers) != EOF){
-        // Se ne trovo una del tipo richiesto e non posseduta dal richiedente
-        if((e_type == type || type == 'a') && strstr(e_peers, check) == NULL){
-            printf("Trovata entry da inviare\n");
-            // Aggiungo il suo numero di porta tra i peer che possiedono quella entry
-            strcat(e_peers, check);
-            // Gliela mando
-            ret = sprintf(whole_entry, "%s %s %c %d %s", header, e_time, e_type, e_quantity, e_peers);
-            whole_entry[ret] = '\0';
-            send_UDP(listener_socket, whole_entry, ret, req_port, ack);
-        }
-        // Se quell'entry e' gia' presente la copio e basta
-        else {
-            ret = sprintf(whole_entry, "%s %s %c %d %s", header, e_time, e_type, e_quantity, e_peers);
-            whole_entry[ret] = '\0';
-        }
-        fprintf(temp, "%s\n", whole_entry+9);
-    }
-
-    fclose(fd);
-    fclose(temp);
-    remove(filename);
-    rename("./peer_dir/temp.txt", filename);
-    
-    printf("Fine delle entries da inviare\n");
-}
-
-// Invia tutte le entries che mancano al peer richiedente e che sono nel suo database
-void send_double_missing_entries(){
-    FILE *fd;
-    char filename[MAX_FILENAME_LEN];
-    char e_time[TIME_LEN];
-    char e_type;
-    int e_quantity;
-    char e_peers[6*MAX_CONNECTED_PEERS];
-    char whole_entry[MAX_ENTRY_UPDATE];
-    char check1[7];
-    char check2[7];
-    char check3[13];
-    int ret;
-    char *bool1, *bool2;
-
-    if(neighbor[0] == -1)               
-        return;                
-
-    if(neighbor[1] == -1){
-        send_missing_entries(neighbor[0], 'a', "EP2P_NEW", "2NEW_ACK");
-        return;
-    }
-
-    ret = sprintf(check1, "%d;", neighbor[0]);
-    check1[ret] = '\0';
-    ret = sprintf(check2, "%d;", neighbor[1]);
-    check2[ret] = '\0';
-    ret = sprintf(check3, "%d;%d;", neighbor[0], neighbor[1]);
-    check3[ret] = '\0';
-
-    retrieve_time();
-
-    sprintf(filename, "%s%s_%d.txt", "./peer_dir/", current_d, my_port);
-
-    printf("Scorro tutte le entries\n");
-
-    fd = fopen(filename, "r");
-    if(fd == NULL){
-        printf("Nessuna entry\n");
-        return;
-    }
-    // Scorro tutte le entries
-    while(fscanf(fd, "%s %c %d %s", e_time, &e_type, &e_quantity, e_peers) != EOF){
-            printf("Trovata entry da inviare\n");
-            // Decido a quale peer va inviata
-            bool1 = strstr(e_peers, check1);
-            bool2 = strstr(e_peers, check2);
-
-            // Caso 1: manca a entrambi
-            if(bool1 == NULL && bool2 == NULL)
-                strcat(e_peers, check3);
-            // Caso 2: manca a 2
-            if(bool1 != NULL && bool2 == NULL)
-                strcat(e_peers, check2);
-            // Caso 3: manca a 1
-            if(bool1 == NULL && bool2 != NULL)
-                strcat(e_peers, check1);
-
-            // Mando la entry a chi di dovere
-            ret = sprintf(whole_entry, "%s %s %c %d %s", "EP2P_NEW", e_time, e_type, e_quantity, e_peers);
-            whole_entry[ret] = '\0';
-            if(bool1 == NULL)
-                send_UDP(listener_socket, whole_entry, ret, neighbor[0], "2NEW_ACK");
-            if(bool2 == NULL)
-                send_UDP(listener_socket, whole_entry, ret, neighbor[1], "2NEW_ACK");
-        
-    }
-
-    fclose(fd);
-    
-    printf("Fine delle entries da inviare\n");
-}
-
-// Controlla che nessuno stia eseguendo la get
-int check_g_lock(){
-    char lock_buffer[MAX_LOCK_LEN];
-    char command[MESS_TYPE_LEN];
-    int flag;
-
-    // Invio richiesta al server
-    send_UDP(listener_socket, "IS_G_LCK", MESS_TYPE_LEN, server_port, "ISGL_ACK");
-    // Aspetto risposta con numero di flag che sta tenendo la risorsa oppure 0
-    recv_UDP(listener_socket, lock_buffer, MAX_LOCK_LEN, server_port, "GET_MUTX", "GMTX_ACK");
-    sscanf(lock_buffer, "%s %d", command, &flag);
-    // Lo ritorno
-    return flag;
-}
-
-// Controlla che nessuno stia eseguendo la get da una get --> acquisisce mutua esclusione
-int get_lock(){
-    char lock_buffer[MAX_LOCK_LEN];
-    char command[MESS_TYPE_LEN];
-    int flag;
-
-    // Invio richiesta al server
-    send_UDP(listener_socket, "GET_LOCK", MESS_TYPE_LEN, server_port, "GLCK_ACK");
-    // Aspetto risposta con numero di flag che sta tenendo la risorsa oppure 0
-    recv_UDP(listener_socket, lock_buffer, MAX_LOCK_LEN, server_port, "GET_MUTX", "GMTX_ACK");
-    sscanf(lock_buffer, "%s %d", command, &flag);
-    // Lo ritorno
-    return flag;
-}
-
-// Controlla che nessuno stia eseguendo la stop
-int check_s_lock(){
-    char lock_buffer[MAX_LOCK_LEN];
-    char command[MESS_TYPE_LEN];
-    int flag;
-
-    // Invio richiesta al server
-    send_UDP(listener_socket, "IS_S_LCK", MESS_TYPE_LEN, server_port, "ISSL_ACK");
-    // Aspetto risposta con numero di flag che sta tenendo la risorsa oppure 0
-    recv_UDP(listener_socket, lock_buffer, MAX_LOCK_LEN, server_port, "STP_MUTX", "SMTX_ACK");
-    sscanf(lock_buffer, "%s %d", command, &flag);
-    // Lo ritorno
-    return flag;
-}
-
-// Prova ad acquisire mutua esclusione sulla stop
-int stop_lock(){
-    char lock_buffer[MAX_LOCK_LEN];
-    char command[MESS_TYPE_LEN];
-    int flag;
-
-    // Invio richiesta al server
-    send_UDP(listener_socket, "STP_LOCK", MESS_TYPE_LEN, server_port, "SLCK_ACK");
-    // Aspetto risposta con numero di flag che sta tenendo la risorsa oppure 0
-    recv_UDP(listener_socket, lock_buffer, MAX_LOCK_LEN, server_port, "STP_MUTX", "SMTX_ACK");
-    sscanf(lock_buffer, "%s %d", command, &flag);
-    // Lo ritorno
-    return flag;
-}
-
-// Registra i totali del giorno
-void register_daily_tot(char* aggr){
-    FILE *fd;
-    char filename[MAX_FILENAME_LEN];
-    int ret;
-
-    ret = sprintf(filename, "%s_%d.txt", "./peer_dir/tot_aggr", my_port);
-    filename[ret] = '\0';
-
-    fd = fopen(filename, "a");
-    fprintf(fd, "%s %s\n", current_d, aggr);
-    fclose(fd);
-    // File giornalieri: non servono piu'
-    sprintf(filename, "%s%s_%d.txt", "./peer_dir/", current_d, my_port);
-    remove(filename);
-    sprintf(filename, "%s_%c_%s_%d.txt", "./peer_dir/aggr", 't', current_d, my_port);
-    remove(filename);
-    sprintf(filename, "%s_%c_%s_%d.txt", "./peer_dir/aggr", 'n', current_d, my_port);
-    remove(filename);
-}
-
-// Stampo gli aggregati giornalieri e pulisco la memoria
-void print_daily_aggr(char* entr){
-    int tot[2];
-    char filename[MAX_FILENAME_LEN];
-
-    sscanf(entr, "%d %d", &tot[0], &tot[1]);
-    printf("Tamponi di oggi: %d;\nnuovi casi di oggi: %d\n", tot[0], tot[1]);
-
-    // File giornalieri: non servono piu'
-    sprintf(filename, "%s%s_%d.txt", "./peer_dir/", current_d, my_port);
-    remove(filename);
-    sprintf(filename, "%s_%c_%s_%d.txt", "./peer_dir/aggr", 't', current_d, my_port);
-    remove(filename);
-    sprintf(filename, "%s_%c_%s_%d.txt", "./peer_dir/aggr", 'n', current_d, my_port);
-    remove(filename);
-}
-
-// Controllo iniziale su flag del peer
-int is_flag_up(){
-    char *pointer;
-
-    pointer = strstr(current_t, "17:5");
-    return (pointer != NULL) ? 1 : 0;
-}
-
-// Inserisce in un file temporaneo le entries dal time server
-void insert_temp(char* entry){
-    FILE *fd;
-
-    fd = fopen("temp_entries.txt", "a");
-    fprintf(fd, "%s\n", entry);
-    fclose(fd);
-}
-
-// Converte una data in formato dd:mm:yyyy
-void convert_out_date(char* date){
-    int d,m,y;
-
-    sscanf(date, "%d:%d:%d", &y, &m, &d);
-    sprintf(date, "%d:%d:%d", d,m,y);
-}
-
-// Stampa i risultati finali della get
-void print_results(char aggr, char type, int sum_today, char* date1, char* date2){
-    FILE *fd1;
-    
-
-    // Caso 1: richiesto totale
-    if(aggr == 't'){
-        int sum;
-        int t,c;
-        char u_date[DATE_LEN];
-
-        date1 = (strcmp(date1, "*") == 0) ? "1:1:2021" : date1;
-        date2 = (strcmp(date2, "*") == 0) ? u_date : date2;
-        
-        sum = 0;
-        fd1 = fopen("temp_entries.txt", "r");
-        // Somma il valore giusto
-        while(fscanf(fd1, "%s %d %d", u_date, &t, &c) != EOF){
-            if(type == 't')
-                sum += t;
-            else
-                sum += c;
-        }
-
-        fclose(fd1);
-
-        if(sum_today != -1)
-            sum += sum_today;
-        
-        strcpy(u_date, current_d);
-        convert_out_date(u_date);
-
-        // Stampa
-        printf("Totale ");
-        if(type == 't')
-            printf("tamponi ");
-        else
-            printf("nuovi casi ");
-        printf("da %s a %s: %d\n", (strcmp(date1, "*") == 0) ? "1:1:2021" : date1, (strcmp(date2, "*") == 0) ? u_date : date2, sum);
-    }
-
-    // Caso 2: richiesta variazione
-    else {
-        FILE *fd2;
-        // int var;
-        int t[2];
-        int c[2];
-        char u_date[2][DATE_LEN+1];
-
-        fd1 = fopen("temp_entries.txt", "r");
-        fd2 = fopen("temp_entries.txt", "r");
-
-        printf("Elenco variazioni di ");
-        if(type == 't')
-            printf("tamponi ");
-        else
-            printf("nuovi casi ");        
-        printf("richiestse:\n");
-        // Faccio scorrere i puntatori a distanza di 1
-        fscanf(fd1, "%s %d %d", u_date[0], &t[0], &c[0]);
-        u_date[0][DATE_LEN] = '\0';
-        while(fscanf(fd1, "%s %d %d", u_date[0], &t[0], &c[0]) != EOF){
-            u_date[0][DATE_LEN] = '\0';
-            fscanf(fd2, "%s %d %d", u_date[1], &t[1], &c[1]);
-            u_date[1][DATE_LEN] = '\0';
-            convert_out_date(u_date[1]);
-            convert_out_date(u_date[0]);
-            printf(" - da %s a %s: %d\n", u_date[1], u_date[0], (type == 't') ? t[0] - t[1] : c[0] - c[1]);
-        }
-
-        fscanf(fd2, "%s %d %d", u_date[1], &t[1], &c[1]);
-        u_date[1][DATE_LEN] = '\0';
-
-        fclose(fd1);
-        fclose(fd2);
-
-        if(sum_today != -1){
-            strcpy(u_date[0], current_d);
-            convert_out_date(u_date[0]);
-            convert_out_date(u_date[1]);
-            printf(" - da %s a %s: %d\n", u_date[1], u_date[0], (type == 't') ? sum_today - t[1] : sum_today - c[1]);
-        }
-
-
-    }
-    
-    remove("temp_entries.txt");
-}
-*/

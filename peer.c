@@ -198,7 +198,6 @@ int main(int argc, char **argv)
             {
                 char type;
                 int quantity;
-                char new_entry[ENTR_W_TYPE + 1];
                 int ret;
 
                 // Se peer non connesso non faccio nulla
@@ -215,7 +214,7 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                insert_entry(type, quantity);
+                insert_entry(today, type, quantity);
             }
 /*
             // get

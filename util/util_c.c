@@ -63,13 +63,13 @@ void help_client(int i){
     }
 }
 
-int file_exists(char *path, char *filename){
+int path_exists(char *path){
     struct stat buff;
-    return (stat(strcat(path, filename), &buff) == 0);
+    return (stat(path, &buff) == 0);
 }
 
 int create_path(char *path){
-    return system(strcat("mkdir -p ", path);
+    return system(strcat("mkdir -p ", path));
 } 
 
 void insert_entry(char *date, char type, int quantity){
@@ -79,7 +79,7 @@ void insert_entry(char *date, char type, int quantity){
 
     sprintf(path, "./data/%d/%c/entries/%s.txt", my_port, type, date);
     
-    if (!file_exists){
+    if (!file_exists(path)){
         create_path(path);
     }
 

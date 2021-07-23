@@ -87,9 +87,10 @@ void insert_entry(char *date, char type, int quantity){
 
     if (!path_exists(path)){
         printf("Creating path %s\n", path);
-        create_path(path);
+        printf("create_path(path) returns %d\n", create_path(path));
     }
 
+    printf("Opening file\n");
     fd = fopen(strcat(path, filename), "a");
     fprintf(fd, "%d\n", quantity);
     fclose(fd);

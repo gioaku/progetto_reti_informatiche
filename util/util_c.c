@@ -69,13 +69,16 @@ int path_exists(char *path){
 }
 
 int create_path(char *path){
-    return system(strcat("mkdir -p ", path));
+    char command[MAX_PATH_LEN + 10];
+    sprintf(command, "mkdir -p %s", path);
+    printf("system(\"%s\")", command);
+    return system(command);
 } 
 
 void insert_entry(char *date, char type, int quantity){
     FILE *fd;
-    char path[MAX_PATH_LEN];
-    char filename[MAX_FILENAME_LEN];
+    char path[MAX_PATH_LEN + 1];
+    char filename[MAX_FILENAME_LEN + 1];
     int path_len, filename_len;
     path_len = sprintf(path, "./data/%04d/%c/entries/", my_port, type);
     path[path_len] = '\0';

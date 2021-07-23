@@ -246,10 +246,10 @@ int main(int argc, char **argv)
                 time_t to_time;
                 struct tm *to;
 
-                form_time = time(NULL);
-                from = gmtime(&now_time);
-                form_time = time(NULL);
-                to = gmtime(&now_time);
+                from_time = time(NULL);
+                from = gmtime(&from_time);
+                to_time = time(NULL);
+                to = gmtime(&to_time);
 
 
                 printf("Hai selezionato la get");

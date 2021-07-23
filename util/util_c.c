@@ -63,21 +63,20 @@ void help_client(int i){
     }
 }
 
-int path_exists(char *path){
+int file_exists(char *file){
     struct stat buff;
-    return (stat(path, &buff) == 0);
+    return (stat(file, &buff) == 0);
 }
 
 int create_path(char *path){
     char command[MAX_PATH_LEN + 10];
     sprintf(command, "mkdir -p %s", path);
-    printf("system(\"%s\")", command);
     return system(command);
 } 
 
 void insert_entry(char *date, char type, int quantity){
     FILE *fd;
-    char path[MAX_PATH_LEN + 1];
+    char path[MAX_PATH_LEN + MAX_FILENAME_LEN + 1];
     char filename[MAX_FILENAME_LEN + 1];
     int path_len, filename_len;
     path_len = sprintf(path, "./data/%04d/%c/entries/", my_port, type);
@@ -86,19 +85,18 @@ void insert_entry(char *date, char type, int quantity){
     filename_len = sprintf(filename, "%s.txt", date);
     filename[filename_len] = '\0';
 
-    printf("New entry file : %s%s\n", path, filename);
+    printf("File : %s%s\n", path, filename);
 
-    if (!path_exists(path)){
-        printf("Creating path %s\n", path);
-        printf("create_path(path) returns %d\n", create_path(path));
+    if (!file_exists(path)){
+        printf("Creating path : %s\n", path);
+        create_path(path);
     }
 
-    printf("Opening file\n");
     fd = fopen(strcat(path, filename), "a");
     fprintf(fd, "%d\n", quantity);
     fclose(fd);
 
-    printf("Entry %d inserita nel file: %s%s\n", quantity, path, filename);
+    printf("Entry %d inserita nel file: %s\n", quantity, path);
 }
 
 /*

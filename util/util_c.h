@@ -2,7 +2,7 @@
 
 void print_client_commands();
 void help_client(int);
-int file_exists(char*);
+int path_exists(char*);
 int create_file(char*);
 void insert_entry(char*, char, int);
 

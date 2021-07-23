@@ -2,7 +2,7 @@
 
 int valid_port(int port)
 {
-    return (port >= 0 && port <= 65536);
+    return (port > 0 && port <= 65536);
 }
 
 int is_between(int x, int a, int b)
@@ -10,9 +10,10 @@ int is_between(int x, int a, int b)
     return (a > b) ? (x > a || x < b) : (x > a && x < b);
 }
 
-int valid_date_s(char *date){
+int valid_date_s(char *date)
+{
     int d, m, y;
-    if(sscanf(date, DATE_FORMAT, &y, &m, &d) != 3)
+    if (sscanf(date, DATE_FORMAT, &y, &m, &d) != 3)
         return 0;
     return valid_date_i(d, m, y);
 }
@@ -27,7 +28,8 @@ int valid_date_i(int d, int m, int y)
     return 1;
 }
 
-int in_time_interval(int d, int m, int y, char *from, char *to){
+int in_time_interval(int d, int m, int y, char *from, char *to)
+{
     int fd, fm, fy, td, tm, ty;
     sscanf(from, DATE_FORMAT, &fy, &fm, &fd);
     sscanf(to, DATE_FORMAT, &ty, &tm, &td);
@@ -46,6 +48,18 @@ int file_exists(char *file)
 {
     struct stat buff;
     return (stat(file, &buff) == 0);
+}
+
+int file_exists_i(int port, char type, char *dir, int d, int m, int y){
+    char file[MAX_PATH_LEN + MAX_FILENAME_LEN + 1];
+    file_name(file, port, type, dir, d, m, y);
+    return file_exists(file);
+}
+
+char* file_name(char *file, int port, char type, char *dir, int d, int m, int y)
+{
+    sprintf(file, FILE_FORMAT, REGISTERS, port, type, dir, y, m, d);
+    return file;
 }
 
 int create_path(char *path)

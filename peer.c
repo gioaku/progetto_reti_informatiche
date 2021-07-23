@@ -229,8 +229,8 @@ int main(int argc, char **argv)
                     printf("Errore nell'inserimento dei dati\n");
                     continue;
                 }
-                printf("Calling insert_entry(%s, %c, %d)\n", today, type, quantity);
-                insert_entry(today, type, quantity);
+                printf("Calling append_entry(%s, %c, %d)\n", today, type, quantity);
+                append_entry(today, type, quantity);
             }
 
             // get
@@ -239,6 +239,7 @@ int main(int argc, char **argv)
                 char aggr;
                 char type;
                 char period[DATE_IN_LEN * 2 + 2];
+                int ret;
 
                 struct tm *from = {0};
                 struct tm *to = {0};
@@ -252,10 +253,10 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                tmp = sscanf(command_buffer, "%s %c %c %s", command, &aggr, &type, period);
+                ret = sscanf(command_buffer, "%s %c %c %s", command, &aggr, &type, period);
                 // Numero di parametri
 
-                if (!(tmp == 3 || tmp == 4))
+                if (!(ret == 3 || ret == 4))
                 {
                     printf("Errore nel numero di parametri passati\n");
                     continue;
@@ -267,57 +268,155 @@ int main(int argc, char **argv)
                     continue;
                 }
                 // Controllo sulle date
-                if (tmp == 4)
+                if (ret == 4)
                 {
                     period[DATE_LEN * 2 + 1] = '\0';
                     if (!check_period(period, first_day, today, from, to))
                         continue;
                 }
+                if (ret == 3)
+                {
+                    no_period(first_day, today, from, to);
+                }
 
-                printf("GET : aggr %c, type %c, between %02d:%02d:%04d and %02d:%02d:%04d\n", aggr, type,from->tm_mday, from->tm_mon, from->tm_year + 1900, to->tm_mday, to->tm_mon, to->tm_year + 1900));
+                printf("GET : aggr %c, type %c, between %02d:%02d:%04d and %02d:%02d:%04d\n", aggr, type, from->tm_mday, from->tm_mon, from->tm_year + 1900, to->tm_mday, to->tm_mon, to->tm_year + 1900);
 
                 to_time = mktime(to);
-
+                // se bisogna calcolare il totale
                 if (aggr == 't')
                 {
                     int tmp;
                     int sum;
 
                     sum = 0;
-                    while (from_time <= to_time)
-                    {
 
-                        if (tmp = get_saved_elab(type, from->tm_mday, from->tm_mon, from->tm_year) != -1)
+                    while (from_time < to_time)
+                    {
+                        // se ha i dati li aggiunge e continua
+                        if ((tmp = get_saved_elab(type, from->tm_mday, from->tm_mon, from->tm_year)) != -1)
                         {
                             sum += tmp;
                             from->tm_mday++;
                             from_time = mktime(from);
                             continue;
                         }
+                        // se non ha vicini e non ha dati continua
                         if (nbs.tot == 0)
                         {
                             from->tm_mday++;
                             from_time = mktime(from);
                             continue;
                         }
-                        else if (nbs.tot == 1)
+                        // se ha almeno un vicino chiede a lui
+                        if (nbs.tot > 0)
                         {
                             char buffer[MAX_TCP_MSG + 1];
+                            char msg_type_buffer[MESS_TYPE_LEN + 1];
                             int msg_len;
                             int sock;
-                            
+                            int ret;
+
                             // connect con vicino precedente
                             sock = tcp_connect_init(nbs.prev);
-                            msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, from->tm_year from->tm_mon, from->tm_mday);
-                            
+                            msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, from->tm_year, from->tm_mon, from->tm_mday);
+
                             // send elab req
                             send(sock, buffer, msg_len, 0);
                             recv(sock, buffer, MAX_TCP_MSG, 0);
+                            close(sock);
 
-                            
+                            ret = sscanf(buffer, "%s %d", msg_type_buffer, &tmp);
+                            if (ret == 2 && strcmp(msg_type_buffer, "ELAB_ACK") == 0 && tmp != -1)
+                            {
+                                sum += tmp;
+                                create_elab(type, from->tm_mday, from->tm_mon, from->tm_year, tmp);
+                                from->tm_mday++;
+                                from_time = mktime(from);
+                                continue;
+                            }
+                        }
+                        // se ha due vicini chiede anche all'altro
+                        if (nbs.tot == 2)
+                        {
+                            char buffer[MAX_TCP_MSG + 1];
+                            char msg_type_buffer[MESS_TYPE_LEN + 1];
+                            int msg_len;
+                            int sock;
+                            int ret;
+                            int peer_port;
+
+                            // connect con vicino successivo
+                            sock = tcp_connect_init(nbs.next);
+                            msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, from->tm_year, from->tm_mon, from->tm_mday);
+
+                            // send elab req
+                            send(sock, buffer, msg_len, 0);
+                            recv(sock, buffer, MAX_TCP_MSG, 0);
+                            close(sock);
+
+                            ret = sscanf(buffer, "%s %d", msg_type_buffer, &tmp);
+                            msg_type_buffer[MESS_TYPE_LEN] = '\0';
+
+                            if (ret == 2 && strcmp(msg_type_buffer, "ELAB_ACK") == 0 && tmp != -1)
+                            {
+                                sum += tmp;
+                                create_elab(type, from->tm_mday, from->tm_mon, from->tm_year, tmp);
+                                from->tm_mday++;
+                                from_time = mktime(from);
+                                continue;
+                            }
+                            // se non ho ricevuto risposte positive cerco qualcuno che le ha tutte
+                            msg_len = sprintf(udp_s.buffer, "FL_A_REQ %d %c %04d_%02d_%02d", my_port, type, from->tm_year, from->tm_mon, from->tm_mday);
+                            udp_s.buffer[msg_len] = '\0';
+                            send_udp_wait_ack(udp_s.id, udp_s.buffer, msg_len, nbs.next, "FL_A_ACK");
+                            recv_udp_and_ack(udp_s.id, udp_s.buffer, MAX_UDP_MSG, ALL_PORT, "PROP_ALL", "PR_A_ACK");
+
+                            ret = sscanf(udp_s.buffer, "%s %d", msg_type_buffer, peer_port);
+                            if (ret != 2)
+                            {
+                                printf("Errore nella ricezione della PROP_ALL %d\n", peer_port);
+                                continue;
+                            }
+                            // se peer_port != 0 contiene la porta di un peer che ha tutti i dati
+                            if (peer_port)
+                            {
+                                int qty;
+                                FILE *fd;
+                                // mi connetto
+                                sock = tcp_connect_init(peer_port);
+                                msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, from->tm_year, from->tm_mon, from->tm_mday);
+
+                                // invio della richiesta di dati
+                                send(sock, buffer, msg_len, 0);
+
+                                // apro file per scrivere le entries
+                                fd = open_reg_w(type, from->tm_mday, from->tm_mon, from->tm_year);
+
+                                while (recv(sock, buffer, MAX_TCP_MSG, 0))
+                                {
+                                    ret = sscanf(buffer, "%s %d", msg_type_buffer, &qty);
+                                    msg_type_buffer[MESS_TYPE_LEN] = '\0';
+                                    if (ret == 2 && strcmp("NW_ENTRY", msg_type_buffer) == 0)
+                                    {
+                                        printf("Ricevuta nuova entry %d\n", qty);
+                                        fprintf(fd, "%d\n", qty);
+                                        tmp += quantity;
+                                        send(sock, "NW_E_ACK", MESS_TYPE_LEN, 0);
+                                    }
+                                }
+                                create_elab(type, from->tm_mday, from->tm_mon, from->tm_year, tmp);
+                                from->tm_mday++;
+                                from_time = mktime(from);
+                                continue;
+                            }
+                            // se ancora non ho ricevuto risposte positive cerco tutti quelli che hanno qualcosa
+                            msg_len = sprintf(udp_s.buffer, "FL_S_REQ %d %c %04d_%02d_%02d", my_port, type, from->tm_year, from->tm_mon, from->tm_mday);
+                            udp_s.buffer[msg_len] = '\0';
+                            send_udp_wait_ack(udp_s.id, udp_s.buffer, msg_len, nbs.next, "FL_S_ACK");
+
+                            tmp = collect_entries_waiting_flood(udp_s.id, type, from->tm_mday, from->tm_mon, from->tm_year);
                         }
 
-                        sum += tmp;
                         from->tm_mday++;
                         from_time = mktime(from);
                     }
@@ -325,7 +424,7 @@ int main(int argc, char **argv)
                 }
                 if (aggr == 'v')
                 {
-                    int old, new;
+                    /*int old, new;
 
                     from->tm_day--;
                     from_time = mktime(from);
@@ -345,12 +444,12 @@ int main(int argc, char **argv)
 
                         from->tm_mday++;
                         from_time = mktime(from);
-                    }
+                        */
                 }
             }
 
             // stop
-            else if (strcmp(command, "stop") == 0)
+            else if (strcmp(command_buffer, "stop") == 0)
             {
 
                 // se connesso disconnettere e inviare le entries a next
@@ -518,10 +617,83 @@ int main(int argc, char **argv)
             // altro peer sul socket udp
             else
             {
-                
+                printf("Messaggio ricevuto dal %d: %s\n", src_port, udp_s.buffer);
+
+                // Flood all entries
+                if (strcmp(msg_type_buffer, "FL_A_REQ") == 0)
+                {
+                    char type;
+                    int d, m, y;
+                    int ret;
+                    int req_port;
+                    int msg_len;
+
+                    // manda ack
+                    s_send_ack_udp(udp_s.id, "FL_A_ACK", src_port);
+
+                    ret = sscanf(udp_s.buffer, "%s %d %c %04d_%02d_%02d", msg_type_buffer, req_port, type, y, m, d);
+                    if (ret != 6 || !valid_port(req_port) || (type != 't' && type != 'n') || !valid_date_i(d, m, y) || !in_time_interval(d, m, y, first_day, today))
+                    {
+                        printf("Errore nella ricezione dei parametri della FloodAll\n");
+                        FD_CLR(udp_s.id, &readset);
+                        continue;
+                    }
+
+                    ret = get_saved_elab(type, d, m, y);
+                    if (ret != -1)
+                    {
+                        msg_len = sprintf(udp_s.buffer, "PROP_ALL %d", my_port);
+                        udp_s.buffer[msg_len] = '\0';
+                        send_udp_wait_ack(udp_s.id, udp_s.buffer, msg_len, req_port, "PR_A_ACK");
+                    }
+                    else if (req_port == nbs.next)
+                    {
+                        msg_len = sprintf(udp_s.buffer, "PROP_ALL %d", 0);
+                        udp_s.buffer[msg_len] = '\0';
+                        send_udp_wait_ack(udp_s.id, udp_s.buffer, msg_len, nbs.next, "PR_A_ACK");
+                    }
+                    else
+                    {
+                        msg_len = sprintf(udp_s.buffer, "FL_A_REQ %d %c %04d_%02d_%02d", req_port, type, y, m, d);
+                        udp_s.buffer[msg_len] = '\0';
+                        send_udp_wait_ack(udp_s.id, udp_s.buffer, msg_len, nbs.next, "FL_A_ACK");
+                    }
                 }
-                FD_CLR(udp_s.id, &readset);
+
+                // Flood some entries
+                else if (strcmp(msg_type_buffer, "FL_S_REQ") == 0)
+                {
+                    char type;
+                    int d, m, y;
+                    int ret;
+                    int req_port;
+                    int msg_len;
+
+                    // manda ack
+                    s_send_ack_udp(udp_s.id, "FL_S_ACK", src_port);
+
+                    ret = sscanf(udp_s.buffer, "%s %d %c %04d_%02d_%02d", msg_type_buffer, req_port, type, y, m, d);
+                    if (ret != 6 || !valid_port(req_port) || (type != 't' && type != 'n') || !valid_date_i(d, m, y) || !in_time_interval(d, m, y, first_day, today))
+                    {
+                        printf("Errore nella ricezione dei parametri della FloodAll\n");
+                        FD_CLR(udp_s.id, &readset);
+                        continue;
+                    }
+
+                    if (file_exists_i(my_port, type, ENTRIES, d, m, y);)
+                    {
+                        msg_len = sprintf(udp_s.buffer, "PROP_SME %d", my_port);
+                        udp_s.buffer[msg_len] = '\0';
+                        send_udp_wait_ack(udp_s.id, udp_s.buffer, msg_len, req_port, "PR_S_ACK");
+                    }
+
+                    msg_len = sprintf(udp_s.buffer, "FL_S_REQ %d %c %04d_%02d_%02d", req_port, type, y, m, d);
+                    udp_s.buffer[msg_len] = '\0';
+                    send_udp_wait_ack(udp_s.id, udp_s.buffer, msg_len, nbs.next, "FL_S_ACK");
+                }
             }
+            FD_CLR(udp_s.id, &readset);
         }
-        return 0;
     }
+    return 0;
+}

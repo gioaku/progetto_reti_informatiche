@@ -1,3 +1,5 @@
+#ifndef MSG
+#define MSG
 #include "const.h"
 #include "neighbors.h"
 
@@ -14,6 +16,8 @@ struct TcpSocket{
     socklen_t addr_len;
     char buffer[MAX_TCP_MSG];    
 };
+
+#endif
 
 void set_address(struct sockaddr_in*, socklen_t*, int);
 int udp_socket_init(struct UdpSocket*, int);

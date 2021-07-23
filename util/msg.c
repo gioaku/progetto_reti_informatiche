@@ -106,11 +106,11 @@ int s_send_ack_udp(int socket, char *buffer, int send_port)
     return 0;
 }
 
-// Attesa e ricezione di un messaggio con header specifico - ritorna 1 se arriva giusto - 0 altrimenti
+// Attesa e ricezione di un messaggio con header specifico - ritorna recv_port se arriva giusto - 0 altrimenti
 int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_header)
 {
     int recv_port;
-    char temp_buffer[MESS_TYPE_LEN + 1];
+    char msg_type_buffer[MESS_TYPE_LEN + 1];
     struct timeval util_tv;
     fd_set readset;
 
@@ -129,24 +129,24 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
         // lettura messaggio
         recv_port = s_recv_udp(socket, buffer, buff_l);
 
-        sscanf(buffer, "%s", temp_buffer);
-        temp_buffer[MESS_TYPE_LEN] = '\0';
+        sscanf(buffer, "%s", msg_type_buffer);
+        msg_type_buffer[MESS_TYPE_LEN] = '\0';
 
         // se messaggio diverso scarta
-        if (port != recv_port)
+        if (port != recv_port && port != ALL_PORT)
         {
-            printf("Warning: [R] Arrivato un messaggio %s inatteso da [err] %d mentre attendevo %s da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
+            printf("Warning: [R] Arrivato un messaggio %s inatteso da [err] %d mentre attendevo %s da %d, scartato\n", msg_type_buffer, recv_port, correct_header, port);
         }
-        else if (strcmp(correct_header, temp_buffer) != 0)
+        else if (strcmp(correct_header, msg_type_buffer) != 0)
         {
-            printf("Warning: [R] Arrivato un messaggio [err] %s inatteso da %d mentre attendevo %s da %d, scartato\n", temp_buffer, recv_port, correct_header, port);
+            printf("Warning: [R] Arrivato un messaggio [err] %s inatteso da %d mentre attendevo %s da %d, scartato\n", msg_type_buffer, recv_port, correct_header, port);
         }
 
-        // se messaggio giusto ritorna 1
+        // se messaggio giusto ritorna recv_port
         else
         {
-            printf("Messaggio %s ricevuto correttamente dal mittente %d\n", temp_buffer, recv_port);
-            return 1;
+            printf("Messaggio %s ricevuto correttamente dal mittente %d\n", msg_type_buffer, recv_port);
+            return recv_port;
         }
     }
     return 0;
@@ -178,52 +178,24 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
     return 0;
 }
 
-// Attesa del messagio con header specifico e invio dell'ack - ritorna 1 se ack mandato con successo - ritorna 0 altrimenti
+// Attesa del messagio con header specifico e invio dell'ack - ritorna recv_port se ack mandato con successo - ritorna 0 altrimenti
 int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *correct_header, char *ack_type)
 {
+    int recv_port;
     int tries = ACK_TRIES;
-
     // riceve messaggio
-    while (!recv_udp(socket, buffer, buff_l, port, correct_header) && tries-- > 0)
-        ;
-    if (tries > -1)
+    do
+    {
+        recv_port = recv_udp(socket, buffer, buff_l, port, correct_header);
+    } while (!recv_port && tries-- > 0);
+
+        if (tries > -1)
     {
         // manda l'ack
-        return s_send_ack_udp(socket, ack_type, port);
+        if(s_send_ack_udp(socket, ack_type, port))
+            return recv_port;
     }
 
     printf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d\n", correct_header, port);
     return 0;
-}
-
-int handle_tcp_socket(int sock)
-{
-    char buffer[MAX_TCP_MSG + 1];
-    char msg_type_buffer[MESS_TYPE_LEN + 1];
-    int ret;
-
-    while (1)
-    {
-        ret = recv(sock, (void *)buffer, MAX_TCP_MSG, 0);
-
-        if (ret == 0)
-            return 0;
-
-        buffer[ret] = '\0';
-
-        strncpy(msg_type_buffer, buffer, MESS_TYPE_LEN);
-        msg_type_buffer[MESS_TYPE_LEN] = '\0';
-
-        printf("TCP [%d] : Ricevuto messaggio %s\n", sock, msg_type_buffer);
-        if (strcmp(msg_type_buffer, "ELAB_REQ"))
-        {
-            char type;
-            int d, m, y;
-
-            ret = sscanf(buffer, "%s %c %04d_%02d_%02d", msg_type_buffer, &type, &y, &m, &d);
-            if (ret != 5)
-                continue;
-            
-        }
-    }
 }

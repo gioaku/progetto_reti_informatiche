@@ -58,5 +58,18 @@
 #define MAX_UDP_MSG 630
 // Massima lunghezza messaggio tcp
 #define MAX_TCP_MSG 630
-
+// Tutte le porte per le receive
+#define ALL_PORT -1
+// Directory de registri
+#define REGISTERS "data"
+// Directory entries
+#define ENTRIES "entries"
+// Directory agglomerati
+#define ELABS "elabs"
+// Formato del path alle directory dei file dei registri
+#define PATH_FORMAT "./%s/%04d/%c/%s/"
+// Formato del path ai file dei registri
+#define FILE_FORMAT "./%s/%04d/%c/%s/%04d_%02d_%02d.txt"
+// Formato del nome dei file dei registri
+#define FILENAME_FORMAT "%04d_%02d_%02d.txt"
 #endif

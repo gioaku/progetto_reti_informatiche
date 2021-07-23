@@ -302,7 +302,7 @@ int main(int argc, char **argv)
 
             FD_CLR(0, &readset);
         }
-
+        // Aggiornamento della data corrente
         if (update_date(today))
         {
             int msg_len;

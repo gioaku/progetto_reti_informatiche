@@ -11,6 +11,13 @@
         "inet.h": "c",
         "util_c.h": "c",
         "stdlib.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "array": "c",
+        "functional": "c",
+        "istream": "c",
+        "ostream": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c"
     }
 }

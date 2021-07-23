@@ -8,9 +8,12 @@
 int valid_port(int);
 int is_between(int, int, int);
 int valid_date_i(int, int, int);
+int valid_date_s(char *);
 int file_exists(char *);
 int create_path(char *);
-int sooner_or_eq(int d1, int m1, int y1, int d2, int m2, int y2);
-int sooner(int d1, int m1, int y1, int d2, int m2, int y2);
+int sooner_or_eq(int, int, int, int, int, int);
+int sooner(int, int, int, int, int, int);
+int in_time_interval(int, int, int, char *, char *);
+int file_exists_i(int, char, char *, int, int, int);
 
 #endif

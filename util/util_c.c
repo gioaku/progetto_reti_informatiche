@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
@@ -60,6 +61,33 @@ void help_client(int i){
         default:
             printf("Errore nella chiamata\n");
     }
+}
+
+int file_exists(char *path, char *filename){
+    struct stat buff;
+    return (stat(strcat(path, filename), &buff) == 0);
+}
+
+int create_path(char *path){
+    return system(strcat("mkdir -p ", path);
+} 
+
+void insert_entry(char *date, char type, int quantity){
+    FILE *fd;
+    char path[MAX_PATH_LEN];
+    char filename[MAX_FILENAME_LEN];
+
+    sprintf(path, "./data/%d/%c/entries/%s.txt", my_port, type, date);
+    
+    if (!file_exists){
+        create_path(path);
+    }
+
+    fd = fopen(filename, "a");
+    fprintf(fd, "%d\n", quantity);
+    fclose(fd);
+
+    printf("Entry %d inserita nel file: %s%s\n", quantity, path, filename);
 }
 
 /*

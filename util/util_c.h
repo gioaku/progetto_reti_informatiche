@@ -2,6 +2,10 @@
 
 void print_client_commands();
 void help_client(int);
+int file_exists(char*, char*);
+int create_file(char*);
+int insert_entry(char*, char, int);
+
 int check_dates(char*,char*,char);
 void insert_entry(char,int);
 void insert_entry_string(char*);

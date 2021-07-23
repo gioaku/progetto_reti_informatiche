@@ -214,13 +214,8 @@ int main(int argc, char **argv)
                     printf("Errore nell'inserimento dei dati\n");
                     continue;
                 }
-                
-                ret = sprintf(new_entry, "%s %c", "NEW_ENTR", type);
-                new_entry[ret] = '\0';
 
-                //send_UDP(listener_socket, new_entry, ret, server_port, "ENEW_ACK");
-
-                //insert_entry(type, quantity);
+                insert_entry(type, quantity);
             }
 /*
             // get

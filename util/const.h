@@ -10,8 +10,12 @@
 #define ACK_TRIES 10
 // Lunghezza di una stringa di data
 #define DATE_LEN 10
+// Formato di una stringa di data
+#define DATE_FORMAT "%04d-%02d-%02d"
 // Lunghezza di una stringa di orario
 #define TIME_LEN 8
+// Formato di una stringa di orario
+#define TIME_FORMAT "%02d:%02d:%02d"
 // Massimo numero di peer connessi (scelta di progettazione)
 #define MAX_CONNECTED_PEERS 100
 // Massima lunghezza di un'entry di aggiornamento con header (deriva dal massimo numero di peer connessi)
@@ -19,7 +23,9 @@
 // Stringa di localhost
 #define LOCALHOST "127.0.0.1"
 // Massima lunghezza di un filename per le entries
-#define MAX_FILENAME_LEN 31
+#define MAX_FILENAME_LEN 100
+// Massima lunghezza di un path
+#define MAX_PATH_LEN 100
 // Minimo anno per una data della get
 #define MIN_YEAR 2021
 // Massima lunghezza di un messaggio legato ai lock di get e stop

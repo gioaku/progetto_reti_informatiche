@@ -8,6 +8,7 @@
         "peer_file.h": "c",
         "random": "c",
         "stdio.h": "c",
-        "inet.h": "c"
+        "inet.h": "c",
+        "util_c.h": "c"
     }
 }

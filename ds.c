@@ -36,16 +36,6 @@ int fdmax;
 
 int main(int argc, char **argv)
 {
-    int ret, n;
-    FILE* fd;
-
-    fd = fopen("./ciao.txt", "r");
-    ret = fscanf(fd, "%d", &n);
-    printf("%d", n);
-    fclose(fd);
-    
-    
-    
     // pulizia set
     FD_ZERO(&master);
     FD_ZERO(&readset);
@@ -70,7 +60,6 @@ int main(int argc, char **argv)
     // stapa elenco comandi
     print_server_commands();
 
-    
     // ciclo infinito di funzionamento ds
     while (1)
     {
@@ -165,7 +154,6 @@ int main(int argc, char **argv)
                     sock.buffer[msg_len] = '\0';
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.prev, "NEXT_ACK");
-
                 }
                 print_peers_number();
             }

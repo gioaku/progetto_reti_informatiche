@@ -76,17 +76,21 @@ void insert_entry(char *date, char type, int quantity){
     FILE *fd;
     char path[MAX_PATH_LEN];
     char filename[MAX_FILENAME_LEN];
-    
-    sprintf(path, "./data/%d/%c/entries/", my_port, type);
-    sprintf(filename, "%s.txt", date);
-    printf("New entry file : %s%s\n", path);
+    int path_len, filename_len;
+    path_len = sprintf(path, "./data/%04d/%c/entries/", my_port, type);
+    path[path_len] = '\0';
+
+    filename_len = sprintf(filename, "%s.txt", date);
+    filename[filename_len] = '\0';
+
+    printf("New entry file : %s%s\n", path, filename);
 
     if (!path_exists(path)){
         printf("Creating path %s\n", path);
         create_path(path);
     }
 
-    fd = fopen(filename, "a");
+    fd = fopen(strcat(path, filename), "a");
     fprintf(fd, "%d\n", quantity);
     fclose(fd);
 

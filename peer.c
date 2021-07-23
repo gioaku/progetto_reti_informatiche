@@ -240,12 +240,19 @@ int main(int argc, char **argv)
                 char type;
                 char period[DATE_IN_LEN * 2 + 2];
                 int ret;
-                struct tm a, b;
-                struct tm *from = &a;
-                struct tm *to = &b;
-                time_t from_time = time(NULL);
-                time_t to_time = time(NULL);
 
+                time_t from_time;
+                struct tm *from;
+                time_t to_time;
+                struct tm *to;
+
+                form_time = time(NULL);
+                from = gmtime(&now_time);
+                form_time = time(NULL);
+                to = gmtime(&now_time);
+
+
+                printf("Hai selezionato la get");
                 // Se peer non connesso non faccio nulla
                 if (server_port == -1)
                 {

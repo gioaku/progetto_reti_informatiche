@@ -241,8 +241,8 @@ int main(int argc, char **argv)
                 char period[DATE_IN_LEN * 2 + 2];
                 int ret;
 
-                struct tm *from = {0};
-                struct tm *to = {0};
+                struct tm *from;
+                struct tm *to;
                 time_t from_time = time(NULL);
                 time_t to_time = time(NULL);
 
@@ -267,6 +267,7 @@ int main(int argc, char **argv)
                     printf("Errore nell'inserimento della richiesta\n");
                     continue;
                 }
+                printf('pre check period\n');
                 // Controllo sulle date
                 if (ret == 4)
                 {

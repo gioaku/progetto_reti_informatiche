@@ -164,7 +164,7 @@ int main(int argc, char **argv)
                 }
 
                 // controllo sui parametri letti
-                if (!valid_port(nbs.prev) || !valid_port(nbs.next))
+                if (nbs.tot > 0 && (!valid_port(nbs.prev) || !valid_port(nbs.next)))
                 {
                     printf("Errore: lista di vicini ricevuta non valida. Riprovare\n");
                     nbs.tot = -1;
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
                 // ricevo la prima data
                 if (!recv_udp_and_ack(udp_s.id, udp_s.buffer, MAX_UDP_MSG, server_port, "SET_FDAY", "FDAY_ACK"))
                 {
-                    printf("Errore: impossibile ricevere la di oggi dal server. Riprovare\n");
+                    printf("Errore: impossibile ricevere la data first dal server. Riprovare\n");
                     continue;
                 }
 

@@ -199,7 +199,7 @@ int main(int argc, char **argv)
                 printf("Data di oggi ricevuta dal server : %s\n", date_buffer);
 
                 // ricevo la start date
-                if (!recv_udp_and_ack(udp.id, udp.buffer, MAX_UDP_MSG, server_port, "SET_SDAY", "FDAY_ACK"))
+                if (!recv_udp_and_ack(udp.id, udp.buffer, MAX_UDP_MSG, server_port, "SET_SDAY", "SDAY_ACK"))
                 {
                     printf("Errore: impossibile ricevere la data start dal server. Riprovare\n");
                     send_udp_wait_ack(udp.id, "CLT_EXIT", HEADER_LEN, server_port, "C_EX_ACK");

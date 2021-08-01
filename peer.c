@@ -272,16 +272,7 @@ int main(int argc, char **argv)
 
                 struct Date from;
                 struct Date to;
-                // time_t from_time;
-                // struct tm *from;
-                // time_t to_time;
-                // struct tm *to;
-
-                // from_time = time(NULL);
-                // from = gmtime(&from_time);
-                // to_time = time(NULL);
-                // to = gmtime(&to_time);
-
+                
                 // se peer non connesso non faccio nulla
                 if (server_port == -1 || nbs.tot == -1)
                 {

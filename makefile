@@ -32,5 +32,3 @@ all: ./ds ./peer
 
 clean:
 	-rm -f ./*.o ./ds ./peer ./util/*.o
-	-mv ./data ./logs
-	-rm -rf ./data/*

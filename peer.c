@@ -304,16 +304,16 @@ int main(int argc, char **argv)
                 // controllo su aggr
                 if (!(aggr == 't' || aggr == 'v'))
                 {
-                    printf("Errore nell'inserimento del dato 'aggr'\n");
+                    printf("Errore nell'inserimento del dato 'aggr' %c\n", aggr);
                     help_client(3);
                     FD_CLR(0, &readset);
                     continue;
                 }
 
                 // controllo su type
-                if ((type == 't' || type == 'n'))
+                if (!(type == 't' || type == 'n'))
                 {
-                    printf("Errore nell'inserimento  del dato 'type'\n");
+                    printf("Errore nell'inserimento  del dato 'type' %c\n", type);
                     help_client(3);
                     FD_CLR(0, &readset);
                     continue;
@@ -357,142 +357,6 @@ int main(int argc, char **argv)
                     {
                         sum += get_total(udp.id, my_port, type, date, nbs);
                     }
-                    /*
-                    while (from_time < to_time)
-                    {
-                        // se ha i dati li aggiunge e continua
-                        if ((tmp = get_saved_elab(type, from->tm_mday, from->tm_mon + 1, from->tm_year)) != -1)
-                        {
-                            sum += tmp;
-                            from->tm_mday++;
-                            from_time = mktime(from);
-                            continue;
-                        }
-                        // se non ha vicini e non ha dati continua
-                        if (nbs.tot == 0)
-                        {
-                            from->tm_mday++;
-                            from_time = mktime(from);
-                            continue;
-                        }
-                        // se ha almeno un vicino chiede a lui
-                        if (nbs.tot > 0)
-                        {
-                            char buffer[MAX_TCP_MSG + 1];
-                            char header_buff[HEADER_LEN + 1];
-                            int msg_len;
-                            int sock;
-                            int ret;
-
-                            // connect con vicino precedente
-                            sock = tcp_connect_init(nbs.prev);
-                            msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, from->tm_year, from->tm_mon + 1, from->tm_mday);
-
-                            // send elab req
-                            send(sock, buffer, msg_len, 0);
-                            recv(sock, buffer, MAX_TCP_MSG, 0);
-                            close(sock);
-
-                            ret = sscanf(buffer, "%s %d", header_buff, &tmp);
-                            if (ret == 2 && strcmp(header_buff, "ELAB_ACK") == 0 && tmp != -1)
-                            {
-                                sum += tmp;
-                                create_elab(type, from->tm_mday, from->tm_mon + 1, from->tm_year, tmp);
-                                from->tm_mday++;
-                                from_time = mktime(from);
-                                continue;
-                            }
-                        }
-                        // se ha due vicini chiede anche all'altro
-                        if (nbs.tot == 2)
-                        {
-                            char buffer[MAX_TCP_MSG + 1];
-                            char header_buff[HEADER_LEN + 1];
-                            int msg_len;
-                            int sock;
-                            int ret;
-                            int peer_port;
-
-                            // connect con vicino successivo
-                            sock = tcp_connect_init(nbs.next);
-                            msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, from->tm_year, from->tm_mon + 1, from->tm_mday);
-
-                            // send elab req
-                            send(sock, buffer, msg_len, 0);
-                            recv(sock, buffer, MAX_TCP_MSG, 0);
-                            close(sock);
-
-                            ret = sscanf(buffer, "%s %d", header_buff, &tmp);
-                            header_buff[HEADER_LEN] = '\0';
-
-                            if (ret == 2 && strcmp(header_buff, "ELAB_ACK") == 0 && tmp != -1)
-                            {
-                                sum += tmp;
-                                create_elab(type, from->tm_mday, from->tm_mon + 1, from->tm_year, tmp);
-                                from->tm_mday++;
-                                from_time = mktime(from);
-                                continue;
-                            }
-                            // se non ho ricevuto risposte positive cerco qualcuno che le ha tutte
-                            msg_len = sprintf(udp.buffer, "FL_A_REQ %d %c %04d_%02d_%02d", my_port, type, from->tm_year, from->tm_mon + 1, from->tm_mday);
-                            udp.buffer[msg_len] = '\0';
-                            send_udp_wait_ack(udp.id, udp.buffer, msg_len, nbs.next, "FL_A_ACK");
-                            recv_udp_and_ack(udp.id, udp.buffer, MAX_UDP_MSG, ALL_PORT, "PROP_ALL", "PR_A_ACK");
-
-                            ret = sscanf(udp.buffer, "%s %d", header_buff, &peer_port);
-                            if (ret != 2)
-                            {
-                                printf("Errore nella ricezione della PROP_ALL %d\n", peer_port);
-                                continue;
-                            }
-                            // se peer_port != 0 contiene la porta di un peer che ha tutti i dati
-                            if (peer_port)
-                            {
-                                int qty;
-                                FILE *fd;
-                                // mi connetto
-                                sock = tcp_connect_init(peer_port);
-                                msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, from->tm_year, from->tm_mon + 1, from->tm_mday);
-
-                                // invio della richiesta di dati
-                                send(sock, buffer, msg_len, 0);
-
-                                // apro file per scrivere le entries
-                                fd = open_reg_w(type, from->tm_mday, from->tm_mon + 1, from->tm_year);
-
-                                while (recv(sock, buffer, MAX_TCP_MSG, 0))
-                                {
-                                    ret = sscanf(buffer, "%s %d", header_buff, &qty);
-                                    header_buff[HEADER_LEN] = '\0';
-                                    if (ret == 2 && strcmp("NW_ENTRY", header_buff) == 0)
-                                    {
-                                        printf("Ricevuta nuova entry %d\n", qty);
-                                        fprintf(fd, "%d\n", qty);
-                                        tmp += qty;
-                                        send(sock, "NW_E_ACK", HEADER_LEN, 0);
-                                    }
-                                }
-                                create_elab(type, from->tm_mday, from->tm_mon + 1, from->tm_year, tmp);
-                                from->tm_mday++;
-                                from_time = mktime(from);
-                                continue;
-                            }
-                            // se ancora non ho ricevuto risposte positive cerco tutti quelli che hanno qualcosa
-                            msg_len = sprintf(udp.buffer, "FL_S_REQ %d %c %04d_%02d_%02d", my_port, type, from->tm_year, from->tm_mon + 1, from->tm_mday);
-                            udp.buffer[msg_len] = '\0';
-                            send_udp_wait_ack(udp.id, udp.buffer, msg_len, nbs.next, "FL_S_ACK");
-
-                            tmp = collect_entries_waiting_flood(udp.id, type, from->tm_mday, from->tm_mon + 1, from->tm_year);
-                            sum += tmp;
-                            create_elab(type, from->tm_mday, from->tm_mon + 1, from->tm_year, tmp);
-                            from->tm_mday++;
-                            from_time = mktime(from);
-                            continue;
-                        }
-
-                        from->tm_mday++;
-                        from_time = mktime(from);
-                    }*/
                     printf("Totale di %c nel periodo %s: %d\n", type, period, sum);
                 }
                 if (aggr == 'v')
@@ -510,27 +374,6 @@ int main(int argc, char **argv)
                         printf("Variazione di %c il giorno %02d:%02d:%04d: %d", type, date.d, date.m, date.y, new - old);
                         old = new;
                     }
-                    /*int old, new;
-
-                    from->tm_day--;
-                    from_time = mktime(from);
-
-                    if (!get_saved_elab(type, from->tm_mday, from->tm_mon, from->tm_year, &old))
-                    {
-                    }
-
-                    while (from_time <= to_time)
-                    {
-                        if (!get_saved_elab(type, from->tm_mday, from->tm_mon, from->tm_year, &new))
-                        {
-                        }
-
-                        printf("Variazioni di %c in data %02d:%02d:%04d : %d\n", type, from->tm_mday, from->tm_mon, from->tm_year, new - old);
-                        old = new;
-
-                        from->tm_mday++;
-                        from_time = mktime(from);
-                        */
                 }
             }
 

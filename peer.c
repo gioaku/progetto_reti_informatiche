@@ -185,9 +185,10 @@ int main(int argc, char **argv)
                 }
 
                 ret = sscanf(udp.buffer, "%s %s", header_buff, date_buffer);
+                today = atod(date_buffer, DATE_FORMAT);
 
                 // controllo data odierna ricevuta
-                if (ret != 2 || !dvalid(atod(date_buffer, DATE_FORMAT)))
+                if (ret != 2 || !dvalid(today))
                 {
                     printf("Errore nella ricezione della data odierna %s\n", date_buffer);
                     send_udp_wait_ack(udp.id, "CLT_EXIT", HEADER_LEN, server_port, "C_EX_ACK");
@@ -195,7 +196,6 @@ int main(int argc, char **argv)
                     continue;
                 }
 
-                today = atod(date_buffer, DATE_IN_FORMAT);
                 printf("Data di oggi ricevuta dal server : %s\n", date_buffer);
 
                 // ricevo la start date

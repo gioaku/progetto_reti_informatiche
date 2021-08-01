@@ -185,7 +185,7 @@ int main(int argc, char **argv)
                 }
 
                 ret = sscanf(udp.buffer, "%s %s", header_buff, date_buffer);
-                today = atod(date_buffer, DATE_FORMAT);
+                today = atod(date_buffer);
 
                 // controllo data odierna ricevuta
                 if (ret != 2 || !dvalid(today))
@@ -208,7 +208,7 @@ int main(int argc, char **argv)
                 }
 
                 ret = sscanf(udp.buffer, "%s %s", header_buff, date_buffer);
-                start_date = atod(date_buffer, DATE_FORMAT);
+                start_date = atod(date_buffer);
 
                 // controllo sulla start date ricevuta
                 if (ret != 2 || !dvalid(start_date))
@@ -671,7 +671,7 @@ int main(int argc, char **argv)
                     // legge data
                     tmp = sscanf(udp.buffer, "%s %s", header_buff, date_buffer);
 
-                    if (tmp != 2 || !dvalid(atod(date_buffer, DATE_FORMAT)))
+                    if (tmp != 2 || !dvalid(atod(date_buffer)))
                     {
                         printf("Errore nella ricezione della data odierna");
                         FD_CLR(udp.id, &readset);
@@ -680,7 +680,7 @@ int main(int argc, char **argv)
                     // invia ack
                     send_ack_udp(udp.id, "TDAY_ACK", server_port);
                     printf("Data ricevuta dal server : %s\n", date_buffer);
-                    today = atod(date_buffer, DATE_IN_FORMAT);
+                    today = atod(date_buffer);
                 }
 
                 // Notifica chiusura server

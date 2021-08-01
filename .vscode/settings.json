@@ -20,6 +20,7 @@
         "type_traits": "c",
         "utility": "c",
         "types.h": "c",
-        "util.h": "c"
+        "util.h": "c",
+        "date.h": "c"
     }
 }

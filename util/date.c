@@ -1,16 +1,16 @@
 #include "date.h"
 
-struct Date atod(char *buff, char *format)
+struct Date atod(char *buff)
 {
     struct Date ret;
-    if (sscanf(buff, format, &ret.y, &ret.m, &ret.y) != 3)
+    if (sscanf(buff, DATE_FORMAT, &ret.y, &ret.m, &ret.d) != 3)
         printf("Error: date.c::atod fallita\n");
     return ret;
 }
 
-void dtoa(char *buff, struct Date d, char *format)
+void dtoa(char *buff, struct Date d)
 {
-    if (sprintf(buff, format, d.y, d.m, d.d) != 3)
+    if (sprintf(buff, DATE_FORMAT, d.y, d.m, d.d) != 3)
         printf("Error: date.c::dtoa fallita\n");
     return;
 }

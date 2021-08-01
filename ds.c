@@ -123,7 +123,7 @@ int main(int argc, char **argv)
                 };
 
                 // composizione messaggio today
-                dtoa(date_buffer, today, DATE_FORMAT);
+                dtoa(date_buffer, today);
                 msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", date_buffer);
                 sock.buffer[msg_len] = '\0';
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
                 }
 
                 // composizione messaggio start date
-                dtoa(date_buffer, start_date, DATE_FORMAT);
+                dtoa(date_buffer, start_date);
                 msg_len = sprintf(sock.buffer, "%s %s", "SET_SDAY", date_buffer);
                 sock.buffer[msg_len] = '\0';
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
@@ -303,7 +303,7 @@ int main(int argc, char **argv)
             char date_buffer[DATE_LEN];
 
             //composizione messaggio
-            dtoa(date_buffer, today, DATE_FORMAT);
+            dtoa(date_buffer, today);
             msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", date_buffer);
             sock.buffer[msg_len] = '\0';
             printf("Lista da inviare a tutti: %s (lunga %d byte)\n", sock.buffer, msg_len);

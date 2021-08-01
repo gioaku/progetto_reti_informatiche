@@ -28,10 +28,10 @@ struct Date
 };
 
 // String to date
-struct Date atod(char *buff, char* format);
+struct Date atod(char *buff);
 
 // Date to string
-void dtoa(char *buff, struct Date d, char* format);
+void dtoa(char *buff, struct Date d);
 
 // Check date
 int dvalid(struct Date d);

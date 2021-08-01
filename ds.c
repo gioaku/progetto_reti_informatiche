@@ -1,24 +1,9 @@
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-
-// Funzioni di utilita'
 #include "./util/util_s.h"
-// Gestione del file con i peer connessi alla rete
-#include "./util/peer_file.h"
-// Gesione dei messaggi
-#include "./util/msg.h"
 
+// Variabili di stato
 int my_port;
-char today[DATE_LEN + 1];
-char first_day[DATE_LEN + 1];
+struct Date today;
+struct Date start_date;
 
 // Udp socket
 struct UdpSocket sock;
@@ -37,38 +22,23 @@ int fdmax;
 
 int main(int argc, char **argv)
 {
+    // lettura porta dagli argomenti
+    my_port = atoi(argv[1]);
+
+    // inizializzazione date
+    update_date(&today);
+    printf("Oggi: %02d:%02d:%04d\n", today.d, today.m, today.y);
+    start_date = get_start_date(today);
+    printf("Start date: %02d:%02d:%04d\n", start_date.d, start_date.m, start_date.y);
+
     // pulizia set
     FD_ZERO(&master);
     FD_ZERO(&readset);
 
-    my_port = atoi(argv[1]);
-    
-    // inizializzazione data
-    update_date(today);
-    if (!file_exists("./data/ds/first_day.txt"))
-    {
-        FILE *fd;
-
-        strcpy(first_day, today);
-        create_path("./data/ds/");
-        fd = fopen("./data/ds/first_day.txt", "w");
-        fprintf(fd, "%s", first_day);
-        fclose(fd);
-    }
-    else {
-        FILE *fd;
-
-        fd = fopen("./data/ds/first_day.txt", "r");
-        fscanf(fd, "%s", first_day);
-        fclose(fd);
-    }
-
-    printf("Inizializzata prima data a %s e la data di oggi a %s\n", first_day, today);
-
-    // creazione socket di ascolto
+    // creazione socket udp
     if (udp_socket_init(&sock, my_port) == -1)
     {
-        printf("Error: udp init gone wrong\n");
+        printf("Errore: impossibile inizializzare socket di ascolto\n");
         exit(0);
     }
 
@@ -95,26 +65,30 @@ int main(int argc, char **argv)
         {
             // porta del peer mittente
             int src_port;
-            // Buffer su cui ricevere messaggio di richiesta connessione
-            char msg_type_buffer[MESS_TYPE_LEN + 1];
+            // buffer per header del messaggio
+            char header_buff[HEADER_LEN + 1];
 
             // ricezione messaggio
-            src_port = s_recv_udp(sock.id, sock.buffer, MESS_TYPE_LEN);
-            sscanf(sock.buffer, "%s", msg_type_buffer);
-            msg_type_buffer[MESS_TYPE_LEN] = '\0';
+            src_port = s_recv_udp(sock.id, sock.buffer, HEADER_LEN);
+            sscanf(sock.buffer, "%s", header_buff);
+            header_buff[HEADER_LEN] = '\0';
 
-            printf("Arrivato messaggio %s da %d sul socket\n", msg_type_buffer, src_port);
+            printf("Arrivato messaggio %s da %d sul socket\n", header_buff, src_port);
 
             // richiesta di connessione
-            if (strcmp(msg_type_buffer, "CONN_REQ") == 0)
+            if (strcmp(header_buff, "CONN_REQ") == 0)
             {
-                struct Neighbors nbs; // Variabile per salvare eventuali vicini
-                int msg_len;          // Variabile per la lunghezza del messaggio da inviare al peer
+                // nuovi vicini
+                struct Neighbors nbs;
+                // lunghezza del messaggio
+                int msg_len;
+                // buffer per scrivere la data da inviare
+                char date_buffer[DATE_LEN + 1];
 
                 // ack dell'arrivo della richiesta
-                if (!s_send_ack_udp(sock.id, "CONN_ACK", src_port))
+                if (!send_ack_udp(sock.id, "CONN_ACK", src_port))
                 {
-                    printf("Errore: impossibile inviare ack per la richiesta di connessione\n");
+                    FD_CLR(sock.id, &readset);
                     continue;
                 }
 
@@ -123,13 +97,12 @@ int main(int argc, char **argv)
 
                 if (nbs.tot == -1)
                 {
-                    printf("Impossibile connettere il peer\n");
-                    // Uscita
+                    printf("Impossibile connettere il peer %d\n", src_port);
                     FD_CLR(sock.id, &readset);
                     continue;
                 }
 
-                // compongo la lista
+                // creo messaggio vicini
                 if (nbs.tot == 0)
                     msg_len = sprintf(sock.buffer, "%s", "NBR_LIST");
 
@@ -149,29 +122,37 @@ int main(int argc, char **argv)
                     continue;
                 };
 
-                msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", today);
+                // composizione messaggio today
+                dtoa(date_buffer, today, DATE_FORMAT);
+                msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", date_buffer);
                 sock.buffer[msg_len] = '\0';
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
 
+                // invio di today
                 if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "TDAY_ACK"))
                 {
                     remove_peer(src_port);
                     printf("Errore: impossibile comunicare data al peer\nOperazione abortita\n");
+                    FD_CLR(sock.id, &readset);
                     continue;
                 }
 
-                msg_len = sprintf(sock.buffer, "%s %s", "SET_FDAY", first_day);
+                // composizione messaggio start date
+                dtoa(date_buffer, start_date, DATE_FORMAT);
+                msg_len = sprintf(sock.buffer, "%s %s", "SET_SDAY", date_buffer);
                 sock.buffer[msg_len] = '\0';
                 printf("Lista da inviare a %d: %s (lunga %d byte)\n", src_port, sock.buffer, msg_len);
 
-                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "FDAY_ACK"))
+                // invio di start date
+                if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, src_port, "SDAY_ACK"))
                 {
                     remove_peer(src_port);
                     printf("Errore: impossibile comunicare data al peer\nOperazione abortita\n");
+                    FD_CLR(sock.id, &readset);
                     continue;
                 }
-                
-                // invio aggiornamenti vicini
+
+                // invio aggiornamenti ai vicini
                 if (nbs.tot > 0)
                 {
                     // comunica modifica a next
@@ -186,36 +167,41 @@ int main(int argc, char **argv)
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.prev, "NEXT_ACK");
                 }
+
+                // stampa del nuovo numero di peer
                 print_peers_number();
             }
 
-            // Richiesta di uscita
-            if (strcmp(msg_type_buffer, "CLT_EXIT") == 0)
+            // richiesta di uscita
+            if (strcmp(header_buff, "CLT_EXIT") == 0)
             {
-                // Variabili per salvare informazioni temporanee
+                // vecchi vicini
                 struct Neighbors nbs;
+                // lunghezza del messaggio
                 int msg_len;
 
-                printf("Ricevuto messaggio di richiesta di uscita da %d\n", src_port);
-                s_send_ack_udp(sock.id, "C_EX_ACK", src_port);
-
-                // Se il peer per qualche motivo non e' in lista non faccio nulla
-                if (get_position(src_port) == -1)
+                //ack dell'arrivo della richiesta
+                if (!send_ack_udp(sock.id, "C_EX_ACK", src_port))
                 {
-                    printf("Errore: peer %d non presente nella lista dei peer connessi.\nOperazione abortita\n", src_port);
                     FD_CLR(sock.id, &readset);
                     continue;
                 }
 
+                // se peer non in lista non faccio nulla
+                if (get_position(src_port) == -1)
+                {
+                    printf("Warning: peer %d non presente nella lista dei peer connessi.\nOperazione abortita\n", src_port);
+                    FD_CLR(sock.id, &readset);
+                    continue;
+                }
+
+                // rimozione peer dalla lista
                 nbs = remove_peer(src_port);
 
                 printf("Disconnesso il peer %d dalla rete\n", src_port);
 
-                if (nbs.tot == 0)
-                {
-                    printf("Disconnesso l'ultimo peer\n");
-                }
-                else
+                // se aveva vicini li aggiorno del cambiamento
+                if (nbs.tot != 0)
                 {
                     // comunica modifica a next
                     msg_len = sprintf(sock.buffer, "%s %d", "PRE_UPDT", nbs.prev);
@@ -228,21 +214,26 @@ int main(int argc, char **argv)
                     sock.buffer[msg_len] = '\0';
                     printf("Lista da inviare a %d: %s (lunga %d byte)\n", nbs.prev, sock.buffer, msg_len);
                     send_udp_wait_ack(sock.id, sock.buffer, msg_len, nbs.prev, "NEXT_ACK");
-
-                    print_peers_number();
                 }
+
+                // stampa del nuovo numero di peer
+                print_peers_number();
             }
         }
-        // Gestione comandi da stdin
+        // comando da stdin
         if (FD_ISSET(0, &readset))
         {
-            // Parsing dell'input
+            // numero di input
             int input_number;
+            // eventuale parametro passato
             int neighbor_peer;
+            // buffer per leggere il comando
             char command[MAX_COMMAND_S];
 
+            // leggo il comando
             fgets(command_buffer, MAX_STDIN_S, stdin);
             input_number = sscanf(command_buffer, "%s %d", command, &neighbor_peer);
+            
             // help
             if (strcmp(command, "help\0") == 0)
             {
@@ -272,7 +263,7 @@ int main(int argc, char **argv)
             // esc
             else if (strcmp(command, "esc\0") == 0)
             {
-                printf("Invio ai peer i messaggi di disconnessione\n");
+                printf("Inizio disconnesione\n");
                 int port = get_port(0);
 
                 // rimozione di tutti i peer previo avviso
@@ -281,10 +272,10 @@ int main(int argc, char **argv)
                     printf("Invio SRV_EXIT a %d\n", port);
 
                     // invio messaggio
-                    if (!send_udp_wait_ack(sock.id, "SRV_EXIT", MESS_TYPE_LEN, port, "S_XT_ACK"))
+                    if (!send_udp_wait_ack(sock.id, "SRV_EXIT", HEADER_LEN, port, "S_XT_ACK"))
                     {
                         printf("Errore: impossibile disconnettere il peer %d\n", port);
-                        // spero bene per lui
+                        // spero bene per lui e continuo
                     }
 
                     // rimozione peer
@@ -298,15 +289,22 @@ int main(int argc, char **argv)
             else
             {
                 printf("Errore, comando non esistente\n");
+                print_server_commands();
             }
 
             FD_CLR(0, &readset);
         }
         // Aggiornamento della data corrente
-        if (update_date(today))
+        if (update_date(&today))
         {
+            // lunghezza del messaggio da inviare
             int msg_len;
-            msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", today);
+            // buffer per la data da inviare
+            char date_buffer[DATE_LEN];
+
+            //composizione messaggio
+            dtoa(date_buffer, today, DATE_FORMAT);
+            msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", date_buffer);
             sock.buffer[msg_len] = '\0';
             printf("Lista da inviare a tutti: %s (lunga %d byte)\n", sock.buffer, msg_len);
 
@@ -320,6 +318,5 @@ int main(int argc, char **argv)
             }
         }
     }
-
     return 0;
 }

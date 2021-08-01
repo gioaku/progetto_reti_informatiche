@@ -1,6 +1,35 @@
-#include "util.h"
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 
+// Funzioni generiche
+#include "util.h"
+// Gestione date
+#include "date.h"
+// Gestione peer graph
+#include "peer_file.h"
+// Gestione messaggi
+#include "msg.h"
+
+
+// Path del file che contiene la start date
+#define START_DATE_FILE "./data/ds/start_date.txt"
+// Path della directory che contiene la start date
+#define START_DATE_DIR "./data/ds/"
+// Massima lunghezza di un messaggio proveniente da stdin per il server
+#define MAX_STDIN_S 30
+// Massima lunghezza di un comando per il server
+#define MAX_COMMAND_S 13
+
+// Elenco dei comandi disponibili lato server
 void print_server_commands();
-void add_entry(char);
-int read_entries(char);
-int update_date(char*);
+
+// Restituisce la start date salvata se presente - altrimenti salva today e lo restituisce
+struct Date get_start_date(struct Date today);

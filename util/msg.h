@@ -1,32 +1,82 @@
 #ifndef MSG
 #define MSG
-#include "const.h"
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+
 #include "neighbors.h"
 
-struct UdpSocket{
+// Lunghezza header messaggio
+#define HEADER_LEN 8
+// Attesa dell'ack
+#define USEC 15000
+// Tentativi per inviare un messaggio
+#define ACK_TRIES 10
+// Massima lunghezza di un'entry di aggiornamento con header (deriva dal massimo numero di peer connessi)
+#define MAX_ENTRY_UPDATE 630
+// Stringa di localhost
+#define LOCALHOST "127.0.0.1"
+// Massima lunghezza messaggio udp
+#define MAX_UDP_MSG 630
+// Massima lunghezza messaggio tcp
+#define MAX_TCP_MSG 630
+// Tutte le porte per le receive
+#define ALL_PORT -1
+
+struct UdpSocket
+{
     int id;
     struct sockaddr_in addr;
     socklen_t addr_len;
     char buffer[MAX_UDP_MSG];
 };
 
-struct TcpSocket{
+struct TcpSocket
+{
     int id;
     struct sockaddr_in addr;
     socklen_t addr_len;
-    char buffer[MAX_TCP_MSG];    
+    char buffer[MAX_TCP_MSG];
 };
 
+// Pulizia delle variabili per l'indirizzo del socket
+void set_address(struct sockaddr_in *addr_p, socklen_t *len_p, int port);
 
-void set_address(struct sockaddr_in*, socklen_t*, int);
-int udp_socket_init(struct UdpSocket*, int);
-int tcp_listener_init(struct TcpSocket*, int);
-int accept_connection(int);
-int tcp_connect_init(int);
-int s_recv_udp(int, char*, int);
-int s_send_udp(int, char*, int, int);
-int s_send_ack_udp(int, char*, int);
-int recv_udp(int, char*, int, int, char*);
-int send_udp_wait_ack(int, char*, int, int, char*);
-int recv_udp_and_ack(int, char*, int, int, char*, char*);
+// Inizializzazione del socket udp - restituisce il descrittore di socket
+int udp_socket_init(struct UdpSocket *sock, int port);
+
+// Inizializzazione del socket di ascolto tcp - ritorna socket id
+int tcp_listener_init(struct TcpSocket * sock, int port);
+
+// Inizializzazione del socket connesso - ritorna socket id
+int tcp_connect_init(int port);
+
+// Accept della connessione tcp con i vicini - ritorna descrittore del nuovo socket - ritorna -1 in caso di errore
+int accept_connection(int listener);
+
+// Ricezione bloccante di un messaggio - ritorna la porta del mittente
+int s_recv_udp(int socket, char *buffer, int buff_l);
+
+// Invio di un messaggio - ritorna 1 se ha successo - ritorna 0 altrimenti
+int s_send_udp(int socket, char *buffer, int buff_l, int send_port);
+
+// Invio di un ack - ritorna 1 se ha successo - ritorna 0 altrimenti
+int send_ack_udp(int socket, char *buffer, int send_port);
+
+// Attesa e ricezione di un messaggio con header specifico - ritorna recv_port se arriva giusto - 0 altrimenti
+int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_header);
+
+// Invio di un messaggio fino all'arrivo dell' ack - ritorna 1 se ha successo - ritorna 0 altrimenti
+int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acked);
+
+// Attesa del messagio con header specifico e invio dell'ack - ritorna recv_port se ack mandato con successo - ritorna 0 altrimenti
+int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *correct_header, char *ack_type);
+
 #endif

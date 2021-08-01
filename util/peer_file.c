@@ -6,8 +6,6 @@
 #include <time.h>
 
 #include "peer_file.h"
-// Costanti
-#include "const.h"
 
 // Numero di peer connessi alla rete
 struct PeerList connected_peersn;
@@ -200,7 +198,6 @@ struct Neighbors insert_peer(int port)
         tail = connected_peersn.list;
 
         // esce quando l'ordine di porta viene rispettato
-        // while (is_between(port, tail->port, head->port))
         while ((head->port < port && tail->port > port) || (head->port > tail->port && (port < tail->port || port > head->port)))
         {
             // se peer connesso ritorna i vicini

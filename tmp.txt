@@ -1,3 +1,1 @@
-comunicazione peer server per la start
-    send with ack
-mutex ??
+

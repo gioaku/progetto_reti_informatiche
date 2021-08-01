@@ -18,6 +18,8 @@
         "ostream": "c",
         "tuple": "c",
         "type_traits": "c",
-        "utility": "c"
+        "utility": "c",
+        "types.h": "c",
+        "util.h": "c"
     }
 }

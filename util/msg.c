@@ -169,13 +169,36 @@ int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *corre
         recv_port = recv_udp(socket, buffer, buff_l, port, correct_header);
     } while (!recv_port && tries-- > 0);
 
-        if (tries > -1)
+    if (tries > -1)
     {
         // manda l'ack
-        if(send_ack_udp(socket, ack_type, recv_port))
+        if (send_ack_udp(socket, ack_type, recv_port))
             return recv_port;
     }
 
     printf("Errore: [R] impossibile ricevere messaggio %s dal destinatario %d\n", correct_header, port);
     return 0;
+}
+
+void send_tcp(int sock, char *buffer, int msg_len)
+{
+    int ret;
+
+    ret = send(sock, buffer, msg_len, 0);
+    if (ret < msg_len)
+    {
+        printf("Errore: [S] impossibile inviare messaggio %s\n", buffer);
+    }
+}
+
+int recv_tcp(int sock, char *buffer)
+{
+    int ret;
+
+    ret = recv(sock, buffer, MAX_TCP_MSG, 0);
+    if (ret < 0)
+    {
+        printf("Errore: [R] impossibile ricevere messaggio\n");
+    }
+    return ret;
 }

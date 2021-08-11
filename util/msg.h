@@ -79,4 +79,10 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
 // Attesa del messagio con header specifico e invio dell'ack - ritorna recv_port se ack mandato con successo - ritorna 0 altrimenti
 int recv_udp_and_ack(int socket, char *buffer, int buff_l, int port, char *correct_header, char *ack_type);
 
+// Invio messaggio su socket tcp
+void send_tcp(int sock, char *buffer, int msg_len);
+
+// Ricezione messaggio su socket tcp
+int recv_tcp(int sock, char *buffer);
+
 #endif

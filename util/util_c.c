@@ -211,10 +211,10 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     printf("Debug: <get_total> tcp_init con prev\n");
     sock = tcp_connect_init(nbs.prev);
 
-    printf("Debug: <get_total> mando %s a prev\n", buffer);
+    printf("Debug: <get_total> mando %s a prev %d\n", buffer, nbs.prev);
     send(sock, buffer, msg_len, 0);
     recv(sock, buffer, MAX_TCP_MSG, 0);
-    printf("Debug: <get_total> ricevuto %s da prev\n", buffer);
+    printf("Debug: <get_total> ricevuto %s da prev %d\n", buffer, nbs.prev);
 
     close(sock);
 
@@ -229,7 +229,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     }
 
     // se siamo solo due chiedo i dati, li aggiungo, elaboro, salvo, ritorno
-    if (nbs.tot != 2)
+    if (nbs.tot < 2)
     {
         FILE *fd;
         int qty;
@@ -263,9 +263,11 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     buffer[msg_len] = '\0';
     sock = tcp_connect_init(nbs.next);
 
+    printf("Debug: <get_total> mando %s a next %d\n", buffer, nbs.next);
     send(sock, buffer, msg_len, 0);
     recv(sock, buffer, MAX_TCP_MSG, 0);
     close(sock);
+    printf("Debug: <get_total> ricevuto %s da next %d\n", buffer, nbs.next);
 
     msg_len = sscanf(buffer, "%s %d", header_buff, &ret);
     if (msg_len == 2 && strcmp(header_buff, "ELAB_ACK") == 0 && ret != -1)
@@ -403,7 +405,13 @@ void handle_tcp_socket(int port, int sock)
     printf("Debug: <handle_tcp_socket> started\n");
 
     ret = recv(sock, buffer, MAX_TCP_MSG, 0);
+    if (ret < 0){
+        printf("Errore: [R] impossibile ricevere il messaggio\n");
+        close(sock);
+        return 1;
+    }
     buffer[ret] = '\0';
+
     printf("Debug: <handle_tcp_socket> received %s lunga %d\n", buffer, ret);
 
     while (ret)
@@ -420,8 +428,11 @@ void handle_tcp_socket(int port, int sock)
             struct Date date;
 
             ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-            if (ret != 5)
-                continue;
+            if (ret != 5){
+                close(sock);
+                return;
+            }
+
             msg_len = sprintf(buffer, "ELAB_ACK %d", get_saved_elab(port, type, date));
             buffer[msg_len] = '\0';
             send(sock, buffer, msg_len, 0);

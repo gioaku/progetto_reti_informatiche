@@ -48,8 +48,8 @@ void help_client(int i)
         printf("Parametri:\n");
         printf(" - aggr : tipo di aggregazione, se totale o variazioni giornaliere [t/v]\n");
         printf(" - type : carattere per indicare se tamponi o nuovi casi [t/n]\n");
-        printf(" - date1 : lower bound della ricerca, '*' per lower bound minimo\n");
-        printf(" - date2 : upper bound della ricerca, '*' per upper bound massimo\n");
+        printf(" - date1 : lower bound della ricerca [dd:mm:yyyy], '*' per lower bound minimo\n");
+        printf(" - date2 : upper bound della ricerca [dd:mm:yyyy], '*' per upper bound massimo\n");
         printf("Nota: se non si vuole nessun bound omettere le date\n");
         break;
     case 4:

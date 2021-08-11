@@ -117,7 +117,7 @@ FILE *open_reg(int port, char type, struct Date date, char *mode)
     get_path_string(path, port, type, ENTRIES);
     get_filename_string(filename, date);
 
-    printf("File : %s%s\n", path, filename);
+    printf("File: <open_reg> %s%s\n", path, filename);
 
     if (!file_exists(path))
     {
@@ -194,7 +194,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     {
         return ret;
     }
-    printf("Debug: <get_total> non ho il dato elaborato");
+    printf("Debug: <get_total> non ho il dato elaborato\n");
     // se non ci sono altri ritorno la somma dei miei e la salvo
     if (nbs.tot == 0)
     {
@@ -208,10 +208,10 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';
 
-    printf("Debug: <get_total> tcp_init con prev");
+    printf("Debug: <get_total> tcp_init con prev\n");
     sock = tcp_connect_init(nbs.prev);
 
-    printf("Debug: <get_total> mando %s a prev", buffer);
+    printf("Debug: <get_total> mando %s a prev\n", buffer);
     send(sock, buffer, msg_len, 0);
     recv(sock, buffer, MAX_TCP_MSG, 0);
     close(sock);
@@ -352,7 +352,7 @@ int get_entries_sum(int port, char type, struct Date date)
 
     get_file_string(file, port, type, ENTRIES, date);
 
-    printf("File : %s\n", file);
+    printf("File: <get_entries_sum> %s\n", file);
 
     if (!file_exists(file))
     {
@@ -377,7 +377,7 @@ void create_elab(int port, char type, struct Date date, int qty)
     get_path_string(path, port, type, ELABS);
     get_filename_string(filename, date);
 
-    printf("File : %s%s\n", path, filename);
+    printf("File: <create_elab> %s%s\n", path, filename);
 
     if (!file_exists(path))
     {
@@ -397,7 +397,7 @@ void handle_tcp_socket(int port, int sock)
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
     int ret;
-    printf("Debug: <handle_tcp_socket> started");
+    printf("Debug: <handle_tcp_socket> started\n");
     ret = recv(sock, buffer, MAX_TCP_MSG, 0);
     buffer[ret] = '\0';
 

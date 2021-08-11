@@ -272,7 +272,7 @@ int main(int argc, char **argv)
 
                 struct Date from;
                 struct Date to;
-                
+
                 // se peer non connesso non faccio nulla
                 if (server_port == -1 || nbs.tot == -1)
                 {
@@ -346,7 +346,7 @@ int main(int argc, char **argv)
                     // per ogni giorno ottenere e se necessario salvare dato aggregato
                     for (date = from; soonereq(date, to); dnext(&date))
                     {
-                        printf("Debug: get_total port: %d, type %c, date %d/%d/%d, vicini %d e %d", my_port, type, date.d, date.m, date.y, nbs.prev, nbs.next);
+                        printf("Debug: get_total port: %d, type %c, date %d/%d/%d, vicini %d e %d\n", my_port, type, date.d, date.m, date.y, nbs.prev, nbs.next);
                         sum += get_total(udp.id, my_port, type, date, nbs);
                     }
                     printf("Totale di %c nel periodo %s: %d\n", type, period, sum);
@@ -422,11 +422,14 @@ int main(int argc, char **argv)
             pid = fork();
             if (pid == 0)
             {
+                printf("Debug: processo figlio gestisce il socket %d\n", new_sd);
+
                 close(listener_s.id);
                 handle_tcp_socket(my_port, new_sd);
                 close(new_sd);
                 exit(0);
             }
+            printf("Debug: processo padre ritorna in ascolto\n", new_sd);
 
             close(new_sd);
             FD_CLR(listener_s.id, &readset);

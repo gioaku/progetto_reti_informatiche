@@ -196,9 +196,11 @@ int recv_tcp(int sock, char *buffer)
     int ret;
 
     ret = recv(sock, buffer, MAX_TCP_MSG, 0);
+    /*
     if (ret < 0)
     {
         printf("Errore: [R] impossibile ricevere messaggio\n");
     }
+    */
     return ret;
 }

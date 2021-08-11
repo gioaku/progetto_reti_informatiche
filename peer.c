@@ -316,7 +316,7 @@ int main(int argc, char **argv)
                     period[DATE_LEN * 2 + 1] = '\0';
                     if (!check_period(period, start_date, today, &from, &to))
                     {
-                        help_client(2);
+                        help_client(3);
                         FD_CLR(0, &readset);
                         continue;
                     }

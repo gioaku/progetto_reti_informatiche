@@ -429,7 +429,7 @@ int main(int argc, char **argv)
                 close(new_sd);
                 exit(0);
             }
-            printf("Debug: processo padre ritorna in ascolto\n", new_sd);
+            printf("Debug: processo padre ritorna in ascolto\n");
 
             close(new_sd);
             FD_CLR(listener_s.id, &readset);

@@ -214,6 +214,8 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     printf("Debug: <get_total> mando %s a prev\n", buffer);
     send(sock, buffer, msg_len, 0);
     recv(sock, buffer, MAX_TCP_MSG, 0);
+    printf("Debug: <get_total> ricevuto %s da prev\n", buffer);
+
     close(sock);
 
     msg_len = sscanf(buffer, "%s %d", header_buff, &ret);
@@ -397,9 +399,12 @@ void handle_tcp_socket(int port, int sock)
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
     int ret;
+
     printf("Debug: <handle_tcp_socket> started\n");
+
     ret = recv(sock, buffer, MAX_TCP_MSG, 0);
     buffer[ret] = '\0';
+    printf("Debug: <handle_tcp_socket> received %s lunga %d\n", buffer, ret);
 
     while (ret)
     {
@@ -420,6 +425,9 @@ void handle_tcp_socket(int port, int sock)
             msg_len = sprintf(buffer, "ELAB_ACK %d", get_saved_elab(port, type, date));
             buffer[msg_len] = '\0';
             send(sock, buffer, msg_len, 0);
+            
+            close(sock);
+            return;
         }
 
         else if (strcmp(header_buff, "SEND_ALL") == 0)
@@ -451,13 +459,14 @@ void handle_tcp_socket(int port, int sock)
                 send(sock, buffer, msg_len, 0);
                 recv(sock, buffer, HEADER_LEN, 0);
             }
-            close(sock);
             fclose(fd);
+            close(sock);
             return;
         }
 
         ret = recv(sock, buffer, MAX_TCP_MSG, 0);
         buffer[ret] = '\0';
+        printf("Debug: <handle_tcp_socket> received %s lunga %d\n", buffer, ret);
     }
 }
 

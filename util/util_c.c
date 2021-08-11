@@ -194,7 +194,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     {
         return ret;
     }
-    prinf("Debug: <get_total> non ho il dato elaborato");
+    printf("Debug: <get_total> non ho il dato elaborato");
     // se non ci sono altri ritorno la somma dei miei e la salvo
     if (nbs.tot == 0)
     {
@@ -208,10 +208,10 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';
 
-    prinf("Debug: <get_total> tcp_init con prev");
+    printf("Debug: <get_total> tcp_init con prev");
     sock = tcp_connect_init(nbs.prev);
 
-    prinf("Debug: <get_total> mando %s a prev", buffer);
+    printf("Debug: <get_total> mando %s a prev", buffer);
     send(sock, buffer, msg_len, 0);
     recv(sock, buffer, MAX_TCP_MSG, 0);
     close(sock);

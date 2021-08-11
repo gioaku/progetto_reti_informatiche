@@ -468,6 +468,8 @@ int main(int argc, char **argv)
                             nbs.tot = 0;
                         else if (nbs.prev == nbs.next)
                             nbs.tot = 1;
+                        else 
+                            nbs.tot = 2;
                     }
                     else
                     {
@@ -492,6 +494,8 @@ int main(int argc, char **argv)
                             nbs.tot = 0;
                         else if (nbs.prev == nbs.next)
                             nbs.tot = 1;
+                        else 
+                            nbs.tot = 2;
                     }
                     else
                     {

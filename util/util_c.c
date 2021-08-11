@@ -194,7 +194,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     {
         return ret;
     }
-
+    prinf("Debug: <get_total> non ho il dato elaborato");
     // se non ci sono altri ritorno la somma dei miei e la salvo
     if (nbs.tot == 0)
     {
@@ -206,8 +206,12 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     // chiedo ai miei vicini se hanno il dato
 
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+    buffer[msg_len] = '\0';
+
+    prinf("Debug: <get_total> tcp_init con prev");
     sock = tcp_connect_init(nbs.prev);
 
+    prinf("Debug: <get_total> mando %s a prev", buffer);
     send(sock, buffer, msg_len, 0);
     recv(sock, buffer, MAX_TCP_MSG, 0);
     close(sock);
@@ -230,6 +234,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
 
         sock = tcp_connect_init(nbs.prev);
         msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+        buffer[msg_len] = '\0';
         send(sock, buffer, msg_len, 0);
         fd = open_reg(port, type, date, "a");
 
@@ -253,6 +258,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     }
 
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+    buffer[msg_len] = '\0';
     sock = tcp_connect_init(nbs.next);
 
     send(sock, buffer, msg_len, 0);
@@ -391,7 +397,7 @@ void handle_tcp_socket(int port, int sock)
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
     int ret;
-
+    printf("Debug: <handle_tcp_socket> started");
     ret = recv(sock, buffer, MAX_TCP_MSG, 0);
     buffer[ret] = '\0';
 

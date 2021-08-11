@@ -342,10 +342,11 @@ int main(int argc, char **argv)
                 {
                     struct Date date;
                     int sum = 0;
-
+                    printf("Degug: inizio ciclo for di get_total");
                     // per ogni giorno ottenere e se necessario salvare dato aggregato
                     for (date = from; soonereq(date, to); dnext(&date))
                     {
+                        printf("Debug: get_total port: %d, type %c, date %d/%d/%d, vicini %d e %d", my_port, type, date.d, date.m, date.y, nbs.prev, nbs.next);
                         sum += get_total(udp.id, my_port, type, date, nbs);
                     }
                     printf("Totale di %c nel periodo %s: %d\n", type, period, sum);

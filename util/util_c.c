@@ -258,7 +258,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
             if (msg_len == 2 && strcmp("NW_ENTRY", header_buff) == 0)
             {
                 send_tcp(sock, "NW_E_ACK", HEADER_LEN);
-                
+
                 fprintf(fd, "%d\n", qty);
                 ret += qty;
             }
@@ -287,6 +287,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         return ret;
     }
 
+    ret = 10;
     // altirmenti provo a cercare qualcuno che abbia tutti i dati
     do
     {
@@ -295,7 +296,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         send_udp_wait_ack(udp, buffer, msg_len, nbs.next, "FL_A_ACK");
         recv_udp_and_ack(udp, buffer, MAX_UDP_MSG, ALL_PORT, "PROP_ALL", "PR_A_ACK");
         msg_len = sscanf(buffer, "%s %d", header_buff, &peer_port);
-    } while (msg_len != 2);
+    } while (msg_len != 2 && ret-- > 0);
 
     if (peer_port)
     {
@@ -305,7 +306,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         sock = tcp_connect_init(peer_port);
         msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
         send_tcp(sock, buffer, msg_len);
-        
+
         fd = open_reg(port, type, date, "w");
         ret = 0;
 
@@ -318,7 +319,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
             if (msg_len == 2 && strcmp("NW_ENTRY", header_buff) == 0)
             {
                 send_tcp(sock, "NW_E_ACK", HEADER_LEN);
-                
+
                 fprintf(fd, "%d\n", qty);
                 ret += qty;
             }
@@ -410,14 +411,12 @@ void handle_tcp_socket(int port, int sock)
     char header_buff[HEADER_LEN + 1];
     int ret;
 
-
     ret = recv_tcp(sock, buffer);
     if (ret < 0)
     {
         close(sock);
         return;
     }
-
 
     while (ret)
     {

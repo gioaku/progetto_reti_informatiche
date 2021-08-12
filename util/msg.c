@@ -46,7 +46,7 @@ int tcp_connect_init(int port)
         printf("Errore: <tcp_connect> impossibile connettersi al listner di %d\n", port);
         return -1;
     }
-
+    pritnf("TCP: connessione stabilita con peer %d sul socket %d", port, sock);
     return sock;
 }
 

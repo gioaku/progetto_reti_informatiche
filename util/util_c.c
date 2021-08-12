@@ -411,16 +411,9 @@ void handle_tcp_socket(int port, int sock)
 {
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
-    int ret;
+    int ret;    
 
-    ret = recv_tcp(sock, buffer);
-    if (ret < 0)
-    {
-        close(sock);
-        return;
-    }
-
-    while (ret)
+    while (recv_tcp(sock, buffer) > 0)
     {
 
         buffer[ret] = '\0';
@@ -466,7 +459,7 @@ void handle_tcp_socket(int port, int sock)
 
             if (!file_exists(file))
             {
-                close(sock);
+                printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);
                 return;
             }
 
@@ -479,12 +472,11 @@ void handle_tcp_socket(int port, int sock)
 
                 recv_tcp(sock, buffer);
             }
+
+            printf("Debug: mandati tutte le entries richieste\n");
             fclose(fd);
-            close(sock);
             return;
         }
-
-        ret = recv_tcp(sock, buffer);
     }
 }
 
@@ -526,8 +518,12 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
 
                     while (recv_tcp(sock, buffer) > 0)
                     {
+                        printf("Debug: pre lettura\n");
+                        
                         msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
                         header_buff[HEADER_LEN] = '\0';
+                        printf("Debug: post lettura\n");
+
                         if (msg_len == 2 && strcmp("NW_ENTRY", header_buff) == 0)
                         {
                             send_tcp(sock, "NW_E_ACK", HEADER_LEN);

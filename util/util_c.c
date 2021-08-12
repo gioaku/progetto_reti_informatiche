@@ -223,11 +223,9 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
 
     printf("Debug: <get_total> tcp_init con prev\n");
     sock = tcp_connect_init(nbs.prev);
-    
 
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';
-    printf("Debug: <get_total> mando %s a prev %d\n", buffer, nbs.prev);
     send_tcp(sock, buffer, msg_len);
 
     recv_tcp(sock, buffer);
@@ -253,7 +251,6 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
 
         sock = tcp_connect_init(nbs.prev);
         msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
-        buffer[msg_len] = '\0';
         send_tcp(sock, buffer, msg_len);
         fd = open_reg(port, type, date, "a");
 
@@ -266,7 +263,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
             if (msg_len == 2 && strcmp("NW_ENTRY", header_buff) == 0)
             {
                 send_tcp(sock, "NW_E_ACK", HEADER_LEN);
-                printf("Ricevuta nuova entry %d\n", qty);
+                
                 fprintf(fd, "%d\n", qty);
                 ret += qty;
             }
@@ -279,9 +276,8 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     sock = tcp_connect_init(nbs.next);
 
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
-    buffer[msg_len] = '\0';
-    printf("Debug: <get_total> mando %s a next %d\n", buffer, nbs.next);
-    send_tcp(sock, buffer, msg_len + 1);
+
+    send_tcp(sock, buffer, msg_len);
 
     recv_tcp(sock, buffer);
     close(sock);
@@ -315,7 +311,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         sock = tcp_connect_init(peer_port);
         msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
         send_tcp(sock, buffer, msg_len);
-
+        
         fd = open_reg(port, type, date, "w");
         ret = 0;
 
@@ -328,7 +324,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
             if (msg_len == 2 && strcmp("NW_ENTRY", header_buff) == 0)
             {
                 send_tcp(sock, "NW_E_ACK", HEADER_LEN);
-                printf("Ricevuta nuova entry %d\n", qty);
+                
                 fprintf(fd, "%d\n", qty);
                 ret += qty;
             }
@@ -425,7 +421,6 @@ void handle_tcp_socket(int port, int sock)
     ret = recv_tcp(sock, buffer);
     if (ret < 0)
     {
-        printf("Errore: [R] impossibile ricevere il messaggio\n");
         close(sock);
         return;
     }
@@ -439,7 +434,6 @@ void handle_tcp_socket(int port, int sock)
         strncpy(header_buff, buffer, HEADER_LEN);
         header_buff[HEADER_LEN] = '\0';
 
-        printf("TCP [%d] : Ricevuto messaggio %s\n", sock, header_buff);
         if (strcmp(header_buff, "ELAB_REQ") == 0)
         {
             char type;
@@ -455,6 +449,7 @@ void handle_tcp_socket(int port, int sock)
 
             msg_len = sprintf(buffer, "ELAB_ACK %d", get_saved_elab(port, type, date));
             buffer[msg_len] = '\0';
+
             send_tcp(sock, buffer, msg_len);
 
             close(sock);
@@ -488,6 +483,7 @@ void handle_tcp_socket(int port, int sock)
                 msg_len = sprintf(buffer, "NW_ENTRY %d", qty);
                 buffer[msg_len] = '\0';
                 send_tcp(sock, buffer, msg_len);
+
                 recv_tcp(sock, buffer);
             }
             fclose(fd);
@@ -535,6 +531,7 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
                     msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
 
                     send_tcp(sock, buffer, msg_len);
+
                     while (recv_tcp(sock, buffer))
                     {
                         msg_len = sscanf(buffer, "%s %d", header_buff, &qty);

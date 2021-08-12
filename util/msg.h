@@ -55,7 +55,7 @@ int udp_socket_init(struct UdpSocket *sock, int port);
 // Inizializzazione del socket di ascolto tcp - ritorna socket id
 int tcp_listener_init(struct TcpSocket * sock, int port);
 
-// Inizializzazione del socket connesso - ritorna socket id
+// Inizializzazione del socket connesso - ritorna socket id - ritorna -1 altrimenti
 int tcp_connect_init(int port);
 
 // Accept della connessione tcp con i vicini - ritorna descrittore del nuovo socket - ritorna -1 in caso di errore

@@ -146,12 +146,9 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     date1 = period;
     date2 = ptr + 1;
 
-    printf("Debug: <check_period> date1: %s, date2: %s\n", date1, date2);
-
     // controllo *-* non valido
     if (strcmp(date1, "*") == 0 && strcmp(date2, "*") == 0)
     {
-        printf("Debug: <check_period> *-* non valido\n");
         return 0;
     }
 
@@ -167,12 +164,10 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         ret = sscanf(date1, DATE_IN_FORMAT, &from->d, &from->m, &from->y);
         if (ret != 3 || !dvalid(*from) || !soonereq(start_date, *from) || !sooner(*from, today))
         {
-            printf("Debug: <check_period> from non valido day: %d, month: %d, year: %d\n", from->d, from->m, from->y);
             (*ptr) = '-';
             return 0;
         }
     }
-    printf("Debug: <check_period> from assegnato: %d, %d, %d\n", from->d, from->m, from->y);
 
     // assegnazione to
     if (strcmp(date2, "*") == 0)
@@ -188,11 +183,9 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         if (ret != 3 || !dvalid(*to) || !soonereq(*from, *to) || !sooner(*to, today))
         {
             (*ptr) = '-';
-            printf("Debug: <check_period> to non valido day: %d, month: %d, year: %d\n", to->d, to->m, to->y);
             return 0;
         }
     }
-    printf("Debug: <check_period> to assegnato: %d, %d, %d\n", to->d, to->m, to->y);
     (*ptr) = '-';
     return 1;
 }
@@ -213,6 +206,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     ret = get_saved_elab(port, type, date);
     if (ret != -1)
     {
+        printf("Debug: <get_total> ho il dato elaborato: %d\n", ret);
         return ret;
     }
     printf("Debug: <get_total> non ho il dato elaborato\n");
@@ -220,6 +214,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     if (nbs.tot == 0)
     {
         ret = get_entries_sum(port, type, date);
+        printf("Debug: <get_total> sono solo, totale: %d\n", ret);
         create_elab(port, type, date, ret);
         return ret;
     }
@@ -227,7 +222,8 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     // chiedo ai miei vicini se hanno il dato
 
     printf("Debug: <get_total> tcp_init con prev\n");
-    sock = tcp_connect_init(nbs.prev);
+    sock = tcp_connect_init(nbs.prev)) == -1);
+    
 
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';

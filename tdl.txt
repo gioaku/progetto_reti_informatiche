@@ -1,6 +1,7 @@
 problemi
-    check_period
-    
+    get_total   
+        prova tutti i casi
+
 
  
 check all msg codes

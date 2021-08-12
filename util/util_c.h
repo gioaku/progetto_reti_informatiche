@@ -65,7 +65,7 @@ FILE* open_reg(int port, char type, struct Date date, char* mode);
 // Controlla che il periodo fornito sia valido e inizializza from e to
 int check_period(char * period, struct Date start_date, struct Date today, struct Date *from, struct Date *to);
 
-// Ottiene il dato aggregato e se necessario lo salva
+// Ottiene il dato aggregato e se necessario lo salva - ritorna -1 altimenti
 int get_total(int udp, int port,char type, struct Date date, struct Neighbors nbs);
 
 // Restituisce totale di tipo type in data d/m/y - ritorna -1 altrimenti

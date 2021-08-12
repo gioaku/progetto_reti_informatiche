@@ -314,7 +314,7 @@ int main(int argc, char **argv)
                 // controllo sulle date
                 if (ret == 4)
                 {
-                    period[DATE_LEN * 2 + 1] = '\0';
+                    period[DATE_IN_LEN * 2 + 1] = '\0';
                     if (!check_period(period, start_date, today, &from, &to))
                     {
                         printf("Errore: dato period: '%s' non inserito correttamente\n", period);

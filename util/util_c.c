@@ -136,12 +136,14 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
 
     if (sscanf(period, "%s-%s", date1, date2) != 2)
     {
+        printf("Debug: <check_period> primo if fallito\n");
         return 0;
     }
 
     // controllo *-* non valido
     if (strcmp(date1, "*") == 0 && strcmp(date2, "*") == 0)
     {
+        printf("Debug: <check_period> secondo if fallito\n");
         return 0;
     }
 
@@ -158,6 +160,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         if (ret != 3 || !dvalid(*from) || !soonereq(start_date, *from) || !sooner(*from, today))
             return 0;
     }
+    printf("Debug: <check_period> from assegnato: %d, %d, %d\n", from.d, from.m, from.y);
 
     // assegnazione to
     if (strcmp(date2, "*") == 0)
@@ -173,6 +176,8 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         if (ret != 3 || !dvalid(*to) || !soonereq(*from, *to) || !sooner(*to, today))
             return 0;
     }
+    printf("Debug: <check_period> to assegnato: %d, %d, %d\n", to.d, to.m, to.y);
+
     return 1;
 }
 
@@ -204,7 +209,6 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     }
 
     // chiedo ai miei vicini se hanno il dato
-
 
     printf("Debug: <get_total> tcp_init con prev\n");
     sock = tcp_connect_init(nbs.prev);
@@ -407,7 +411,8 @@ void handle_tcp_socket(int port, int sock)
     printf("Debug: <handle_tcp_socket> started\n");
 
     ret = recv_tcp(sock, buffer);
-    if (ret < 0){
+    if (ret < 0)
+    {
         printf("Errore: [R] impossibile ricevere il messaggio\n");
         close(sock);
         return;
@@ -430,7 +435,8 @@ void handle_tcp_socket(int port, int sock)
             struct Date date;
 
             ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-            if (ret != 5){
+            if (ret != 5)
+            {
                 close(sock);
                 return;
             }
@@ -438,7 +444,7 @@ void handle_tcp_socket(int port, int sock)
             msg_len = sprintf(buffer, "ELAB_ACK %d", get_saved_elab(port, type, date));
             buffer[msg_len] = '\0';
             send_tcp(sock, buffer, msg_len);
-            
+
             close(sock);
             return;
         }

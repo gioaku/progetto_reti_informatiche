@@ -282,7 +282,6 @@ int main(int argc, char **argv)
                 }
 
                 ret = sscanf(command_buffer, "%s %c %c %s", command, &aggr, &type, period);
-                printf("Debug: aggr '%c', type '%c', period '%s'\n", aggr, type, period);
 
                 // controllo numero di parametri
                 if (!(ret == 3 || ret == 4))
@@ -348,7 +347,6 @@ int main(int argc, char **argv)
                     // per ogni giorno ottenere e se necessario salvare dato aggregato
                     for (date = from; soonereq(date, to); dnext(&date))
                     {
-                        printf("Debug: get_total port: %d, type %c, date %d/%d/%d, vicini %d e %d, sono %d\n", my_port, type, date.d, date.m, date.y, nbs.prev, nbs.next, nbs.tot);
                         sum += get_total(udp.id, my_port, type, date, nbs);
                     }
                     printf("Totale di %c nel periodo %s: %d\n", type, period, sum);
@@ -424,14 +422,12 @@ int main(int argc, char **argv)
             pid = fork();
             if (pid == 0)
             {
-                printf("Debug: processo figlio gestisce il socket %d\n", new_sd);
 
                 close(listener_s.id);
                 handle_tcp_socket(my_port, new_sd);
                 close(new_sd);
                 exit(0);
             }
-            printf("Debug: processo padre ritorna in ascolto\n");
 
             close(new_sd);
             FD_CLR(listener_s.id, &readset);
@@ -563,7 +559,7 @@ int main(int argc, char **argv)
                     ret = sscanf(udp.buffer, "%s %d %c %04d_%02d_%02d", header_buff, &req_port, &type, &date.y, &date.m, &date.d);
                     if (ret != 6 || !valid_port(req_port) || (type != 't' && type != 'n') || !dvalid(date) || !soonereq(start_date, date) || !sooner(date, today))
                     {
-                        printf("Errore nella ricezione dei parametri della FloodAll\n");
+                        printf("Errore: parametri della flood-all non corretti\n");
                         FD_CLR(udp.id, &readset);
                         continue;
                     }
@@ -605,7 +601,7 @@ int main(int argc, char **argv)
                     ret = sscanf(udp.buffer, "%s %d %c %04d_%02d_%02d", header_buff, &req_port, &type, &date.y, &date.m, &date.d);
                     if (ret != 6 || !valid_port(req_port) || (type != 't' && type != 'n') || !dvalid(date) || !soonereq(start_date, date) || !sooner(date, today))
                     {
-                        printf("Errore nella ricezione dei parametri della FloodAll\n");
+                        printf("Errore: parametri della flood-some non corretti\n");
                         FD_CLR(udp.id, &readset);
                         continue;
                     }

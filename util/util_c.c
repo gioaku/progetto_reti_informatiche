@@ -206,22 +206,18 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     ret = get_saved_elab(port, type, date);
     if (ret != -1)
     {
-        printf("Debug: <get_total> ho il dato elaborato: %d\n", ret);
         return ret;
     }
-    printf("Debug: <get_total> non ho il dato elaborato\n");
     // se non ci sono altri ritorno la somma dei miei e la salvo
     if (nbs.tot == 0)
     {
         ret = get_entries_sum(port, type, date);
-        printf("Debug: <get_total> sono solo, totale: %d\n", ret);
         create_elab(port, type, date, ret);
         return ret;
     }
 
     // chiedo ai miei vicini se hanno il dato
 
-    printf("Debug: <get_total> tcp_init con prev\n");
     sock = tcp_connect_init(nbs.prev);
 
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
@@ -229,7 +225,6 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     send_tcp(sock, buffer, msg_len);
 
     recv_tcp(sock, buffer);
-    printf("Debug: <get_total> ricevuto %s da prev %d\n", buffer, nbs.prev);
 
     close(sock);
 
@@ -281,7 +276,6 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
 
     recv_tcp(sock, buffer);
     close(sock);
-    printf("Debug: <get_total> ricevuto %s da next %d\n", buffer, nbs.next);
 
     msg_len = sscanf(buffer, "%s %d", header_buff, &ret);
     if (msg_len == 2 && strcmp(header_buff, "ELAB_ACK") == 0 && ret != -1)
@@ -416,7 +410,6 @@ void handle_tcp_socket(int port, int sock)
     char header_buff[HEADER_LEN + 1];
     int ret;
 
-    printf("Debug: <handle_tcp_socket> started\n");
 
     ret = recv_tcp(sock, buffer);
     if (ret < 0)
@@ -426,7 +419,6 @@ void handle_tcp_socket(int port, int sock)
     }
     buffer[ret] = '\0';
 
-    printf("Debug: <handle_tcp_socket> received %s lunga %d\n", buffer, ret);
 
     while (ret)
     {
@@ -493,7 +485,6 @@ void handle_tcp_socket(int port, int sock)
 
         ret = recv_tcp(sock, buffer);
         buffer[ret] = '\0';
-        printf("Debug: <handle_tcp_socket> received %s lunga %d\n", buffer, ret);
     }
 }
 

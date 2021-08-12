@@ -249,7 +249,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         send_tcp(sock, buffer, msg_len);
         fd = open_reg(port, type, date, "a");
 
-        while (recv_tcp(sock, buffer))
+        while (recv_tcp(sock, buffer) > 0)
         {
 
             msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
@@ -310,7 +310,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         fd = open_reg(port, type, date, "w");
         ret = 0;
 
-        while (recv_tcp(sock, buffer))
+        while (recv_tcp(sock, buffer) > 0)
         {
 
             msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
@@ -523,7 +523,7 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
 
                     send_tcp(sock, buffer, msg_len);
 
-                    while (recv_tcp(sock, buffer))
+                    while (recv_tcp(sock, buffer) > 0)
                     {
                         msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
                         header_buff[HEADER_LEN] = '\0';

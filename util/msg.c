@@ -188,6 +188,11 @@ void send_tcp(int sock, char *buffer, int msg_len)
 {
     int ret;
 
+    if (sock == -1)
+    {
+        return -1;
+    }
+    
     ret = send(sock, buffer, msg_len, 0);
     if (ret < 0)
     {
@@ -201,6 +206,11 @@ void send_tcp(int sock, char *buffer, int msg_len)
 int recv_tcp(int sock, char *buffer)
 {
     int ret;
+
+    if (sock == -1)
+    {
+        return -1;
+    }
 
     ret = recv(sock, buffer, MAX_TCP_MSG, 0);
     buffer[ret] = '\0';

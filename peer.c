@@ -282,11 +282,12 @@ int main(int argc, char **argv)
                 }
 
                 ret = sscanf(command_buffer, "%s %c %c %s", command, &aggr, &type, period);
+                printf("Debug: aggr '%c', type '%c', period '%s'\n", aggr, type, period);
 
                 // controllo numero di parametri
                 if (!(ret == 3 || ret == 4))
                 {
-                    printf("Errore: numero parametri non corretto\n");
+                    printf("Errore: numero parametri: '%d' non corretto\n", ret);
                     help_client(3);
                     FD_CLR(0, &readset);
                     continue;

@@ -568,19 +568,19 @@ int main(int argc, char **argv)
                     {
                         msg_len = sprintf(udp.buffer, "PROP_ALL %d", my_port);
                         udp.buffer[msg_len] = '\0';
-                        send_udp_wait_ack(udp.id, udp.buffer, msg_len, req_port, "PR_A_ACK");
+                        send_udp_wait_ack(udp.id, udp.buffer, msg_len + 1, req_port, "PR_A_ACK");
                     }
                     else if (req_port == nbs.next)
                     {
                         msg_len = sprintf(udp.buffer, "PROP_ALL %d", 0);
                         udp.buffer[msg_len] = '\0';
-                        send_udp_wait_ack(udp.id, udp.buffer, msg_len, nbs.next, "PR_A_ACK");
+                        send_udp_wait_ack(udp.id, udp.buffer, msg_len + 1, nbs.next, "PR_A_ACK");
                     }
                     else
                     {
                         msg_len = sprintf(udp.buffer, "FL_A_REQ %d %c %04d_%02d_%02d", req_port, type, date.y, date.m, date.d);
                         udp.buffer[msg_len] = '\0';
-                        send_udp_wait_ack(udp.id, udp.buffer, msg_len, nbs.next, "FL_A_ACK");
+                        send_udp_wait_ack(udp.id, udp.buffer, msg_len + 1, nbs.next, "FL_A_ACK");
                     }
                 }
 
@@ -609,7 +609,7 @@ int main(int argc, char **argv)
                     {
                         msg_len = sprintf(udp.buffer, "PROP_SME %d", my_port);
                         udp.buffer[msg_len] = '\0';
-                        send_udp_wait_ack(udp.id, udp.buffer, msg_len, req_port, "PR_S_ACK");
+                        send_udp_wait_ack(udp.id, udp.buffer, msg_len + 1, req_port, "PR_S_ACK");
                     }
 
                     msg_len = sprintf(udp.buffer, "FL_S_REQ %d %c %04d_%02d_%02d", req_port, type, date.y, date.m, date.d);
@@ -621,7 +621,7 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        send_udp_wait_ack(udp.id, udp.buffer, msg_len, nbs.next, "FL_S_ACK");
+                        send_udp_wait_ack(udp.id, udp.buffer, msg_len + 1, nbs.next, "FL_S_ACK");
                     }
                 }
             }

@@ -41,7 +41,7 @@ int tcp_connect_init(int port)
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     set_address(&(addr), (socklen_t *)&(addr_len), port);
-    if (connect(sock, (struct sockaddr *)&(addr), sizeof(addr)) == 0){
+    if (!connect(sock, (struct sockaddr *)&(addr), sizeof(addr)) == 0){
         printf("Errore: <tcp_connect> impossibile connettersi al listner di %d\n", port);
         return -1;
     }

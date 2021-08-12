@@ -47,7 +47,6 @@ int tcp_connect_init(int port)
         return -1;
     }
 
-    printf("Debug: <tcp_connect> connessione riuscita con il peer %d, socket: %d\n", port, sock);
     return sock;
 }
 

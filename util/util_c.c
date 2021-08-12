@@ -137,7 +137,8 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
 
     ptr = strchr(period, '-');
 
-    if (ptr == NULL){
+    if (ptr == NULL)
+    {
         return 0;
     }
 
@@ -145,7 +146,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     date1 = period;
     date2 = ptr + 1;
 
-    printf("Debug: <check_period> date1: %s, date2: %s", date1, date2);
+    printf("Debug: <check_period> date1: %s, date2: %s\n", date1, date2);
 
     // controllo *-* non valido
     if (strcmp(date1, "*") == 0 && strcmp(date2, "*") == 0)
@@ -165,7 +166,11 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     {
         ret = sscanf(date1, DATE_IN_FORMAT, &from->y, &from->m, &from->d);
         if (ret != 3 || !dvalid(*from) || !soonereq(start_date, *from) || !sooner(*from, today))
+        {
+            printf("Debug: <check_period> from non valido\n");
+            (*ptr) = '-';
             return 0;
+        }
     }
     printf("Debug: <check_period> from assegnato: %d, %d, %d\n", from->d, from->m, from->y);
 
@@ -181,6 +186,8 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     {
         ret = sscanf(date2, DATE_IN_FORMAT, &to->y, &to->m, &to->d);
         if (ret != 3 || !dvalid(*to) || !soonereq(*from, *to) || !sooner(*to, today))
+            (*ptr) = '-';
+            printf("Debug: <check_period> to non valido\n");
             return 0;
     }
     printf("Debug: <check_period> to assegnato: %d, %d, %d\n", to->d, to->m, to->y);

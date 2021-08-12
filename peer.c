@@ -342,7 +342,7 @@ int main(int argc, char **argv)
                 {
                     struct Date date;
                     int sum = 0;
-                    printf("Degug: inizio ciclo for di get_total");
+                    printf("Degug: inizio ciclo for di get_total\n");
                     // per ogni giorno ottenere e se necessario salvare dato aggregato
                     for (date = from; soonereq(date, to); dnext(&date))
                     {

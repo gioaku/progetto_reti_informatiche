@@ -205,14 +205,15 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
 
     // chiedo ai miei vicini se hanno il dato
 
-    msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
-    buffer[msg_len] = '\0';
 
     printf("Debug: <get_total> tcp_init con prev\n");
     sock = tcp_connect_init(nbs.prev);
 
+    msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+    buffer[msg_len] = '\0';
     printf("Debug: <get_total> mando %s a prev %d\n", buffer, nbs.prev);
     send_tcp(sock, buffer, msg_len);
+
     recv_tcp(sock, buffer);
     printf("Debug: <get_total> ricevuto %s da prev %d\n", buffer, nbs.prev);
 
@@ -259,12 +260,13 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         return ret;
     }
 
-    msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
-    buffer[msg_len] = '\0';
     sock = tcp_connect_init(nbs.next);
 
+    msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+    buffer[msg_len] = '\0';
     printf("Debug: <get_total> mando %s a next %d\n", buffer, nbs.next);
-    send_tcp(sock, buffer, msg_len);
+    send_tcp(sock, buffer, msg_len + 1);
+
     recv_tcp(sock, buffer);
     close(sock);
     printf("Debug: <get_total> ricevuto %s da next %d\n", buffer, nbs.next);

@@ -41,8 +41,12 @@ int tcp_connect_init(int port)
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     set_address(&(addr), (socklen_t *)&(addr_len), port);
-    if (connect(sock, (struct sockaddr *)&(addr), sizeof(addr)) == 0)
+    if (connect(sock, (struct sockaddr *)&(addr), sizeof(addr)) == 0){
+        printf("Errore: <tcp_connect> impossibile connettersi al listner di %d\n", port);
         return -1;
+    }
+
+    printf("Debug: <tcp_connect> connessione riuscita con il peer %d, socket: %d\n", port, sock);
     return sock;
 }
 
@@ -185,10 +189,11 @@ void send_tcp(int sock, char *buffer, int msg_len)
     int ret;
 
     ret = send(sock, buffer, msg_len, 0);
-    if (ret < msg_len)
+    if (ret < 0)
     {
         printf("Errore: [S] impossibile inviare messaggio %s\n", buffer);
     }
+    printf("Debug: <send_tcp> inviati %d bytes su %d sul socket %d\n", ret, msg_len, sock);
 }
 
 int recv_tcp(int sock, char *buffer)

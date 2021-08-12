@@ -286,7 +286,7 @@ int main(int argc, char **argv)
                 // controllo numero di parametri
                 if (!(ret == 3 || ret == 4))
                 {
-                    printf("Errore : numero parametri non corretto\n");
+                    printf("Errore: numero parametri non corretto\n");
                     help_client(3);
                     FD_CLR(0, &readset);
                     continue;
@@ -295,7 +295,7 @@ int main(int argc, char **argv)
                 // controllo su aggr
                 if (!(aggr == 't' || aggr == 'v'))
                 {
-                    printf("Errore nell'inserimento del dato 'aggr' %c\n", aggr);
+                    printf("Errore: dato aggr: '%c' non inserito correttamente\n", aggr);
                     help_client(3);
                     FD_CLR(0, &readset);
                     continue;
@@ -304,7 +304,7 @@ int main(int argc, char **argv)
                 // controllo su type
                 if (!(type == 't' || type == 'n'))
                 {
-                    printf("Errore nell'inserimento  del dato 'type' %c\n", type);
+                    printf("Errore: dato type: '%c' non inserito correttamente\n", type);
                     help_client(3);
                     FD_CLR(0, &readset);
                     continue;
@@ -316,6 +316,7 @@ int main(int argc, char **argv)
                     period[DATE_LEN * 2 + 1] = '\0';
                     if (!check_period(period, start_date, today, &from, &to))
                     {
+                        printf("Errore: dato period: '%s' non inserito correttamente\n", period);
                         help_client(3);
                         FD_CLR(0, &readset);
                         continue;

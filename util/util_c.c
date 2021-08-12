@@ -57,7 +57,7 @@ void help_client(int i)
         printf("Parametri: nessuno\n");
         break;
     default:
-        printf("Errore nella chiamata\n");
+        printf("Errore: stato non previsto\n");
     }
     return;
 }

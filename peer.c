@@ -190,7 +190,7 @@ int main(int argc, char **argv)
                 // controllo data odierna ricevuta
                 if (ret != 2 || !dvalid(today))
                 {
-                    printf("Errore nella ricezione della data odierna %s\n", date_buffer);
+                    printf("Errore: data odierna ricevuta non valida %s\n", date_buffer);
                     send_udp_wait_ack(udp.id, "CLT_EXIT", HEADER_LEN, server_port, "C_EX_ACK");
                     FD_CLR(0, &readset);
                     continue;
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
                 // controllo sulla start date ricevuta
                 if (ret != 2 || !dvalid(start_date))
                 {
-                    printf("Errore nella ricezione della prima data %s\n", date_buffer);
+                    printf("Errore: data start ricevuta non valida %s\n", date_buffer);
                     send_udp_wait_ack(udp.id, "CLT_EXIT", HEADER_LEN, server_port, "C_EX_ACK");
                     FD_CLR(0, &readset);
                     continue;
@@ -251,7 +251,7 @@ int main(int argc, char **argv)
                 ret = sscanf(command_buffer, "%s %c %d", command, &type, &qty);
                 if (!(type == 't' || type == 'n') || ret != 3 || qty < 1)
                 {
-                    printf("Errore : dati inseriti non corretti\nOperazione abortita\n");
+                    printf("Errore: dati inseriti non corretti\nOperazione abortita\n");
                     help_client(2);
                     FD_CLR(0, &readset);
                     continue;
@@ -383,7 +383,7 @@ int main(int argc, char **argv)
                     // tentativo di disconnessione
                     if (!send_udp_wait_ack(udp.id, "CLT_EXIT", HEADER_LEN, server_port, "C_EX_ACK"))
                     {
-                        printf("Errore disconnessione non riuscita\n");
+                        printf("Errore: disconnessione non riuscita\n");
                         continue;
                     }
 
@@ -470,7 +470,7 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        printf("Errore nell'aggiornamento del vicino precedente da %d a %d\nOperazione annullata\n", nbs.prev, port);
+                        printf("Errore: impossibile aggiornare il vicino precedente da %d a %d\nOperazione annullata\n", nbs.prev, port);
                     }
                 }
 
@@ -496,7 +496,7 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        printf("Errore nell'aggiornamento del vicino successivo da %d a %d\nOperazione annullata\n", nbs.next, port);
+                        printf("Errore: imposssibile aggiornare il vicino successivo da %d a %d\nOperazione annullata\n", nbs.next, port);
                     }
                 }
 
@@ -512,7 +512,7 @@ int main(int argc, char **argv)
 
                     if (tmp != 2 || !dvalid(atod(date_buffer)))
                     {
-                        printf("Errore nella ricezione della data odierna");
+                        printf("Errore: impossibile ricevere data odierna valida");
                         FD_CLR(udp.id, &readset);
                         continue;
                     }

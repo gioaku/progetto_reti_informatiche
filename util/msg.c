@@ -87,7 +87,7 @@ int send_ack_udp(int socket, char *buffer, int send_port)
 {
     if (s_send_udp(socket, buffer, HEADER_LEN, send_port))
     {
-        printf("Messaggio %s inviato correttamente al destinatario %d\n", buffer, send_port);
+        printf("UDP: inviato messaggio '%s' al destinatario %d\n", buffer, send_port);
         return 1;
     }
     printf("Errore: [S] Impossibile inviare ack %s al destinatario %d\n", buffer, send_port);
@@ -132,7 +132,7 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
         // se messaggio giusto ritorna recv_port
         else
         {
-            printf("Messaggio %s ricevuto correttamente dal mittente %d\n", header_buff, recv_port);
+            printf("UDP: ricevuto messaggio '%s' dal mittente %d\n", header_buff, recv_port);
             return recv_port;
         }
     }
@@ -149,14 +149,14 @@ int send_udp_wait_ack(int socket, char *buffer, int buff_l, int port, char *acke
     {
         printf("Errore: [S] Impossibile inviare messaggio %s al destinatario %d\n", buffer, port);
     }
-    printf("Messaggio %s inviato correttamente al destinatario %d\n", buffer, port);
+    printf("UDP: inviato messaggio '%s' al destinatario %d\n", buffer, port);
 
     while (!recv_udp(socket, recv_buffer, HEADER_LEN, port, acked) && tries-- > 0)
         ;
 
     if (tries > -1)
     {
-        printf("Messaggio %s ricevuto correttamente dal destinatario %d\n", buffer, port);
+        printf("UDP: ricevuto messaggio '%s' dal destinatario %d\n", buffer, port);
         return 1;
     }
 
@@ -196,7 +196,7 @@ void send_tcp(int sock, char *buffer, int msg_len)
     }
 
     buffer[ret] = '\0';
-    printf("TCP [%d] : Inviato messaggio %s\n", sock, buffer);
+    printf("TCP [%d] : inviato messaggio '%s'\n", sock, buffer);
 }
 
 int recv_tcp(int sock, char *buffer)
@@ -210,7 +210,7 @@ int recv_tcp(int sock, char *buffer)
     {
         printf("Errore: [R] impossibile ricevere messaggio\n");
     }
-    printf("TCP [%d] : Ricevuto messaggio %s\n", sock, buffer);
+    printf("TCP [%d] : ricevuto messaggio '%s'\n", sock, buffer);
 
     return ret;
 }

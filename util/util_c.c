@@ -417,12 +417,12 @@ void handle_tcp_socket(int port, int sock)
         close(sock);
         return;
     }
-    buffer[ret] = '\0';
 
 
     while (ret)
     {
 
+        buffer[ret] = '\0';
         strncpy(header_buff, buffer, HEADER_LEN);
         header_buff[HEADER_LEN] = '\0';
 
@@ -484,8 +484,9 @@ void handle_tcp_socket(int port, int sock)
         }
 
         ret = recv_tcp(sock, buffer);
-        buffer[ret] = '\0';
     }
+
+    close(sock);
 }
 
 int collect_all_entries(int port, int udp, char type, struct Date date)

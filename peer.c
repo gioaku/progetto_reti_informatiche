@@ -447,7 +447,7 @@ int main(int argc, char **argv)
             // server
             if (src_port == server_port)
             {
-                printf("Messaggio ricevuto dal server: %s\n", udp.buffer);
+                printf("UDP: ricevuto messaggio '%s' dal server\n", udp.buffer);
 
                 // aggiornamento vicino precedente
                 if (strcmp(header_buff, "PRE_UPDT") == 0)
@@ -542,7 +542,7 @@ int main(int argc, char **argv)
             // altro peer sul socket udp
             else
             {
-                printf("Messaggio ricevuto dal %d: %s\n", src_port, udp.buffer);
+                printf("UDP: ricevuto messaggio '%s' dal peer %d\n", udp.buffer, src_port);
 
                 // Flood all entries
                 if (strcmp(header_buff, "FL_A_REQ") == 0)

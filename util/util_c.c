@@ -222,7 +222,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     // chiedo ai miei vicini se hanno il dato
 
     printf("Debug: <get_total> tcp_init con prev\n");
-    sock = tcp_connect_init(nbs.prev)) == -1);
+    sock = tcp_connect_init(nbs.prev);
     
 
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);

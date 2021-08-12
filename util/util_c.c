@@ -462,18 +462,19 @@ void handle_tcp_socket(int port, int sock)
                 printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);
                 return;
             }
+            printf("Debug: inizio lettura delle entries richieste\n");
 
             fd = fopen(file, "r");
             while (fscanf(fd, "%d\n", &qty) != EOF)
             {
                 msg_len = sprintf(buffer, "NW_ENTRY %d", qty);
                 buffer[msg_len] = '\0';
-                send_tcp(sock, buffer, msg_len);
+                send_tcp(sock, buffer, msg_len + 1);
 
                 recv_tcp(sock, buffer);
             }
 
-            printf("Debug: mandati tutte le entries richieste\n");
+            printf("Debug: mandate tutte le entries richieste\n");
             fclose(fd);
             return;
         }

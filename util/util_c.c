@@ -296,6 +296,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
 
     recv_udp_and_ack(udp, buffer, MAX_UDP_MSG, ALL_PORT, "PROP_ALL", "PR_A_ACK");
     msg_len = sscanf(buffer, "%s %d", header_buff, &peer_port);
+    buffer[msg_len] = '\0';
 
     if (peer_port)
     {

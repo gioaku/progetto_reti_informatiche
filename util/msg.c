@@ -114,7 +114,7 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
     {
         // lettura messaggio
         recv_port = s_recv_udp(socket, buffer, buff_l);
-
+        buffer[buff_l] = '\0';
         sscanf(buffer, "%s", header_buff);
         header_buff[HEADER_LEN] = '\0';
 
@@ -131,7 +131,7 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
         // se messaggio giusto ritorna recv_port
         else
         {
-            printf("UDP: ricevuto messaggio '%s' dal mittente %d\n", header_buff, recv_port);
+            printf("UDP: ricevuto messaggio '%s' dal mittente %d\n", buffer, recv_port);
             return recv_port;
         }
     }
@@ -192,7 +192,7 @@ void send_tcp(int sock, char *buffer, int msg_len)
     {
         return -1;
     }
-    
+
     ret = send(sock, buffer, msg_len, 0);
     if (ret < 0)
     {

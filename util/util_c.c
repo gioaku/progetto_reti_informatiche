@@ -134,9 +134,9 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     char date1[DATE_IN_LEN + 1], date2[DATE_IN_LEN + 1];
     int ret;
 
-    if (sscanf(period, "%s-%s", date1, date2) != 2)
+    if ((ret = sscanf(period, "%s-%s", date1, date2)) != 2)
     {
-        printf("Debug: <check_period> primo if fallito\n");
+        printf("Debug: <check_period> primo if fallito, period: '%s', date1: '%s', date2: '%s', sscan: '%d'\n", period, date1, date2, ret);
         return 0;
     }
 

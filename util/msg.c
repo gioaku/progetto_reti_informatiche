@@ -79,6 +79,7 @@ int s_send_udp(int socket, char *buffer, int buff_l, int send_port)
     send_addr_len = sizeof(send_addr);
     set_address(&send_addr, &send_addr_len, send_port);
 
+    buffer[buff_l] = '\0';
     return sendto(socket, buffer, buff_l, 0, (struct sockaddr *)&send_addr, send_addr_len) > 0;
 }
 

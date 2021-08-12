@@ -46,7 +46,7 @@ int tcp_connect_init(int port)
         printf("Errore: <tcp_connect> impossibile connettersi al listner di %d\n", port);
         return -1;
     }
-    pritnf("TCP: connessione stabilita con peer %d sul socket %d", port, sock);
+    printf("TCP: connessione stabilita con peer %d sul socket %d", port, sock);
     return sock;
 }
 
@@ -188,9 +188,10 @@ void send_tcp(int sock, char *buffer, int msg_len)
 {
     int ret;
 
-    if (sock == -1)
+    if (sock < 0)
     {
-        return -1;
+        printf("Errore: [S] impossibile inviare sock: %d\n", sock);
+        return;
     }
 
     ret = send(sock, buffer, msg_len, 0);

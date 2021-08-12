@@ -352,7 +352,7 @@ int get_saved_elab(int port, char type, struct Date date)
     char file[MAX_FILE_LEN + 1];
     int ret;
 
-    get_file_string(file, port, type, ENTRIES, date);
+    get_file_string(file, port, type, ELABS, date);
 
     if (file_exists(file))
     {

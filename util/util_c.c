@@ -164,7 +164,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     }
     else
     {
-        ret = sscanf(date1, DATE_IN_FORMAT, &from->y, &from->m, &from->d);
+        ret = sscanf(date1, DATE_IN_FORMAT, &from->d, &from->m, &from->y);
         if (ret != 3 || !dvalid(*from) || !soonereq(start_date, *from) || !sooner(*from, today))
         {
             printf("Debug: <check_period> from non valido day: %d, month: %d, year: %d\n", from->d, from->m, from->y);
@@ -184,7 +184,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     }
     else
     {
-        ret = sscanf(date2, DATE_IN_FORMAT, &to->y, &to->m, &to->d);
+        ret = sscanf(date2, DATE_IN_FORMAT, &to->d, &to->m, &to->y);
         if (ret != 3 || !dvalid(*to) || !soonereq(*from, *to) || !sooner(*to, today))
             (*ptr) = '-';
         printf("Debug: <check_period> to non valido%d, %d, %d\n", to->d, to->m, to->y);

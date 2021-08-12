@@ -287,22 +287,22 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         return ret;
     }
 
-    ret = 10;
     // altirmenti provo a cercare qualcuno che abbia tutti i dati
-    do
-    {
-        msg_len = sprintf(buffer, "FL_A_REQ %d %c %04d_%02d_%02d", port, type, date.y, date.m, date.d);
-        buffer[msg_len] = '\0';
-        send_udp_wait_ack(udp, buffer, msg_len, nbs.next, "FL_A_ACK");
-        recv_udp_and_ack(udp, buffer, MAX_UDP_MSG, ALL_PORT, "PROP_ALL", "PR_A_ACK");
-        msg_len = sscanf(buffer, "%s %d", header_buff, &peer_port);
-    } while (msg_len != 2 && ret-- > 0);
+
+    msg_len = sprintf(buffer, "FL_A_REQ %d %c %04d_%02d_%02d", port, type, date.y, date.m, date.d);
+    buffer[msg_len] = '\0';
+
+    send_udp_wait_ack(udp, buffer, msg_len, nbs.next, "FL_A_ACK");
+
+    recv_udp_and_ack(udp, buffer, MAX_UDP_MSG, ALL_PORT, "PROP_ALL", "PR_A_ACK");
+    msg_len = sscanf(buffer, "%s %d", header_buff, &peer_port);
 
     if (peer_port)
     {
+        printf("Debug: trovato peer con tutte le entries: %d", peer_port);
         int qty;
         FILE *fd;
-
+        
         sock = tcp_connect_init(peer_port);
         msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
         send_tcp(sock, buffer, msg_len);
@@ -330,6 +330,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     }
 
     // bisogna raccogliere tutte le entries
+    printf("Debug: chiedo a tutti le entries che hanno");
 
     msg_len = sprintf(buffer, "FL_S_REQ %d %c %04d_%02d_%02d", port, type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';

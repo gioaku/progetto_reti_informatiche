@@ -160,7 +160,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         if (ret != 3 || !dvalid(*from) || !soonereq(start_date, *from) || !sooner(*from, today))
             return 0;
     }
-    printf("Debug: <check_period> from assegnato: %d, %d, %d\n", from.d, from.m, from.y);
+    printf("Debug: <check_period> from assegnato: %d, %d, %d\n", from->d, from->m, from->y);
 
     // assegnazione to
     if (strcmp(date2, "*") == 0)
@@ -176,7 +176,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         if (ret != 3 || !dvalid(*to) || !soonereq(*from, *to) || !sooner(*to, today))
             return 0;
     }
-    printf("Debug: <check_period> to assegnato: %d, %d, %d\n", to.d, to.m, to.y);
+    printf("Debug: <check_period> to assegnato: %d, %d, %d\n", to->d, to->m, to->y);
 
     return 1;
 }

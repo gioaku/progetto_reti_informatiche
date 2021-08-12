@@ -131,19 +131,26 @@ FILE *open_reg(int port, char type, struct Date date, char *mode)
 int check_period(char *period, struct Date start_date, struct Date today, struct Date *from, struct Date *to)
 {
 
-    char date1[DATE_IN_LEN + 1], date2[DATE_IN_LEN + 1];
+    char *date1, *date2;
+    char *ptr;
     int ret;
 
-    if ((ret = sscanf(period, "%s-%s", date1, date2)) != 2)
-    {
-        printf("Debug: <check_period> primo if fallito, period: '%s', date1: '%s', date2: '%s', sscan: '%d'\n", period, date1, date2, ret);
+    ptr = strchr(period, '-');
+
+    if (ptr == NULL){
         return 0;
     }
+
+    (*ptr) = '\0';
+    date1 = period;
+    date2 = ptr + 1;
+
+    printf("Debug: <check_period> date1: %s, date2: %s", date1, date2);
 
     // controllo *-* non valido
     if (strcmp(date1, "*") == 0 && strcmp(date2, "*") == 0)
     {
-        printf("Debug: <check_period> secondo if fallito\n");
+        printf("Debug: <check_period> *-* non valido\n");
         return 0;
     }
 

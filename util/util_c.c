@@ -73,6 +73,7 @@ int get_path_string(char *path, int port, char type, char *dir)
 int get_file_string(char *file, int port, char type, char *dir, struct Date date)
 {
     int len;
+    printf("Debug: <get_file_string> port: %d, type: %c, dir: %s, date: %d/%d/%d\n", port, type, dir, date.d, date.m, date.y);
     len = sprintf(file, FILE_FORMAT, REGISTERS, port, type, dir, date.y, date.m, date.d);
     file[len] = '\0';
     return len;

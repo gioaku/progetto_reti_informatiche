@@ -419,7 +419,7 @@ void handle_tcp_socket(int port, int sock)
         buffer[ret] = '\0';
         strncpy(header_buff, buffer, HEADER_LEN);
         header_buff[HEADER_LEN] = '\0';
-        pdebug("<handle_tcp_socket> buffer: '%s', header_buffer: '%s'");
+        printf("Debug: <handle_tcp_socket> buffer: '%s', header_buffer: '%s'", buffer, header_buff);
         if (strcmp(header_buff, "ELAB_REQ") == 0)
         {
             char type;

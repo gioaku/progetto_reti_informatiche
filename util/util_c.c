@@ -429,7 +429,7 @@ void handle_tcp_socket(int port, int sock)
             ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
             if (ret != 5)
             {
-                pdebug("closing... ret: %d, header_buff: '%s', type: %c, date: %d/%d/%d", ret, header_buff, type, date.d, date.m, date.y);
+                printf("Debug: closing... ret: %d, header_buff: '%s', type: %c, date: %d/%d/%d\n", ret, header_buff, type, date.d, date.m, date.y);
                 return;
             }
 

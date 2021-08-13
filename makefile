@@ -33,7 +33,10 @@ all: ./ds ./peer
 clean:
 	-rm -f ./*.o ./ds ./peer ./util/*.o 
 	-rm -rf ./data/
-	
+
+	mkdir -p ./data/ds
+	echo 2021_07_27 > ./data/ds/start_date.txt
+
 	mkdir -p ./data/5001/n/entries/
 	echo 101 > ./data/5001/n/entries/2021_07_28.txt
 	echo 102 > ./data/5001/n/entries/2021_07_29.txt

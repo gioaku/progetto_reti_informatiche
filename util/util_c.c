@@ -138,7 +138,6 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
 
     if (ptr == NULL)
     {
-        pdebug("1");
         return 0;
     }
 
@@ -149,7 +148,6 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     // controllo *-* non valido
     if (strcmp(date1, "*") == 0 && strcmp(date2, "*") == 0)
     {
-        pdebug("2");
         return 0;
     }
 
@@ -165,8 +163,6 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         ret = sscanf(date1, DATE_IN_FORMAT, &from->d, &from->m, &from->y);
         if (ret != 3 || !dvalid(*from) || !soonereq(start_date, *from) || !sooner(*from, today))
         {
-            pdebug("3");
-            printf("\tret: %d, valid: %d, son start: %d, son today: %d\n", ret, dvalid(*from), soonereq(start_date, *from), sooner(*from, today));
             (*ptr) = '-';
             return 0;
         }
@@ -185,7 +181,6 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         ret = sscanf(date2, DATE_IN_FORMAT, &to->d, &to->m, &to->y);
         if (ret != 3 || !dvalid(*to) || !soonereq(*from, *to) || !sooner(*to, today))
         {
-            pdebug("4");
             (*ptr) = '-';
             return 0;
         }

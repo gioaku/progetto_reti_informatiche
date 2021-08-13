@@ -121,7 +121,6 @@ FILE *open_reg(int port, char type, struct Date date, char *mode)
 
     if (!file_exists(path))
     {
-        printf("Creating path : %s\n", path);
         create_path(path);
     }
 
@@ -390,11 +389,10 @@ void create_elab(int port, char type, struct Date date, int qty)
     get_path_string(path, port, type, ELABS);
     get_filename_string(filename, date);
 
-    printf("File: <create_elab> %s%s\n", path, filename);
+    printf("File: <create_elab> %s%s, qty:\n", path, filename);
 
     if (!file_exists(path))
     {
-        printf("Creating path : %s\n", path);
         create_path(path);
     }
 

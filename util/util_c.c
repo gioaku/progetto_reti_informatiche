@@ -77,6 +77,7 @@ int get_file_string(char *file, int port, char type, char *dir, struct Date date
     len = sprintf(file, FILE_FORMAT, REGISTERS, port, type, dir, date.y, date.m, date.d);
     file[len] = '\0';
     printf("len: %d\n", len);
+    printf("Debug: file: '%s'\n", file);
     return len;
 }
 
@@ -413,7 +414,7 @@ void handle_tcp_socket(int port, int sock)
 {
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
-    int ret;    
+    int ret;
     printf("Debug: <handle_tcp_socket>(port = %d, sock = %d)\n", port, sock);
     while ((ret = recv_tcp(sock, buffer)) > 0)
     {
@@ -455,7 +456,7 @@ void handle_tcp_socket(int port, int sock)
             sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
             pdebug("letto i parametri");
             get_file_string(file, port, type, ENTRIES, date);
-            printf("Debug: file: '%s'\n");
+            printf("Debug: file: '%s'\n", file);
             if (!file_exists(file))
             {
                 printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);
@@ -522,7 +523,7 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
                     while (recv_tcp(sock, buffer) > 0)
                     {
                         printf("Debug: pre lettura\n");
-                        
+
                         msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
                         header_buff[HEADER_LEN] = '\0';
                         printf("Debug: post lettura\n");

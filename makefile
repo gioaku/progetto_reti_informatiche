@@ -31,4 +31,5 @@ all: ./ds ./peer
 	gcc -Wall -c ./util/date.c -o ./util/date.o
 
 clean:
-	-rm -f ./*.o ./ds ./peer ./util/*.o
+	-rm -f ./*.o ./ds ./peer ./util/*.o 
+	-rm -rf ./data/*/n/elabs/

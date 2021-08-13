@@ -529,10 +529,10 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
                         printf("Debug: post lettura hb: '%s', msg_len: %d\n");
                         tmp = (msg_len == 2);
                         printf("Debug: tmp 1: %d, msg_len: %d\n", tmp, msg_len);
-                        tmp = tmp && strcmp(header_buff, "NW_ENTRY");
+                        tmp = tmp && (strcmp(header_buff, "NW_ENTRY") == 0);
                         printf("Debug: tmp 2: %d, header_buff: '%s'\n", tmp, header_buff);
 
-                        if (msg_len == 2 && strcmp(header_buff, "NW_ENTRY") == 0)
+                        if (msg_len == 2 && (strcmp(header_buff, "NW_ENTRY") == 0))
                         {
                             send_tcp(sock, "NW_E_ACK", HEADER_LEN + 1);
                             printf("Ricevuta nuova entry %d\n", qty);

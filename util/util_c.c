@@ -412,14 +412,14 @@ void handle_tcp_socket(int port, int sock)
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
     int ret;    
-    printf("Debug: <handle_tcp_socket>(port = %d, sock = %d)", port, sock);
+    printf("Debug: <handle_tcp_socket>(port = %d, sock = %d)\m", port, sock);
     while ((ret = recv_tcp(sock, buffer)) > 0)
     {
 
         buffer[ret] = '\0';
         strncpy(header_buff, buffer, HEADER_LEN);
         header_buff[HEADER_LEN] = '\0';
-        printf("Debug: <handle_tcp_socket> buffer: '%s', header_buffer: '%s'", buffer, header_buff);
+        printf("Debug: <handle_tcp_socket> buffer: '%s', header_buffer: '%s'\n", buffer, header_buff);
         if (strcmp(header_buff, "ELAB_REQ") == 0)
         {
             char type;

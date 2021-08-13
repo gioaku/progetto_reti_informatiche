@@ -373,13 +373,13 @@ int get_entries_sum(int port, char type, struct Date date)
 
     tot = 0;
     fd = fopen(file, "r");
-    
+
     while (fscanf(fd, "%d\n", &qty) != EOF)
     {
         tot += qty;
     }
     fclose(fd);
-    printf("Somma entries nel file '%s': %d", file, tot);
+    printf("Somma entries nel file '%s': %d\n", file, tot);
     return tot;
 }
 
@@ -483,7 +483,7 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
     int qty;
 
     tot = get_entries_sum(port, type, date);
-    printf("Debug: mie tot: %d\n", tot);
+
     FD_ZERO(&readset);
     FD_SET(udp, &readset);
 

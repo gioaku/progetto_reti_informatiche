@@ -521,11 +521,16 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
 
                     while (recv_tcp(sock, buffer) > 0)
                     {
+                        int tmp;
                         printf("Debug: pre lettura\n");
 
                         msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
                         header_buff[HEADER_LEN] = '\0';
-                        printf("Debug: post lettura\n");
+                        printf("Debug: post lettura hb: '%s', msg_len: %d\n");
+                        tmp = (msg_len == 2);
+                        printf("Debug: tmp 1: %d, msg_len: %d\n", tmp, msg_len);
+                        tmp = tmp && strcmp(header_buff, "NW_ENTRY");
+                        printf("Debug: tmp 2: %d, header_buff: '%s'\n", tmp, header_buff);
 
                         if (msg_len == 2 && strcmp(header_buff, "NW_ENTRY") == 0)
                         {

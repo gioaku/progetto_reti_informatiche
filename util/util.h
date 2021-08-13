@@ -11,5 +11,5 @@ int valid_port(int port);
 
 int file_exists(char * file);
 int create_path(char * path);
-
+void pdebug(char *str);
 #endif

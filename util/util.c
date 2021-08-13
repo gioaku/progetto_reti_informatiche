@@ -18,3 +18,7 @@ int create_path(char *path)
     sprintf(command, "mkdir -p %s", path);
     return system(command);
 }
+
+void pdebug(char *str){
+    printf("Debug: %s\n", str);
+}

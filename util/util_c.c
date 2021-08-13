@@ -450,13 +450,11 @@ void handle_tcp_socket(int port, int sock)
             FILE *fd;
             char file[MAX_FILE_LEN + 1];
             int qty;
-
-            ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-            if (ret != 5)
-                continue;
-
+            pdebug("entrato nella send_all");
+            sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+            pdebug("letto i parametri");
             get_file_string(file, port, type, ENTRIES, date);
-
+            
             if (!file_exists(file))
             {
                 printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);

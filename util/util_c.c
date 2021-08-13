@@ -412,7 +412,7 @@ void handle_tcp_socket(int port, int sock)
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
     int ret;    
-    printf("Debug: <handle_tcp_socket>(port = %d, sock = %d)\m", port, sock);
+    printf("Debug: <handle_tcp_socket>(port = %d, sock = %d)\n", port, sock);
     while ((ret = recv_tcp(sock, buffer)) > 0)
     {
 
@@ -453,7 +453,7 @@ void handle_tcp_socket(int port, int sock)
             sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
             pdebug("letto i parametri");
             get_file_string(file, port, type, ENTRIES, date);
-
+            printf("Debug: file: '%s'\n");
             if (!file_exists(file))
             {
                 printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);
@@ -462,8 +462,11 @@ void handle_tcp_socket(int port, int sock)
             printf("Debug: inizio lettura delle entries richieste\n");
 
             fd = fopen(file, "r");
+
+            pdebug("aperto file");
             while (fscanf(fd, "%d\n", &qty) != EOF)
             {
+                pdebug("prima lettura");
                 msg_len = sprintf(buffer, "NW_ENTRY %d", qty);
                 buffer[msg_len] = '\0';
                 send_tcp(sock, buffer, msg_len + 1);

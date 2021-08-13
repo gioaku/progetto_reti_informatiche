@@ -414,7 +414,7 @@ int main(int argc, char **argv)
             }
             else
             {
-                printf("Richiesta di connessione accettata sul socket %d\n", new_sd);
+                printf("TCP: richiesta di connessione accettata sul socket %d\n", new_sd);
             }
 
             // fork per gestire la connessione tcp

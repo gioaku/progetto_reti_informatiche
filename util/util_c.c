@@ -412,24 +412,24 @@ void handle_tcp_socket(int port, int sock)
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
     int ret;    
-
+    pdebug("<handle_tcp_socket>(port = %d, sock = %d)");
     while (recv_tcp(sock, buffer) > 0)
     {
 
         buffer[ret] = '\0';
         strncpy(header_buff, buffer, HEADER_LEN);
         header_buff[HEADER_LEN] = '\0';
-
+        pdebug("<handle_tcp_socket> buffer: '%s', header_buffer: '%s'");
         if (strcmp(header_buff, "ELAB_REQ") == 0)
         {
             char type;
             int msg_len;
             struct Date date;
-
+            pdebug("entrato nella elab_req");
             ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
             if (ret != 5)
             {
-                close(sock);
+                pdebug("closing... ret: %d, header_buff: '%s', type: %c, date: %d/%d/%d", ret, header_buff, type, date.d, date.m, date.y);
                 return;
             }
 
@@ -438,7 +438,6 @@ void handle_tcp_socket(int port, int sock)
 
             send_tcp(sock, buffer, msg_len);
 
-            close(sock);
             return;
         }
 
@@ -454,7 +453,7 @@ void handle_tcp_socket(int port, int sock)
             sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
             pdebug("letto i parametri");
             get_file_string(file, port, type, ENTRIES, date);
-            
+
             if (!file_exists(file))
             {
                 printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);

@@ -412,8 +412,8 @@ void handle_tcp_socket(int port, int sock)
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
     int ret;    
-    pdebug("<handle_tcp_socket>(port = %d, sock = %d)");
-    while (recv_tcp(sock, buffer) > 0)
+    printf("Debug: <handle_tcp_socket>(port = %d, sock = %d)", port, sock);
+    while ((ret = recv_tcp(sock, buffer)) > 0)
     {
 
         buffer[ret] = '\0';

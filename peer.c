@@ -362,7 +362,7 @@ int main(int argc, char **argv)
                     for (date = from; soonereq(date, to); dnext(&date))
                     {
                         new = get_total(udp.id, my_port, type, date, nbs);
-                        printf("Variazione di %c il giorno %02d:%02d:%04d: %d", type, date.d, date.m, date.y, new - old);
+                        printf("Variazione di %c il giorno %02d:%02d:%04d: %d\n", type, date.d, date.m, date.y, new - old);
                         old = new;
                     }
                 }

@@ -166,6 +166,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         if (ret != 3 || !dvalid(*from) || !soonereq(start_date, *from) || !sooner(*from, today))
         {
             pdebug("3");
+            printf("\tret: %d, valid: %d, son start: %d, son today: %d\n", ret, dvalid(*from), soonereq(start_date, *from), sooner(*from, today));
             (*ptr) = '-';
             return 0;
         }

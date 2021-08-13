@@ -32,4 +32,42 @@ all: ./ds ./peer
 
 clean:
 	-rm -f ./*.o ./ds ./peer ./util/*.o 
-	-rm -rf ./data/*/n/elabs/
+	-rm -rf ./data/
+	
+	mkdir -p ./data/5001/n/entries/
+	echo 101 > ./data/5001/n/entries/2021_07_28.txt
+	echo 102 > ./data/5001/n/entries/2021_07_29.txt
+	echo 103 > ./data/5001/n/entries/2021_07_30.txt
+	echo 104 > ./data/5001/n/entries/2021_07_31.txt
+	echo 105 > ./data/5001/n/entries/2021_08_01.txt
+	echo 106 > ./data/5001/n/entries/2021_08_02.txt
+	echo 107 > ./data/5001/n/entries/2021_08_03.txt
+	
+	mkdir -p ./data/5002/n/entries/
+	echo 201 > ./data/5002/n/entries/2021_07_28.txt
+	echo 202 > ./data/5002/n/entries/2021_07_29.txt
+	echo 203 > ./data/5002/n/entries/2021_07_30.txt
+	echo 204 > ./data/5002/n/entries/2021_07_31.txt
+	echo 205 > ./data/5002/n/entries/2021_08_01.txt
+	echo 206 > ./data/5002/n/entries/2021_08_02.txt
+	echo 207 > ./data/5002/n/entries/2021_08_03.txt
+	
+	mkdir -p ./data/5003/n/entries/
+	echo 301 > ./data/5003/n/entries/2021_07_28.txt
+	echo 302 > ./data/5003/n/entries/2021_07_29.txt
+	echo 303 > ./data/5003/n/entries/2021_07_30.txt
+	echo 304 > ./data/5003/n/entries/2021_07_31.txt
+	echo 305 > ./data/5003/n/entries/2021_08_01.txt
+	echo 306 > ./data/5003/n/entries/2021_08_02.txt
+	echo 307 > ./data/5003/n/entries/2021_08_03.txt
+	
+	mkdir -p ./data/5004/n/entries/
+	echo 401 > ./data/5004/n/entries/2021_07_28.txt
+	echo 402 > ./data/5004/n/entries/2021_07_29.txt
+	echo 403 > ./data/5004/n/entries/2021_07_30.txt
+	echo 404 > ./data/5004/n/entries/2021_07_31.txt
+	echo 405 > ./data/5004/n/entries/2021_08_01.txt
+	echo 406 > ./data/5004/n/entries/2021_08_02.txt
+	echo 407 > ./data/5004/n/entries/2021_08_03.txt
+	
+	

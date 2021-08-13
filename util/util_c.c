@@ -526,7 +526,7 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
 
                         msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
                         header_buff[HEADER_LEN] = '\0';
-                        printf("Debug: post lettura hb: '%s', msg_len: %d\n");
+                        printf("Debug: post lettura hb: '%s', msg_len: %d\n", header_buff, msg_len);
                         tmp = (msg_len == 2);
                         printf("Debug: tmp 1: %d, msg_len: %d\n", tmp, msg_len);
                         tmp = tmp && (strcmp(header_buff, "NW_ENTRY") == 0);

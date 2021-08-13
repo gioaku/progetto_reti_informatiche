@@ -482,6 +482,7 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
     int qty;
 
     tot = get_entries_sum(port, type, date);
+    printf("Debug: mie tot: %d\n");
     FD_ZERO(&readset);
     FD_SET(udp, &readset);
 

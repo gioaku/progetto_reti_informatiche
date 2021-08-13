@@ -514,7 +514,6 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
             {
                 if (valid_port(recv_port))
                 {
-                    send_ack_udp(udp, "PR_S_ACK", recv_port);
                     sock = tcp_connect_init(recv_port);
                     msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
 
@@ -528,9 +527,9 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
                         header_buff[HEADER_LEN] = '\0';
                         printf("Debug: post lettura\n");
 
-                        if (msg_len == 2 && strcmp("NW_ENTRY", header_buff) == 0)
+                        if (msg_len == 2 && strcmp(header_buff, "NW_ENTRY") == 0)
                         {
-                            send_tcp(sock, "NW_E_ACK", HEADER_LEN);
+                            send_tcp(sock, "NW_E_ACK", HEADER_LEN + 1);
                             printf("Ricevuta nuova entry %d\n", qty);
                             append_entry(port, date, type, qty);
                             tot += qty;

@@ -609,7 +609,8 @@ int main(int argc, char **argv)
                     {
                         msg_len = sprintf(udp.buffer, "PROP_SME %d", my_port);
                         udp.buffer[msg_len] = '\0';
-                        send_udp_wait_ack(udp.id, udp.buffer, msg_len + 1, req_port, "PR_S_ACK");
+                        s_send_udp(socket, udp.buffer, msg_len + 1, req_port);
+                        printf("UDP: inviato messaggio '%s' al destinatario %d\n", udp.buffer, req_port);
                     }
 
                     msg_len = sprintf(udp.buffer, "FL_S_REQ %d %c %04d_%02d_%02d", req_port, type, date.y, date.m, date.d);

@@ -370,13 +370,16 @@ int get_entries_sum(int port, char type, struct Date date)
     {
         return 0;
     }
+
     tot = 0;
     fd = fopen(file, "r");
+    
     while (fscanf(fd, "%d\n", &qty) != EOF)
     {
         tot += qty;
     }
     fclose(fd);
+    printf("Somma entries nel file '%s': %d", file, tot);
     return tot;
 }
 
@@ -442,9 +445,9 @@ void handle_tcp_socket(int port, int sock)
             char file[MAX_FILE_LEN + 1];
             int qty;
             sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-            
+
             get_file_string(file, port, type, ENTRIES, date);
-            
+
             if (!file_exists(file))
             {
                 printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);

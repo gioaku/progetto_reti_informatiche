@@ -609,7 +609,7 @@ int main(int argc, char **argv)
                     {
                         msg_len = sprintf(udp.buffer, "PROP_SME %d", my_port);
                         udp.buffer[msg_len] = '\0';
-                        s_send_udp(socket, udp.buffer, msg_len + 1, req_port);
+                        s_send_udp(udp.id, udp.buffer, msg_len + 1, req_port);
                         printf("UDP: inviato messaggio '%s' al destinatario %d\n", udp.buffer, req_port);
                     }
 

@@ -73,11 +73,8 @@ int get_path_string(char *path, int port, char type, char *dir)
 int get_file_string(char *file, int port, char type, char *dir, struct Date date)
 {
     int len;
-    printf("Debug: <get_file_string> port: %d, type: %c, dir: %s, date: %d/%d/%d\n", port, type, dir, date.d, date.m, date.y);
     len = sprintf(file, FILE_FORMAT, REGISTERS, port, type, dir, date.y, date.m, date.d);
     file[len] = '\0';
-    printf("len: %d\n", len);
-    printf("Debug: file: '%s'\n", file);
     return len;
 }
 
@@ -303,7 +300,6 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
 
     if (peer_port)
     {
-        printf("Debug: trovato peer con tutte le entries: %d\n", peer_port);
         int qty;
         FILE *fd;
 
@@ -334,7 +330,6 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     }
 
     // bisogna raccogliere tutte le entries
-    printf("Debug: chiedo a tutti le entries che hanno\n");
 
     msg_len = sprintf(buffer, "FL_S_REQ %d %c %04d_%02d_%02d", port, type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';
@@ -415,24 +410,20 @@ void handle_tcp_socket(int port, int sock)
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
     int ret;
-    printf("Debug: <handle_tcp_socket>(port = %d, sock = %d)\n", port, sock);
     while ((ret = recv_tcp(sock, buffer)) > 0)
     {
 
         buffer[ret] = '\0';
         strncpy(header_buff, buffer, HEADER_LEN);
         header_buff[HEADER_LEN] = '\0';
-        printf("Debug: <handle_tcp_socket> buffer: '%s', header_buffer: '%s'\n", buffer, header_buff);
         if (strcmp(header_buff, "ELAB_REQ") == 0)
         {
             char type;
             int msg_len;
             struct Date date;
-            pdebug("entrato nella elab_req");
             ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
             if (ret != 5)
             {
-                printf("Debug: closing... ret: %d, header_buff: '%s', type: %c, date: %d/%d/%d\n", ret, header_buff, type, date.d, date.m, date.y);
                 return;
             }
 
@@ -452,24 +443,20 @@ void handle_tcp_socket(int port, int sock)
             FILE *fd;
             char file[MAX_FILE_LEN + 1];
             int qty;
-            pdebug("entrato nella send_all");
             sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-            pdebug("letto i parametri");
+            
             get_file_string(file, port, type, ENTRIES, date);
-            printf("Debug: file: '%s'\n", file);
+            
             if (!file_exists(file))
             {
                 printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);
                 return;
             }
-            printf("Debug: inizio lettura delle entries richieste\n");
 
             fd = fopen(file, "r");
 
-            pdebug("aperto file");
             while (fscanf(fd, "%d\n", &qty) != EOF)
             {
-                pdebug("prima lettura");
                 msg_len = sprintf(buffer, "NW_ENTRY %d", qty);
                 buffer[msg_len] = '\0';
                 send_tcp(sock, buffer, msg_len + 1);
@@ -477,7 +464,6 @@ void handle_tcp_socket(int port, int sock)
                 recv_tcp(sock, buffer);
             }
 
-            printf("Debug: mandate tutte le entries richieste\n");
             fclose(fd);
             return;
         }
@@ -522,15 +508,11 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
                     while (recv_tcp(sock, buffer) > 0)
                     {
                         int tmp;
-                        printf("Debug: pre lettura\n");
 
                         msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
                         header_buff[HEADER_LEN] = '\0';
-                        printf("Debug: post lettura hb: '%s', msg_len: %d\n", header_buff, msg_len);
                         tmp = (msg_len == 2);
-                        printf("Debug: tmp 1: %d, msg_len: %d\n", tmp, msg_len);
                         tmp = tmp && (strcmp(header_buff, "NW_ENTRY") == 0);
-                        printf("Debug: tmp 2: %d, header_buff: '%s'\n", tmp, header_buff);
 
                         if (msg_len == 2 && (strcmp(header_buff, "NW_ENTRY") == 0))
                         {

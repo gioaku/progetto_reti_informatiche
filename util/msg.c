@@ -200,7 +200,10 @@ void send_tcp(int sock, char *buffer, int msg_len)
         printf("Errore: [S] impossibile inviare messaggio %s\n", buffer);
     }
 
-    buffer[ret] = '\0';
+    if(buffer[ret] != '\0'){
+        buffer[ret] = '\0';
+    }
+    
     printf("TCP [%d] : inviato messaggio '%s'\n", sock, buffer);
 }
 

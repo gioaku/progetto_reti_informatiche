@@ -240,7 +240,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
             dnext(&tmp);
 
             // se periodo troppo lungo errore
-            if (sooner(from, tmp))
+            if (sooner(*from, tmp))
             {
                 return 0;
             }

@@ -269,7 +269,6 @@ int main(int argc, char **argv)
                 char type;
                 char period[DATE_IN_LEN * 2 + 2];
                 int ret;
-
                 struct Date from;
                 struct Date to;
 
@@ -324,16 +323,33 @@ int main(int argc, char **argv)
                 }
                 else if (ret == 3)
                 {
-                    // from = start_date
-                    from.d = start_date.d;
-                    from.m = start_date.m;
-                    from.y = start_date.y;
+                    struct Date tmp;
 
-                    // to = yesterday
+                    // to = ieri
                     to.d = today.d;
                     to.m = today.m;
                     to.y = today.y;
                     dprev(&to);
+
+                    // tmp = un anno prima di to
+                    tmp.d = to.d;
+                    tmp.m = to.m;
+                    tmp.y = to.y - 1;
+                    dnext(&tmp);
+
+                    // assegnazione from
+                    if (sooner(start_date, tmp))
+                    {
+                        from.d = tmp.d;
+                        from.m = tmp.m;
+                        from.y = tmp.y;
+                    }
+                    else
+                    {
+                        from.d = start_date.d;
+                        from.m = start_date.m;
+                        from.y = start_date.y;
+                    }
                 }
 
                 printf("GET : aggr %c, type %c, between %02d:%02d:%04d and %02d:%02d:%04d\n", aggr, type, from.d, from.m, from.y, to.d, to.m, to.y);
@@ -343,26 +359,36 @@ int main(int argc, char **argv)
                 {
                     struct Date date;
                     int sum = 0;
+
                     // per ogni giorno ottenere e se necessario salvare dato aggregato
                     for (date = from; soonereq(date, to); dnext(&date))
                     {
                         sum += get_total(udp.id, my_port, type, date, nbs);
                     }
-                    printf("Totale di %c nel periodo %s: %d\n", type, period, sum);
+                    printf("[Risultato]: totale di %c nel periodo %s: %d\n", type, period, sum);
                 }
                 if (aggr == 'v')
                 {
                     int old, new;
                     struct Date date;
-
+                    
                     dprev(&from);
-                    old = get_total(udp.id, my_port, type, from, nbs);
+
+                    if (sooner(from, start_date))
+                    {
+                        old = 0;
+                    }
+                    else
+                    {
+                        old = get_total(udp.id, my_port, type, from, nbs);
+                    }
+    
                     dnext(&from);
 
                     for (date = from; soonereq(date, to); dnext(&date))
                     {
                         new = get_total(udp.id, my_port, type, date, nbs);
-                        printf("Variazione di %c il giorno %02d:%02d:%04d: %d\n", type, date.d, date.m, date.y, new - old);
+                        printf("[Risultato]: variazione di %c il giorno %02d:%02d:%04d: %d\n", type, date.d, date.m, date.y, new - old);
                         old = new;
                     }
                 }

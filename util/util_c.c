@@ -50,7 +50,8 @@ void help_client(int i)
         printf(" - type : carattere per indicare se tamponi o nuovi casi [t/n]\n");
         printf(" - date1 : lower bound della ricerca [dd:mm:yyyy], '*' per lower bound minimo\n");
         printf(" - date2 : upper bound della ricerca [dd:mm:yyyy], '*' per upper bound massimo\n");
-        printf("Nota: se non si vuole nessun bound omettere le date\n");
+        printf("    * se non si vuole nessun bound omettere le date\n");
+        printf("    *il periodo non deve superare la durata di un anno\n");
         break;
     case 4:
         printf("\nstop - richiede disconnessione dalla rete\n");
@@ -133,6 +134,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     char *date1, *date2;
     char *ptr;
     int ret;
+    struct Date tmp;
 
     ptr = strchr(period, '-');
 
@@ -151,38 +153,97 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
         return 0;
     }
 
-    // assegnazione from
+    // assegnazione from e to
+
+    // se from unbounded
     if (strcmp(date1, "*") == 0)
     {
-        from->d = start_date.d;
-        from->m = start_date.m;
-        from->y = start_date.y;
+        // assegnazione to
+        ret = sscanf(date2, DATE_IN_FORMAT, &to->d, &to->m, &to->y);
+        if (ret != 3 || !dvalid(*to) || !soonereq(*from, *to) || !sooner(*to, today))
+        {
+            (*ptr) = '-';
+            return 0;
+        }
+
+        // tmp = un anno prima di to
+        tmp.d = to->d;
+        tmp.m = to->m;
+        tmp.y = to->y - 1;
+        dnext(&tmp);
+
+        // assegnazione from
+        if (sooner(start_date, tmp))
+        {
+            from->d = tmp.d;
+            from->m = tmp.m;
+            from->y = tmp.y;
+        }
+        else
+        {
+            from->d = start_date.d;
+            from->m = start_date.m;
+            from->y = start_date.y;
+        }
     }
+    // from definito
     else
     {
+        //assegnazione from
         ret = sscanf(date1, DATE_IN_FORMAT, &from->d, &from->m, &from->y);
         if (ret != 3 || !dvalid(*from) || !soonereq(start_date, *from) || !sooner(*from, today))
         {
             (*ptr) = '-';
             return 0;
         }
-    }
 
-    // assegnazione to
-    if (strcmp(date2, "*") == 0)
-    {
-        to->d = today.d;
-        to->m = today.m;
-        to->y = today.y;
-        dprev(to);
-    }
-    else
-    {
-        ret = sscanf(date2, DATE_IN_FORMAT, &to->d, &to->m, &to->y);
-        if (ret != 3 || !dvalid(*to) || !soonereq(*from, *to) || !sooner(*to, today))
+        // to unbounded
+        if (strcmp(date2, "*") == 0)
         {
-            (*ptr) = '-';
-            return 0;
+            // tmp = un anno dopo di from
+            tmp.d = from->d;
+            tmp.m = from->m;
+            tmp.y = from->y + 1;
+            dprev(&tmp);
+
+            // assegnazione to
+            if (sooner(tmp, today))
+            {
+                to->d = tmp.d;
+                to->m = tmp.m;
+                to->y = tmp.y;
+            }
+            else
+            {
+                to->d = today.d;
+                to->m = today.m;
+                to->y = today.y;
+                dprev(to);
+            }
+        }
+
+        // to definito
+        else
+        {
+            // assegnazione to
+            ret = sscanf(date2, DATE_IN_FORMAT, &to->d, &to->m, &to->y);
+            if (ret != 3 || !dvalid(*to) || !soonereq(*from, *to) || !sooner(*to, today))
+            {
+                (*ptr) = '-';
+                return 0;
+            }
+
+            // tmp = un anno prima di to
+            tmp.d = to->d;
+            tmp.m = to->m;
+            tmp.y = to->y - 1;
+            dnext(&tmp);
+
+            // se periodo troppo lungo errore
+            if (sooner(from, tmp))
+            {
+                return 0;
+            }
         }
     }
     (*ptr) = '-';

@@ -369,7 +369,7 @@ int main(int argc, char **argv)
             }
 
             // stop
-            else if (strcmp(command_buffer, "stop") == 0)
+            else if (strcmp(command, "stop") == 0)
             {
 
                 // se connesso disconnettere e inviare le entries a next

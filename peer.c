@@ -365,7 +365,7 @@ int main(int argc, char **argv)
                     {
                         sum += get_total(udp.id, my_port, type, date, nbs);
                     }
-                    printf("[Risultato]: totale di %c nel periodo %s: %d\n", type, period, sum);
+                    printf("[Risultato]: totale di %c nel periodo <%02d:%02d:%04d-%02d:%02d:%04d>: %d\n", type, from.d, from.m, from.y, to.d, to.m, to.y, sum);
                 }
                 if (aggr == 'v')
                 {

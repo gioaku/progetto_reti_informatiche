@@ -11,7 +11,7 @@ struct Date atod(char *buff)
 void dtoa(char *buff, struct Date d)
 {
     if (sprintf(buff, DATE_FORMAT, d.y, d.m, d.d) != 3)
-        printf("Error: date.c::dtoa fallita\n");
+        printf("Error: date.c::dtoa fallita da buff: %s a date: %d/%d/%d\n", buff, d.d, d.m, d.y);
     return;
 }
 

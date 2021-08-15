@@ -593,7 +593,7 @@ int main(int argc, char **argv)
                     }
 
                     ret = get_saved_elab(my_port, type, date);
-                    printf("Debug: after flood all myport: %d, ret: %d, get_entries_sum: %d", my_port, ret, get_entries_sum(my_port, type, date));
+                    printf("Debug: after flood all myport: %d, ret: %d, get_entries_sum: %d\n", my_port, ret, get_entries_sum(my_port, type, date));
 
                     if (ret > -1 && get_entries_sum(my_port, type, date))
                     {

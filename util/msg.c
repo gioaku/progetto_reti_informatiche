@@ -22,13 +22,12 @@ int udp_socket_init(struct UdpSocket *sock, int port)
 
 int tcp_listener_init(struct TcpSocket *sock, int port)
 {
-    int tmp;
+    int ret;
     int reuse;
     sock->id = socket(AF_INET, SOCK_STREAM, 0);
 
     if (sock->id == -1)
     {
-        printf("Debug: <tcp_listener_init> errore durante il socket init sock: %d\n", sock->id);
         return -1;
     }
 
@@ -37,19 +36,18 @@ int tcp_listener_init(struct TcpSocket *sock, int port)
     reuse = 1;
     // Per evitare che il socket rimanga occupato quando il programma viene forzato a uscire
     if (setsockopt(sock->id, SOL_SOCKET, SO_REUSEADDR, (const char *)&reuse, sizeof(reuse)) < 0)
-        perror("Errore: setsockopt(SO_REUSEADDR) fallita");
+        perror("Errore: <tcp_listener_init> setsockopt(SO_REUSEADDR) fallita");
 
-    if ((tmp = bind(sock->id, (struct sockaddr *)&(sock->addr), sizeof(sock->addr))) != 0)
+    if ((ret = bind(sock->id, (struct sockaddr *)&(sock->addr), sizeof(sock->addr))) != 0)
     {
-        printf("Debug: <tcp_listener_init> errore durante il binding tmp: %d\n", tmp);
+        printf("Errore: <tcp_listener_init> errore durante il binding ret: %d\n", ret);
         return -1;
     }
-    if ((tmp = listen(sock->id, 2)) != 0)
+    if ((ret = listen(sock->id, 2)) != 0)
     {
-        printf("Debug: <tcp_listener_init> errore durante il listening tmp: %d\n", tmp);
+        printf("Errore: <tcp_listener_init> errore durante il listening ret: %d\n", ret);
         return -1;
     }
-    printf("Debug: <tcp_listener_init> returning sock->id: %d", sock->id);
 
     return sock->id;
 }

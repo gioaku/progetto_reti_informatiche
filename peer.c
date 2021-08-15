@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     // creazione socket udp
     if (udp_socket_init(&udp, my_port) == -1)
     {
-        printf("Error: cannot create server socket\n");
+        printf("Error: impossibile creare socket udp\n");
         exit(0);
     }
 

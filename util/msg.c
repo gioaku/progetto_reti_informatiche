@@ -22,13 +22,28 @@ int udp_socket_init(struct UdpSocket *sock, int port)
 
 int tcp_listener_init(struct TcpSocket *sock, int port)
 {
+    int tmp;
     sock->id = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (sock->id == -1)
+    {
+        printf("Debug: <tcp_listener_init> errore durante il socket init sock: %d\n", sock->id);
+        return -1;
+    }
+
     set_address(&(sock->addr), (socklen_t *)&(sock->addr_len), port);
 
-    if (bind(sock->id, (struct sockaddr *)&(sock->addr), sizeof(sock->addr)) != 0)
+    if ((tmp = bind(sock->id, (struct sockaddr *)&(sock->addr), sizeof(sock->addr))) != 0)
+    {
+        printf("Debug: <tcp_listener_init> errore durante il binding tmp: %d\n", tmp);
         return -1;
-    if (listen(sock->id, 2) != 0)
+    }
+    if ((tmp = listen(sock->id, 2)) != 0)
+    {
+        printf("Debug: <tcp_listener_init> errore durante il listening tmp: %d\n", tmp);
         return -1;
+    }
+    printf("Debug: <tcp_listener_init> returning sock->id: %d", sock->id);
 
     return sock->id;
 }

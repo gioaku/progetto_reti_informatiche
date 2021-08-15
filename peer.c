@@ -403,7 +403,7 @@ int main(int argc, char **argv)
                 {
                     printf("Disconnessione in corso...\n");
 
-                    if (nbs,tot > 0)
+                    if (nbs.tot > 0)
                     {
                         // invio delle entries
                         send_entries_to_next(my_port, nbs.next, start_date, today);

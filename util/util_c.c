@@ -538,10 +538,17 @@ void handle_tcp_socket(int port, int sock)
                 sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
 
                 get_file_string(file, port, type, ENTRIES, date);
-                remove(file);
-
-                save_elab = 1;
-                sum = 0;
+                if (get_saved_elab(port, type, date) == -1)
+                {
+                    send_tcp(sock, "RECV_RDY", HEADER_LEN);
+                    remove(file);
+                    save_elab = 1;
+                    sum = 0;
+                }
+                else
+                {
+                    send_tcp(sock, "RECV_NOT", HEADER_LEN);
+                }
             }
 
             // se recv_sme
@@ -555,8 +562,15 @@ void handle_tcp_socket(int port, int sock)
                 sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
 
                 get_file_string(file, port, type, ENTRIES, date);
-
-                save_elab = 0;
+                if (get_saved_elab(port, type, date) == -1)
+                {
+                    send_tcp(sock, "RECV_RDY", HEADER_LEN);
+                    save_elab = 0;
+                }
+                else
+                {
+                    send_tcp(sock, "RECV_NOT", HEADER_LEN);
+                }
             }
 
             // se nw_entry
@@ -669,9 +683,13 @@ void send_entries_to_next(int port, int next, struct Date start_date, struct Dat
 
             send_tcp(sock, buffer, msg_len);
 
-            get_file_string(file, port, type, ENTRIES, date);
-
-            send_all_entries_from_file(file, sock);
+            recv_tcp(sock, buffer);
+            buffer[HEADER_LEN] = '\0';
+            if (strcmp(buffer, "RECV_RDY") == 0)
+            {
+                get_file_string(file, port, type, ENTRIES, date);
+                send_all_entries_from_file(file, sock);
+            }
         }
 
         // se ho alcuni nuovi casi mando una RECV_SME
@@ -682,9 +700,13 @@ void send_entries_to_next(int port, int next, struct Date start_date, struct Dat
 
             send_tcp(sock, buffer, msg_len);
 
-            get_file_string(file, port, type, ENTRIES, date);
-
-            send_all_entries_from_file(file, sock);
+            recv_tcp(sock, buffer);
+            buffer[HEADER_LEN] = '\0';
+            if (strcmp(buffer, "RECV_RDY") == 0)
+            {
+                get_file_string(file, port, type, ENTRIES, date);
+                send_all_entries_from_file(file, sock);
+            }
         }
 
         // tamponi
@@ -697,9 +719,13 @@ void send_entries_to_next(int port, int next, struct Date start_date, struct Dat
 
             send_tcp(sock, buffer, msg_len);
 
-            get_file_string(file, port, type, ENTRIES, date);
-
-            send_all_entries_from_file(file, sock);
+            recv_tcp(sock, buffer);
+            buffer[HEADER_LEN] = '\0';
+            if (strcmp(buffer, "RECV_RDY") == 0)
+            {
+                get_file_string(file, port, type, ENTRIES, date);
+                send_all_entries_from_file(file, sock);
+            }
         }
 
         // se ho alcuni nuovi tamponi mando una RECV_SME
@@ -709,9 +735,13 @@ void send_entries_to_next(int port, int next, struct Date start_date, struct Dat
 
             send_tcp(sock, buffer, msg_len);
 
-            get_file_string(file, port, type, ENTRIES, date);
-
-            send_all_entries_from_file(file, sock);
+            recv_tcp(sock, buffer);
+            buffer[HEADER_LEN] = '\0';
+            if (strcmp(buffer, "RECV_RDY") == 0)
+            {
+                get_file_string(file, port, type, ENTRIES, date);
+                send_all_entries_from_file(file, sock);
+            }
         }
     }
 

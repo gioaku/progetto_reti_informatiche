@@ -371,7 +371,7 @@ int main(int argc, char **argv)
                 {
                     int old, new;
                     struct Date date;
-                    
+
                     dprev(&from);
 
                     if (sooner(from, start_date))
@@ -382,7 +382,7 @@ int main(int argc, char **argv)
                     {
                         old = get_total(udp.id, my_port, type, from, nbs);
                     }
-    
+
                     dnext(&from);
 
                     for (date = from; soonereq(date, to); dnext(&date))
@@ -399,12 +399,15 @@ int main(int argc, char **argv)
             {
 
                 // se connesso disconnettere e inviare le entries a next
-                if (nbs.tot > 0)
+                if (nbs.tot != -1)
                 {
                     printf("Disconnessione in corso...\n");
 
-                    // invio delle entries
-                    send_entries_to_next(my_port, nbs.next, start_date, today);
+                    if (nbs > 0)
+                    {
+                        // invio delle entries
+                        send_entries_to_next(my_port, nbs.next, start_date, today);
+                    }
 
                     // tentativo di disconnessione
                     if (!send_udp_wait_ack(udp.id, "CLT_EXIT", HEADER_LEN, server_port, "C_EX_ACK"))
@@ -630,9 +633,9 @@ int main(int argc, char **argv)
                         FD_CLR(udp.id, &readset);
                         continue;
                     }
-                    
+
                     get_file_string(file, my_port, type, ENTRIES, date);
-                    
+
                     if (file_exists(file))
                     {
                         msg_len = sprintf(udp.buffer, "PROP_SME %d", my_port);

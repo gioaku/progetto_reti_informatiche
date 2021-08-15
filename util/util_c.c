@@ -454,7 +454,7 @@ void create_elab(int port, char type, struct Date date, int qty)
     get_path_string(path, port, type, ELABS);
     get_filename_string(filename, date);
 
-    printf("File: <create_elab> %s%s, qty:\n", path, filename);
+    printf("File: <create_elab> %s%s, qty:%d\n", path, filename, qty);
 
     if (!file_exists(path))
     {
@@ -586,6 +586,11 @@ void handle_tcp_socket(int port, int sock)
                 }
                 send_tcp(sock, "NW_E_ACK", HEADER_LEN + 1);
             }
+        }
+        
+        if (save_elab)
+        {
+            create_elab(port, type, date, sum);
         }
     }
 }

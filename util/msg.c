@@ -35,6 +35,7 @@ int tcp_listener_init(struct TcpSocket *sock, int port)
     set_address(&(sock->addr), (socklen_t *)&(sock->addr_len), port);
     
     reuse = 1;
+    // Per evitare che il socket rimanga occupato quando il programma viene forzato a uscire
     if (setsockopt(sock->id, SOL_SOCKET, SO_REUSEADDR, (const char *)&reuse, sizeof(reuse)) < 0)
         perror("Errore: setsockopt(SO_REUSEADDR) fallita");
 

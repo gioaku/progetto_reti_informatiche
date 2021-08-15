@@ -443,7 +443,7 @@ int main(int argc, char **argv)
             }
             else
             {
-                printf("TCP: richiesta di connessione accettata sul socket %d\n", new_sd);
+               // printf("TCP: richiesta di connessione accettata sul socket %d\n", new_sd);
             }
 
             // fork per gestire la connessione tcp
@@ -475,7 +475,7 @@ int main(int argc, char **argv)
             // server
             if (src_port == server_port)
             {
-                printf("UDP: ricevuto messaggio '%s' dal server\n", udp.buffer);
+                //printf("UDP: ricevuto messaggio '%s' dal server\n", udp.buffer);
 
                 // aggiornamento vicino precedente
                 if (strcmp(header_buff, "PRE_UPDT") == 0)
@@ -570,7 +570,7 @@ int main(int argc, char **argv)
             // altro peer sul socket udp
             else
             {
-                printf("UDP: ricevuto messaggio '%s' dal peer %d\n", udp.buffer, src_port);
+                //printf("UDP: ricevuto messaggio '%s' dal peer %d\n", udp.buffer, src_port);
 
                 // Flood all entries
                 if (strcmp(header_buff, "FL_A_REQ") == 0)
@@ -643,7 +643,7 @@ int main(int argc, char **argv)
                         msg_len = sprintf(udp.buffer, "PROP_SME %d", my_port);
                         udp.buffer[msg_len] = '\0';
                         s_send_udp(udp.id, udp.buffer, msg_len + 1, req_port);
-                        printf("UDP: inviato messaggio '%s' al destinatario %d\n", udp.buffer, req_port);
+                        //printf("UDP: inviato messaggio '%s' al destinatario %d\n", udp.buffer, req_port);
                     }
 
                     msg_len = sprintf(udp.buffer, "FL_S_REQ %d %c %04d_%02d_%02d", req_port, type, date.y, date.m, date.d);

@@ -615,7 +615,7 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
             s_recv_udp(udp, buffer, MAX_UDP_MSG);
             sscanf(buffer, "%s %d", header_buff, &recv_port);
             header_buff[HEADER_LEN] = '\0';
-            printf("UDP: ricevuto messaggio '%s' dal mittente %d\n", buffer, recv_port);
+            //printf("UDP: ricevuto messaggio '%s' dal mittente %d\n", buffer, recv_port);
 
             if (strcmp(header_buff, "PROP_SME") == 0)
             {

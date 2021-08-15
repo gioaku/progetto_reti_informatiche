@@ -83,3 +83,8 @@ void handle_tcp_socket(int port, int sock);
 // Raccoglie le entries(type, date) dei peer di tutta la rete
 int collect_all_entries(int port, int udp, char type, struct Date date);
 
+// Manda tutte le entries al vicino successivo
+void send_entries_to_next(int port, int next, struct Date start_date, struct Date today);
+
+// Estrae le entries dal file e le manda sul socket sock 
+void send_all_entries_from_file(char *file, int sock);

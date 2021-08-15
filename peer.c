@@ -399,12 +399,12 @@ int main(int argc, char **argv)
             {
 
                 // se connesso disconnettere e inviare le entries a next
-                if (nbs.tot != -1)
+                if (nbs.tot > 0)
                 {
                     printf("Disconnessione in corso...\n");
 
                     // invio delle entries
-                    // send_entries_to_next();
+                    send_entries_to_next(my_port, nbs.next, start_date, today);
 
                     // tentativo di disconnessione
                     if (!send_udp_wait_ack(udp.id, "CLT_EXIT", HEADER_LEN, server_port, "C_EX_ACK"))

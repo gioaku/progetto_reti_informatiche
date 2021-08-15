@@ -439,6 +439,7 @@ int get_entries_sum(int port, char type, struct Date date)
     {
         tot += qty;
     }
+
     fclose(fd);
     printf("Somma entries nel file '%s': %d\n", file, tot);
     return tot;
@@ -472,62 +473,104 @@ void handle_tcp_socket(int port, int sock)
     char buffer[MAX_TCP_MSG + 1];
     char header_buff[HEADER_LEN + 1];
     int ret;
-    while ((ret = recv_tcp(sock, buffer)) > 0)
+
+    ret = recv_tcp(sock, buffer);
+    buffer[ret] = '\0';
+    strncpy(header_buff, buffer, HEADER_LEN);
+    header_buff[HEADER_LEN] = '\0';
+
+    if (strcmp(header_buff, "ELAB_REQ") == 0)
     {
-
-        buffer[ret] = '\0';
-        strncpy(header_buff, buffer, HEADER_LEN);
-        header_buff[HEADER_LEN] = '\0';
-        if (strcmp(header_buff, "ELAB_REQ") == 0)
+        char type;
+        int msg_len;
+        struct Date date;
+        ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+        if (ret != 5)
         {
-            char type;
-            int msg_len;
-            struct Date date;
-            ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-            if (ret != 5)
-            {
-                return;
-            }
-
-            msg_len = sprintf(buffer, "ELAB_ACK %d", get_saved_elab(port, type, date));
-            buffer[msg_len] = '\0';
-
-            send_tcp(sock, buffer, msg_len);
-
             return;
         }
 
-        else if (strcmp(header_buff, "SEND_ALL") == 0)
+        msg_len = sprintf(buffer, "ELAB_ACK %d", get_saved_elab(port, type, date));
+        buffer[msg_len] = '\0';
+
+        send_tcp(sock, buffer, msg_len);
+    }
+
+    else if (strcmp(header_buff, "SEND_ALL") == 0)
+    {
+        char type;
+        struct Date date;
+        char file[MAX_FILE_LEN + 1];
+
+        sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+
+        get_file_string(file, port, type, ENTRIES, date);
+
+        if (!file_exists(file))
         {
-            char type;
-            int msg_len;
-            struct Date date;
-            FILE *fd;
-            char file[MAX_FILE_LEN + 1];
-            int qty;
-            sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-
-            get_file_string(file, port, type, ENTRIES, date);
-
-            if (!file_exists(file))
-            {
-                printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);
-                return;
-            }
-
-            fd = fopen(file, "r");
-
-            while (fscanf(fd, "%d\n", &qty) != EOF)
-            {
-                msg_len = sprintf(buffer, "NW_ENTRY %d", qty);
-                buffer[msg_len] = '\0';
-                send_tcp(sock, buffer, msg_len + 1);
-
-                recv_tcp(sock, buffer);
-            }
-
-            fclose(fd);
+            printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);
             return;
+        }
+        send_all_entries_from_file(file, sock);
+    }
+    else if (strcmp(header_buff, "EXIT_PRV") == 0)
+    {
+        char type;
+        struct Date date;
+        char file[MAX_FILE_LEN + 1];
+        int save_elab = 0;
+        int sum = 0;
+
+        send_tcp(sock, "EX_P_ACK", HEADER_LEN);
+
+        while (recv_tcp(sock, buffer))
+        {
+            strncpy(header_buff, buffer, HEADER_LEN);
+            header_buff[HEADER_LEN] = '\0';
+            // se recv_all
+            if (strcmp(header_buff, "RECV_ALL") == 0)
+            {
+                if (save_elab)
+                {
+                    create_elab(port, type, date, sum);
+                }
+
+                sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+
+                get_file_string(file, port, type, ENTRIES, date);
+                remove(file);
+
+                save_elab = 1;
+                sum = 0;
+            }
+
+            // se recv_sme
+            else if (strcmp(header_buff, "RECV_SME") == 0)
+            {
+                if (save_elab)
+                {
+                    create_elab(port, type, date, sum);
+                }
+
+                sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+
+                get_file_string(file, port, type, ENTRIES, date);
+
+                save_elab = 0;
+            }
+
+            // se nw_entry
+            else if (strcmp(header_buff, "NW_ENTRY") == 0)
+            {
+                int qty;
+
+                sscanf(buffer, "%s %d", header_buff, &qty);
+                append_entry(port, date, type, qty);
+                if (save_elab)
+                {
+                    sum += qty;
+                }
+            }
         }
     }
 }
@@ -570,13 +613,8 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
 
                     while (recv_tcp(sock, buffer) > 0)
                     {
-                        int tmp;
-
                         msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
                         header_buff[HEADER_LEN] = '\0';
-                        tmp = (msg_len == 2);
-                        tmp = tmp && (strcmp(header_buff, "NW_ENTRY") == 0);
-
                         if (msg_len == 2 && (strcmp(header_buff, "NW_ENTRY") == 0))
                         {
                             send_tcp(sock, "NW_E_ACK", HEADER_LEN + 1);
@@ -595,4 +633,105 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
             }
         }
     }
+}
+
+void send_entries_to_next(int port, int next, struct Date start_date, struct Date today)
+{
+    struct Date date;
+    int sock;
+    char buffer[MAX_TCP_MSG + 1];
+    int msg_len;
+    char file[MAX_FILE_LEN + 1];
+    char type;
+
+    sock = tcp_connect_init(next);
+    send_tcp(sock, "EXIT_PRV", HEADER_LEN);
+    recv_tcp(sock, buffer);
+    buffer[HEADER_LEN] = '\0';
+
+    if (strcmp(buffer, "EX_P_ACK") != 0)
+    {
+        printf("Errore: impossibile inviare le entries a next\n");
+        return;
+    }
+
+    // per ogni giorno valido
+    for (date = start_date; sooner(date, today); dnext(&date))
+    {
+        // nuovi casi
+        type = 'n';
+
+        // se ho tutti i nuovi casi mando una RECV_ALL
+        if (get_saved_elab(port, type, date) != -1 && get_entries_sum(port, type, date))
+        {
+            msg_len = sprintf(buffer, "RECV_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+
+            send_tcp(sock, buffer, msg_len);
+
+            get_file_string(file, port, type, ENTRIES, date);
+
+            send_all_entries_from_file(file, sock);
+        }
+
+        // se ho alcuni nuovi casi mando una RECV_SME
+        else if (get_entries_sum(port, type, date))
+        {
+
+            msg_len = sprintf(buffer, "RECV_SME %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+
+            send_tcp(sock, buffer, msg_len);
+
+            get_file_string(file, port, type, ENTRIES, date);
+
+            send_all_entries_from_file(file, sock);
+        }
+
+        // tamponi
+        type = 't';
+
+        // se ho tutti i nuovi tamponi mando una RECV_ALL
+        if (get_saved_elab(port, type, date) != -1 && get_entries_sum(port, type, date))
+        {
+            msg_len = sprintf(buffer, "RECV_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+
+            send_tcp(sock, buffer, msg_len);
+
+            get_file_string(file, port, type, ENTRIES, date);
+
+            send_all_entries_from_file(file, sock);
+        }
+
+        // se ho alcuni nuovi tamponi mando una RECV_SME
+        else if (get_entries_sum(port, type, date))
+        {
+            msg_len = sprintf(buffer, "RECV_SME %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+
+            send_tcp(sock, buffer, msg_len);
+
+            get_file_string(file, port, type, ENTRIES, date);
+
+            send_all_entries_from_file(file, sock);
+        }
+    }
+
+    close(sock);
+}
+
+void send_all_entries_from_file(char *file, int sock)
+{
+    int qty, msg_len;
+    char buffer[MAX_TCP_MSG + 1];
+    FILE *fd;
+
+    fd = fopen(file, "r");
+
+    while (fscanf(fd, "%d\n", &qty) != EOF)
+    {
+        msg_len = sprintf(buffer, "NW_ENTRY %d", qty);
+        buffer[msg_len] = '\0';
+        send_tcp(sock, buffer, msg_len + 1);
+
+        recv_tcp(sock, buffer);
+    }
+    fclose(fd);
 }

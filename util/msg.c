@@ -23,6 +23,7 @@ int udp_socket_init(struct UdpSocket *sock, int port)
 int tcp_listener_init(struct TcpSocket *sock, int port)
 {
     int tmp;
+    int reuse;
     sock->id = socket(AF_INET, SOCK_STREAM, 0);
 
     if (sock->id == -1)
@@ -32,6 +33,10 @@ int tcp_listener_init(struct TcpSocket *sock, int port)
     }
 
     set_address(&(sock->addr), (socklen_t *)&(sock->addr_len), port);
+    
+    reuse = 1;
+    if (setsockopt(sock->id, SOL_SOCKET, SO_REUSEADDR, (const char *)&reuse, sizeof(reuse)) < 0)
+        perror("Errore: setsockopt(SO_REUSEADDR) fallita");
 
     if ((tmp = bind(sock->id, (struct sockaddr *)&(sock->addr), sizeof(sock->addr))) != 0)
     {

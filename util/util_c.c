@@ -570,6 +570,7 @@ void handle_tcp_socket(int port, int sock)
                 {
                     sum += qty;
                 }
+                send_tcp(sock, "NW_E_ACK", HEADER_LEN + 1);
             }
         }
     }

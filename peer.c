@@ -593,7 +593,9 @@ int main(int argc, char **argv)
                     }
 
                     ret = get_saved_elab(my_port, type, date);
-                    if (ret != -1 && get_entries_sum(my_port, type, date))
+                    printf("Debug: after flood all myport: %d, ret: %d, get_entries_sum: %d", my_port, ret, get_entries_sum(my_port, type, date));
+
+                    if (ret > -1 && get_entries_sum(my_port, type, date))
                     {
                         msg_len = sprintf(udp.buffer, "PROP_ALL %d", my_port);
                         udp.buffer[msg_len] = '\0';
@@ -601,7 +603,7 @@ int main(int argc, char **argv)
                     }
                     else if (req_port == nbs.next)
                     {
-                        msg_len = sprintf(udp.buffer, "PROP_ALL %d", 0);
+                        msg_len = sprintf(udp.buffer, "PROP_ALL 0");
                         udp.buffer[msg_len] = '\0';
                         send_udp_wait_ack(udp.id, udp.buffer, msg_len + 1, nbs.next, "PR_A_ACK");
                     }

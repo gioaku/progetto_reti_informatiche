@@ -173,7 +173,7 @@ int main(int argc, char **argv)
             }
 
             // richiesta di uscita
-            if (strcmp(header_buff, "CLT_EXIT") == 0)
+            else if (strcmp(header_buff, "CLT_EXIT") == 0)
             {
                 // vecchi vicini
                 struct Neighbors nbs;
@@ -219,6 +219,17 @@ int main(int argc, char **argv)
                 // stampa del nuovo numero di peer
                 print_peers_number();
             }
+            else if (strcmp(header_buff, "LOCK_MTX") == 0)
+            {
+                printf("Debug: mutex lock\n");
+                send_ack_udp(sock.id, "LOCK_ACK", src_port);
+
+            }
+            else if (strcmp(header_buff, "UNLK_MXT") == 0)
+            {
+                printf("Debug: mutext unlock\n");
+                send_ack_udp(sock.id, "UNLK_ACK", src_port);
+            }
         }
         // comando da stdin
         if (FD_ISSET(0, &readset))
@@ -233,7 +244,7 @@ int main(int argc, char **argv)
             // leggo il comando
             fgets(command_buffer, MAX_STDIN_S, stdin);
             input_number = sscanf(command_buffer, "%s %d", command, &neighbor_peer);
-            
+
             // help
             if (strcmp(command, "help\0") == 0)
             {

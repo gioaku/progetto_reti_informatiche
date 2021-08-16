@@ -363,7 +363,7 @@ int main(int argc, char **argv)
                     // per ogni giorno ottenere e se necessario salvare dato aggregato
                     for (date = from; soonereq(date, to); dnext(&date))
                     {
-                        sum += get_total(udp.id, my_port, type, date, nbs);
+                        sum += get_total(udp.id, my_port, type, date, nbs, server_port);
                     }
                     printf("[Risultato]: totale di %c nel periodo <%02d:%02d:%04d-%02d:%02d:%04d>: %d\n", type, from.d, from.m, from.y, to.d, to.m, to.y, sum);
                 }
@@ -380,14 +380,14 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        old = get_total(udp.id, my_port, type, from, nbs);
+                        old = get_total(udp.id, my_port, type, from, nbs, server_port);
                     }
 
                     dnext(&from);
 
                     for (date = from; soonereq(date, to); dnext(&date))
                     {
-                        new = get_total(udp.id, my_port, type, date, nbs);
+                        new = get_total(udp.id, my_port, type, date, nbs, server_port);
                         printf("[Risultato]: variazione di %c il giorno %02d:%02d:%04d: %d\n", type, date.d, date.m, date.y, new - old);
                         old = new;
                     }

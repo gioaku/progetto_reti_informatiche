@@ -8,7 +8,7 @@
 #include "peer_file.h"
 
 // Numero di peer connessi alla rete
-struct PeerList connected_peersn;
+struct PeerList connected_peers;
 
 // Gestione del semaforo di mutua esclusione sulla struttura
 // void peer_file_signal()
@@ -29,20 +29,20 @@ struct PeerList connected_peersn;
 // Inizializza la struttura come libera
 // peer_file_signal();
 
-// Ritorna connected_peersn.peers
+// Ritorna connected_peers.peers
 int get_n_peers(){
-    return connected_peersn.peers;
+    return connected_peers.peers;
 }
 
 
 // Ritorna la porta del peer in posizione pos
 int get_port(int pos)
 {
-    struct PeerElement *tmp_ptr = connected_peersn.list;
-    if (connected_peersn.peers == 0)
+    struct PeerElement *tmp_ptr = connected_peers.list;
+    if (connected_peers.peers == 0)
         return -1;
 
-    if (pos >= connected_peersn.peers || pos < 0)
+    if (pos >= connected_peers.peers || pos < 0)
         return -1;
 
     while (pos-- > 0)
@@ -54,15 +54,15 @@ int get_port(int pos)
 
 int get_first_port()
 {
-    if (connected_peersn.peers != 0)
-        return connected_peersn.list->port;
+    if (connected_peers.peers != 0)
+        return connected_peers.list->port;
     return -1;
 }
 // Controlla se un peer e' connesso o meno
 int get_position(int port)
 {
     // se non ci sono peer connessi ritorna errore
-    if (connected_peersn.peers == 0)
+    if (connected_peers.peers == 0)
         return -1;
 
     //scorre la lista per trovare il peer giusto e ne ritorna la posizione
@@ -71,8 +71,8 @@ int get_position(int port)
         struct PeerElement *punt;
         int pos = 0;
 
-        punt = connected_peersn.list;
-        while (pos < connected_peersn.peers)
+        punt = connected_peers.list;
+        while (pos < connected_peers.peers)
         {
             if (punt->port == port)
                 return pos;
@@ -90,13 +90,13 @@ struct Neighbors get_neighbors(int peer)
 {
     struct Neighbors nbs;
     // se un solo peer ritorna 0 vicini
-    if (connected_peersn.peers <= 1)
+    if (connected_peers.peers <= 1)
     {
         nbs.tot = 0;
         return nbs;
     }
     // se due peer ritorna lo stesso vicino come next e prev, tot = 1
-    else if (connected_peersn.peers == 2)
+    else if (connected_peers.peers == 2)
     {
         nbs.tot = 1;
         if (get_port(0) == peer)
@@ -115,15 +115,15 @@ struct Neighbors get_neighbors(int peer)
         struct PeerElement *head, *tail;
         int first;
 
-        first = connected_peersn.list->port;
-        head = connected_peersn.list->next;
-        tail = connected_peersn.list;
+        first = connected_peers.list->port;
+        head = connected_peers.list->next;
+        tail = connected_peers.list;
         nbs.tot = 2;
 
         if (first == peer)
         {
             nbs.next = head->port;
-            nbs.prev = get_port(connected_peersn.peers - 1);
+            nbs.prev = get_port(connected_peers.peers - 1);
             return nbs;
         }
 
@@ -159,31 +159,31 @@ struct Neighbors insert_peer(int port)
     new->port = port;
 
     // se primo peer
-    if (connected_peersn.peers == 0)
+    if (connected_peers.peers == 0)
     {
-        connected_peersn.list = new;
+        connected_peers.list = new;
         new->next = new;
-        connected_peersn.peers = 1;
+        connected_peers.peers = 1;
 
         nbs.tot = 0;
         return nbs;
     }
 
     // se secondo peer
-    else if (connected_peersn.peers == 1)
+    else if (connected_peers.peers == 1)
     {
-        if (port == connected_peersn.list->port)
+        if (port == connected_peers.list->port)
         {
             free(new);
             nbs.tot = 0;
             return nbs;
         }
 
-        connected_peersn.list->next = new;
-        new->next = connected_peersn.list;
-        connected_peersn.peers = 2;
+        connected_peers.list->next = new;
+        new->next = connected_peers.list;
+        connected_peers.peers = 2;
 
-        nbs.prev = nbs.next = connected_peersn.list->port;
+        nbs.prev = nbs.next = connected_peers.list->port;
         nbs.tot = 1;
 
         return nbs;
@@ -194,8 +194,8 @@ struct Neighbors insert_peer(int port)
     {
         struct PeerElement *head, *tail;
 
-        head = connected_peersn.list->next;
-        tail = connected_peersn.list;
+        head = connected_peers.list->next;
+        tail = connected_peers.list;
 
         // esce quando l'ordine di porta viene rispettato
         while ((head->port < port && tail->port > port) || (head->port > tail->port && (port < tail->port || port > head->port)))
@@ -214,7 +214,7 @@ struct Neighbors insert_peer(int port)
 
         tail->next = new;
         new->next = head;
-        connected_peersn.peers++;
+        connected_peers.peers++;
 
         nbs.prev = tail->port;
         nbs.next = head->port;
@@ -231,26 +231,26 @@ struct Neighbors insert_peer(int port)
 
 int remove_first_peer()
 {
-    if (connected_peersn.peers == 0)
+    if (connected_peers.peers == 0)
     {
         return -1;
     }
-    if (connected_peersn.peers == 1)
+    if (connected_peers.peers == 1)
     {
-        free(connected_peersn.list);
-        connected_peersn.peers = 0;
+        free(connected_peers.list);
+        connected_peers.peers = 0;
         return -1;
     }
     else
     {
         struct PeerElement *punt;
 
-        punt = connected_peersn.list;
-        connected_peersn.list = connected_peersn.list->next;
-        connected_peersn.peers--;
+        punt = connected_peers.list;
+        connected_peers.list = connected_peers.list->next;
+        connected_peers.peers--;
         adjust_last(punt);
         free(punt);
-        return connected_peersn.list->port;
+        return connected_peers.list->port;
     }
 }
 
@@ -258,13 +258,13 @@ void adjust_last(struct PeerElement *ctrl)
 {
     struct PeerElement *punt;
 
-    punt = connected_peersn.list;
+    punt = connected_peers.list;
     do
     {
         punt = punt->next;
     } while (punt->next != ctrl);
 
-    punt->next = connected_peersn.list;
+    punt->next = connected_peers.list;
 }
 
 // Rimuove un peer dalla lista di quelli connessi - ritorna i vicini prima della rimozione
@@ -274,11 +274,11 @@ struct Neighbors remove_peer(int port)
     struct Neighbors nbs;
     int tmp;
 
-    head = connected_peersn.list->next;
-    tail = connected_peersn.list;
-    tmp = connected_peersn.peers;
+    head = connected_peers.list->next;
+    tail = connected_peers.list;
+    tmp = connected_peers.peers;
 
-    if (connected_peersn.peers == 0)
+    if (connected_peers.peers == 0)
     {
         nbs.tot = -1;
         return nbs;
@@ -295,19 +295,19 @@ struct Neighbors remove_peer(int port)
         if (tail->port == port)
         {
             nbs.tot = 0;
-            connected_peersn.peers = 0;
+            connected_peers.peers = 0;
         }
         else
         {
-            if (head == connected_peersn.list)
+            if (head == connected_peers.list)
             {
-                connected_peersn.list = head->next;
+                connected_peers.list = head->next;
             }
             nbs.prev = tail->port;
             nbs.next = head->next->port;
             nbs.tot = (nbs.prev == nbs.next) ? 1 : 2;
             tail->next = head->next;
-            connected_peersn.peers--;
+            connected_peers.peers--;
         }
         free(head);
     }
@@ -323,13 +323,13 @@ struct Neighbors remove_peer(int port)
 // Stampa il numero di peer connessi
 void print_peers_number()
 {
-    printf("Ci sono [ %d ] peer connessi alla rete\n", connected_peersn.peers);
+    printf("Ci sono [ %d ] peer connessi alla rete\n", connected_peers.peers);
 }
 
 // Stampa i peer connessi alla rete (comando showpeers)
 void print_peers()
 {
-    if (connected_peersn.peers == 0)
+    if (connected_peers.peers == 0)
     {
         printf("Non ci sono peers connessi alla rete\n");
     }
@@ -338,10 +338,10 @@ void print_peers()
         struct PeerElement *punt;
         int tmp;
 
-        punt = connected_peersn.list;
+        punt = connected_peers.list;
         printf("I peer connessi alla rete sono:\n");
         printf("\t -- \tpeer\t -- \n");
-        for (tmp = 0; tmp < connected_peersn.peers; tmp++)
+        for (tmp = 0; tmp < connected_peers.peers; tmp++)
         {
             printf("\t -- \t%d\t -- \n", punt->port);
             punt = punt->next;
@@ -352,15 +352,15 @@ void print_peers()
 // Stampa i vicini di tutti i peer (comando showneighbor)
 void print_peers_nbs()
 {
-    if (connected_peersn.peers == 0)
+    if (connected_peers.peers == 0)
     {
         printf("Non ci sono peers connessi alla rete\n");
     }
-    else if (connected_peersn.peers == 1)
+    else if (connected_peers.peers == 1)
     {
         printf("Solo un peer connesso alla rete:\n");
         printf("\t -- \tpeer\t -- \n");
-        printf("\t -- \t%d\t -- \n", connected_peersn.list->port);
+        printf("\t -- \t%d\t -- \n", connected_peers.list->port);
     }
     else
     {
@@ -369,10 +369,10 @@ void print_peers_nbs()
         printf("I peer connessi alla rete sono:\n");
         printf("\tprev -- peer -- next\n");
 
-        first = connected_peersn.list->port;
-        head = connected_peersn.list->next;
-        tail = connected_peersn.list;
-        printf("\t%d -> %d -> %d\n", get_port(connected_peersn.peers - 1), first, head->port);
+        first = connected_peers.list->port;
+        head = connected_peers.list->next;
+        tail = connected_peers.list;
+        printf("\t%d -> %d -> %d\n", get_port(connected_peers.peers - 1), first, head->port);
 
         while (head->port != first)
         {

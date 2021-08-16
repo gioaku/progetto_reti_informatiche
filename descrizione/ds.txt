@@ -1,5 +1,18 @@
 ***DS***
-PeerList
+
+ds: 
+    numero di porta
+date:
+    inizio
+    oggi
+messaggi e comandi:
+    socket udp
+    buffer stdin 
+    master, readset e fdmax   
+rete:
+    connected_peers
+
+
 peer msg
     boot
         insert peer

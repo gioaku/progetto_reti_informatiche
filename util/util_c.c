@@ -250,7 +250,7 @@ int check_period(char *period, struct Date start_date, struct Date today, struct
     return 1;
 }
 
-int get_total(int udp, int port, char type, struct Date date, struct Neighbors nbs)
+int get_total(int udp, int port, char type, struct Date date, struct Neighbors nbs, int server_port)
 {
     // valore di ritorno
     int ret;
@@ -348,6 +348,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     }
 
     // altirmenti provo a cercare qualcuno che abbia tutti i dati
+    send_udp_wait_ack(udp, "LOCK_MTX", HEADER_LEN, server_port, "LOCK_ACK");
 
     msg_len = sprintf(buffer, "FL_A_REQ %d %c %04d_%02d_%02d", port, type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';
@@ -394,6 +395,8 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     msg_len = sprintf(buffer, "FL_S_REQ %d %c %04d_%02d_%02d", port, type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';
     send_udp_wait_ack(udp, buffer, msg_len, nbs.next, "FL_S_ACK");
+    
+    send_udp_wait_ack(udp, "UNLK_MXT", HEADER_LEN, server_port, "UNLK_ACK");
 
     return collect_all_entries(port, udp, type, date);
 }
@@ -547,7 +550,7 @@ void handle_tcp_socket(int port, int sock)
                 }
                 else
                 {
-                    send_tcp(sock, "RECV_NOT", HEADER_LEN);
+                    send_tcp(sock, "RECV_SKP", HEADER_LEN);
                 }
             }
 
@@ -569,7 +572,7 @@ void handle_tcp_socket(int port, int sock)
                 }
                 else
                 {
-                    send_tcp(sock, "RECV_NOT", HEADER_LEN);
+                    send_tcp(sock, "RECV_SKP", HEADER_LEN);
                 }
             }
 

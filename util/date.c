@@ -10,8 +10,7 @@ struct Date atod(char *buff)
 
 void dtoa(char *buff, struct Date d)
 {
-    printf("Debug: ret: %d\n", sprintf(buff, DATE_FORMAT, d.y, d.m, d.d));
-    if (sprintf(buff, DATE_FORMAT, d.y, d.m, d.d) != 3)
+    if (sprintf(buff, DATE_FORMAT, d.y, d.m, d.d) != 10)
         printf("Error: date.c::dtoa fallita da buff: %s a date: %d_%d_%d\n", buff, d.y, d.m, d.d);
     return;
 }

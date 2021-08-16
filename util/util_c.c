@@ -396,9 +396,11 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     buffer[msg_len] = '\0';
     send_udp_wait_ack(udp, buffer, msg_len, nbs.next, "FL_S_ACK");
     
+    ret = collect_all_entries(port, udp, type, date);
+
     send_udp_wait_ack(udp, "UNLK_MXT", HEADER_LEN, server_port, "UNLK_ACK");
 
-    return collect_all_entries(port, udp, type, date);
+    return ret;
 }
 
 int get_saved_elab(int port, char type, struct Date date)

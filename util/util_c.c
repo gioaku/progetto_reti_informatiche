@@ -633,12 +633,13 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
 
         if (FD_ISSET(udp, &readset))
         {
-            s_recv_udp(udp, buffer, MAX_UDP_MSG);
-            sscanf(buffer, "%s %d", header_buff, &recv_port);
+            recv_port = s_recv_udp(udp, buffer, MAX_UDP_MSG);
+            sscanf(buffer, "%s", header_buff);
             header_buff[HEADER_LEN] = '\0';
 
             if (strcmp(header_buff, "PROP_SME") == 0)
             {
+                sscanf(buffer, "%s %d", header_buff, &recv_port);
                 printf("UDP: ricevuto messaggio '%s' dal mittente %d\n", buffer, recv_port);
 
                 if (valid_port(recv_port))
@@ -665,7 +666,7 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
             else if (strcmp(header_buff, "FL_S_REQ") == 0)
             {
                 printf("UDP: ritornato messaggio '%s'\n", buffer);
-                send_ack_udp(udp, "FL_S_ACK", nbs.prev);
+                send_ack_udp(udp, "FL_S_ACK", recv_port);
 
                 create_elab(port, type, date, tot);
                 return tot;

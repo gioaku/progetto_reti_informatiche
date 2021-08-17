@@ -348,7 +348,10 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     }
 
     // altirmenti provo a cercare qualcuno che abbia tutti i dati
-    send_udp_wait_ack(udp, "LOCK_MTX", HEADER_LEN, server_port, "LOCK_ACK");
+    if (server_port != -1)
+    {
+        send_udp_wait_ack(udp, "LOCK_REQ", HEADER_LEN, server_port, "LOCK_ACK");
+    }
 
     msg_len = sprintf(buffer, "FL_A_REQ %d %c %04d_%02d_%02d", port, type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';
@@ -395,10 +398,13 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     msg_len = sprintf(buffer, "FL_S_REQ %d %c %04d_%02d_%02d", port, type, date.y, date.m, date.d);
     buffer[msg_len] = '\0';
     send_udp_wait_ack(udp, buffer, msg_len, nbs.next, "FL_S_ACK");
-    
+
     ret = collect_all_entries(port, udp, type, date);
 
-    send_udp_wait_ack(udp, "UNLK_MXT", HEADER_LEN, server_port, "UNLK_ACK");
+    if (server_port != -1)
+    {
+        send_udp_wait_ack(udp, "UNLK_REQ", HEADER_LEN, server_port, "UNLK_ACK");
+    }
 
     return ret;
 }
@@ -483,120 +489,123 @@ void handle_tcp_socket(int port, int sock)
     buffer[ret] = '\0';
     strncpy(header_buff, buffer, HEADER_LEN);
     header_buff[HEADER_LEN] = '\0';
-
-    if (strcmp(header_buff, "ELAB_REQ") == 0)
+    while (ret > 0)
     {
-        char type;
-        int msg_len;
-        struct Date date;
-        ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-        if (ret != 5)
+        if (strcmp(header_buff, "ELAB_REQ") == 0)
         {
-            return;
-        }
-
-        msg_len = sprintf(buffer, "ELAB_ACK %d", get_saved_elab(port, type, date));
-        buffer[msg_len] = '\0';
-
-        send_tcp(sock, buffer, msg_len);
-    }
-
-    else if (strcmp(header_buff, "SEND_ALL") == 0)
-    {
-        char type;
-        struct Date date;
-        char file[MAX_FILE_LEN + 1];
-
-        sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-
-        get_file_string(file, port, type, ENTRIES, date);
-
-        if (!file_exists(file))
-        {
-            printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);
-            return;
-        }
-        send_all_entries_from_file(file, sock);
-    }
-    else if (strcmp(header_buff, "EXIT_PRV") == 0)
-    {
-        char type;
-        struct Date date;
-        char file[MAX_FILE_LEN + 1];
-        int save_elab = 0;
-        int sum = 0;
-
-        send_tcp(sock, "EX_P_ACK", HEADER_LEN);
-
-        while (recv_tcp(sock, buffer))
-        {
-            strncpy(header_buff, buffer, HEADER_LEN);
-            header_buff[HEADER_LEN] = '\0';
-            // se recv_all
-            if (strcmp(header_buff, "RECV_ALL") == 0)
+            char type;
+            int msg_len;
+            struct Date date;
+            ret = sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+            if (ret != 5)
             {
-                if (save_elab)
+                return;
+            }
+
+            msg_len = sprintf(buffer, "ELAB_ACK %d", get_saved_elab(port, type, date));
+            buffer[msg_len] = '\0';
+
+            send_tcp(sock, buffer, msg_len);
+        }
+
+        else if (strcmp(header_buff, "SEND_ALL") == 0)
+        {
+            char type;
+            struct Date date;
+            char file[MAX_FILE_LEN + 1];
+
+            sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+
+            get_file_string(file, port, type, ENTRIES, date);
+
+            if (!file_exists(file))
+            {
+                printf("Errore: richiesta di dati non posseduti, file '%s' non esistente\n", file);
+                return;
+            }
+            send_all_entries_from_file(file, sock);
+        }
+        else if (strcmp(header_buff, "EXIT_PRV") == 0)
+        {
+            char type;
+            struct Date date;
+            char file[MAX_FILE_LEN + 1];
+            int save_elab = 0;
+            int sum = 0;
+
+            send_tcp(sock, "EX_P_ACK", HEADER_LEN);
+
+            while (recv_tcp(sock, buffer))
+            {
+                strncpy(header_buff, buffer, HEADER_LEN);
+                header_buff[HEADER_LEN] = '\0';
+                // se recv_all
+                if (strcmp(header_buff, "RECV_ALL") == 0)
                 {
-                    create_elab(port, type, date, sum);
+                    if (save_elab)
+                    {
+                        create_elab(port, type, date, sum);
+                    }
+
+                    sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+
+                    get_file_string(file, port, type, ENTRIES, date);
+                    if (get_saved_elab(port, type, date) == -1)
+                    {
+                        send_tcp(sock, "RECV_RDY", HEADER_LEN);
+                        remove(file);
+                        save_elab = 1;
+                        sum = 0;
+                    }
+                    else
+                    {
+                        send_tcp(sock, "RECV_SKP", HEADER_LEN);
+                    }
                 }
 
-                sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+                // se recv_sme
+                else if (strcmp(header_buff, "RECV_SME") == 0)
+                {
+                    if (save_elab)
+                    {
+                        create_elab(port, type, date, sum);
+                    }
 
-                get_file_string(file, port, type, ENTRIES, date);
-                if (get_saved_elab(port, type, date) == -1)
-                {
-                    send_tcp(sock, "RECV_RDY", HEADER_LEN);
-                    remove(file);
-                    save_elab = 1;
-                    sum = 0;
+                    sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
+
+                    get_file_string(file, port, type, ENTRIES, date);
+                    if (get_saved_elab(port, type, date) == -1)
+                    {
+                        send_tcp(sock, "RECV_RDY", HEADER_LEN);
+                        save_elab = 0;
+                    }
+                    else
+                    {
+                        send_tcp(sock, "RECV_SKP", HEADER_LEN);
+                    }
                 }
-                else
+
+                // se nw_entry
+                else if (strcmp(header_buff, "NW_ENTRY") == 0)
                 {
-                    send_tcp(sock, "RECV_SKP", HEADER_LEN);
+                    int qty;
+
+                    sscanf(buffer, "%s %d", header_buff, &qty);
+                    append_entry(port, date, type, qty);
+                    if (save_elab)
+                    {
+                        sum += qty;
+                    }
+                    send_tcp(sock, "NW_E_ACK", HEADER_LEN + 1);
                 }
             }
 
-            // se recv_sme
-            else if (strcmp(header_buff, "RECV_SME") == 0)
+            if (save_elab)
             {
-                if (save_elab)
-                {
-                    create_elab(port, type, date, sum);
-                }
-
-                sscanf(buffer, "%s %c %04d_%02d_%02d", header_buff, &type, &date.y, &date.m, &date.d);
-
-                get_file_string(file, port, type, ENTRIES, date);
-                if (get_saved_elab(port, type, date) == -1)
-                {
-                    send_tcp(sock, "RECV_RDY", HEADER_LEN);
-                    save_elab = 0;
-                }
-                else
-                {
-                    send_tcp(sock, "RECV_SKP", HEADER_LEN);
-                }
-            }
-
-            // se nw_entry
-            else if (strcmp(header_buff, "NW_ENTRY") == 0)
-            {
-                int qty;
-
-                sscanf(buffer, "%s %d", header_buff, &qty);
-                append_entry(port, date, type, qty);
-                if (save_elab)
-                {
-                    sum += qty;
-                }
-                send_tcp(sock, "NW_E_ACK", HEADER_LEN + 1);
+                create_elab(port, type, date, sum);
             }
         }
-
-        if (save_elab)
-        {
-            create_elab(port, type, date, sum);
-        }
+        ret = recv_tcp(sock, buffer);
     }
 }
 
@@ -625,10 +634,11 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
             s_recv_udp(udp, buffer, MAX_UDP_MSG);
             sscanf(buffer, "%s %d", header_buff, &recv_port);
             header_buff[HEADER_LEN] = '\0';
-            printf("UDP: ricevuto messaggio '%s' dal mittente %d\n", buffer, recv_port);
 
             if (strcmp(header_buff, "PROP_SME") == 0)
             {
+                printf("UDP: ricevuto messaggio '%s' dal mittente %d\n", buffer, recv_port);
+
                 if (valid_port(recv_port))
                 {
                     sock = tcp_connect_init(recv_port);
@@ -652,6 +662,8 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
             }
             else if (strcmp(header_buff, "FL_S_REQ") == 0)
             {
+                printf("UDP: ritornato messaggio '%s'\n", buffer);
+
                 create_elab(port, type, date, tot);
                 send_ack_udp(udp, "FL_S_ACK", HEADER_LEN);
                 return tot;

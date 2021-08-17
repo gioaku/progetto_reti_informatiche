@@ -16,10 +16,6 @@ fd_set master;
 fd_set readset;
 int fdmax;
 
-// Mutua esclusione per la start, get e stop
-// Ogni entrata e uscita dei peer deve essere atomica
-// Voglio un grafo costante durante quando un peer esegue una flood for entries
-
 int main(int argc, char **argv)
 {
     // lettura porta dagli argomenti
@@ -34,6 +30,9 @@ int main(int argc, char **argv)
     // pulizia set
     FD_ZERO(&master);
     FD_ZERO(&readset);
+
+    // nessun peer connesso
+    peer_file_init();
 
     // creazione socket udp
     if (udp_socket_init(&sock, my_port) == -1)
@@ -73,7 +72,7 @@ int main(int argc, char **argv)
             sscanf(sock.buffer, "%s", header_buff);
             header_buff[HEADER_LEN] = '\0';
 
-            printf("Arrivato messaggio %s da %d sul socket\n", header_buff, src_port);
+            printf("[UDP]: ricevuto messaggio %s da %d sul socket\n", header_buff, src_port);
 
             // richiesta di connessione
             if (strcmp(header_buff, "CONN_REQ") == 0)
@@ -84,7 +83,10 @@ int main(int argc, char **argv)
                 int msg_len;
                 // buffer per scrivere la data da inviare
                 char date_buffer[DATE_LEN + 1];
-
+                if (!peer_file_free())
+                {
+                    continue;
+                }
                 // ack dell'arrivo della richiesta
                 if (!send_ack_udp(sock.id, "CONN_ACK", src_port))
                 {
@@ -180,6 +182,11 @@ int main(int argc, char **argv)
                 // lunghezza del messaggio
                 int msg_len;
 
+                if (!peer_file_free())
+                {
+                    continue;
+                }
+
                 //ack dell'arrivo della richiesta
                 if (!send_ack_udp(sock.id, "C_EX_ACK", src_port))
                 {
@@ -219,16 +226,21 @@ int main(int argc, char **argv)
                 // stampa del nuovo numero di peer
                 print_peers_number();
             }
-            else if (strcmp(header_buff, "LOCK_MTX") == 0)
+            else if (strcmp(header_buff, "LOCK_REQ") == 0)
             {
-                printf("Debug: mutex lock\n");
                 send_ack_udp(sock.id, "LOCK_ACK", src_port);
-
+                if (get_position(src_port) != -1)
+                {
+                    peer_file_lock();
+                }
             }
-            else if (strcmp(header_buff, "UNLK_MXT") == 0)
+            else if (strcmp(header_buff, "UNLK_REQ") == 0)
             {
-                printf("Debug: mutext unlock\n");
                 send_ack_udp(sock.id, "UNLK_ACK", src_port);
+                if (get_position(src_port) != -1)
+                {
+                    peer_file_unlock();
+                }
             }
         }
         // comando da stdin
@@ -274,24 +286,34 @@ int main(int argc, char **argv)
             // esc
             else if (strcmp(command, "esc\0") == 0)
             {
+                int port;
+                int first;
+
                 printf("Inizio disconnesione\n");
-                int port = get_port(0);
 
-                // rimozione di tutti i peer previo avviso
-                while (port != -1)
+                first = get_port(0);
+
+                while (!send_udp_wait_ack(sock.id, "SRV_EXIT", HEADER_LEN, first, "S_XT_ACK"))
                 {
-                    printf("Invio SRV_EXIT a %d\n", port);
-
-                    // invio messaggio
-                    if (!send_udp_wait_ack(sock.id, "SRV_EXIT", HEADER_LEN, port, "S_XT_ACK"))
-                    {
-                        printf("Errore: impossibile disconnettere il peer %d\n", port);
-                        // spero bene per lui e continuo
-                    }
-
-                    // rimozione peer
-                    port = remove_first_peer();
+                    printf("Errore: [S] Impossibile inviare SRV_EXIT al destinatario %d\n", first);
                 }
+                printf("UDP: inviato messaggio '%s' al destinatario %d\n", sock.buffer, first);
+
+                while ((port = recv_udp_and_ack(sock.id, sock.buffer, HEADER_LEN, -1, "CLT_EXIT", "C_EX_ACK")) != first)
+                {
+                    if (get_position(port) == -1)
+                    {
+                        printf("Warning: peer %d non presente nella lista dei peer connessi.\nOperazione abortita\n", port);
+                    }
+                    // rimozione peer
+                    else
+                    {
+                        remove_peer(port);
+                    }
+                }
+                
+                remove_peer(first);
+                
                 close(sock.id);
                 _exit(0);
             }

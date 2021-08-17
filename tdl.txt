@@ -1,9 +1,3 @@
-problemi
-    get_total   
-        prova tutti i casi
-
-
- 
 check all msg codes
 check all const.h
 check all messages state and possible errors

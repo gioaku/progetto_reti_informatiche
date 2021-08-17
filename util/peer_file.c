@@ -10,30 +10,30 @@
 // Numero di peer connessi alla rete
 struct PeerList connected_peers;
 
-// Gestione del semaforo di mutua esclusione sulla struttura
-// void peer_file_signal()
-// {
-// connected_peers.mutex = 1;
-// }
-
-// int peer_file_wait()
-// {
-// if (!peer_list.mutex)
-// {
-//     return 0;
-// }
-// peer_list.mutex = 0;
-// return 1;
-// }
-
-// Inizializza la struttura come libera
-// peer_file_signal();
-
-// Ritorna connected_peers.peers
-int get_n_peers(){
-    return connected_peers.peers;
+void peer_file_init(){
+    connected_peers.lock = 0;
+    connected_peers.peers = 0;
+    connected_peers.list = NULL;
 }
 
+// Gestione del semaforo di mutua esclusione sulla struttura
+void peer_file_unlock()
+{
+    connected_peers.lock--;
+}
+
+void peer_file_lock()
+{
+    connected_peers.lock++;
+}
+int peer_file_free(){
+    return connected_peers.lock == 0;
+};
+// Ritorna connected_peers.peers
+int get_n_peers()
+{
+    return connected_peers.peers;
+}
 
 // Ritorna la porta del peer in posizione pos
 int get_port(int pos)
@@ -58,6 +58,7 @@ int get_first_port()
         return connected_peers.list->port;
     return -1;
 }
+
 // Controlla se un peer e' connesso o meno
 int get_position(int port)
 {

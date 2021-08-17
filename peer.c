@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     // creazione socket udp
     if (udp_socket_init(&udp, my_port) == -1)
     {
-        printf("Error: impossibile creare socket udp\n");
+        printf("Errore: impossibile creare socket udp\n");
         exit(0);
     }
 
@@ -443,7 +443,7 @@ int main(int argc, char **argv)
             }
             else
             {
-               printf("TCP: richiesta di connessione accettata sul socket %d\n", new_sd);
+                printf("TCP: richiesta di connessione accettata sul socket %d\n", new_sd);
             }
 
             // fork per gestire la connessione tcp
@@ -554,14 +554,53 @@ int main(int argc, char **argv)
                 // Notifica chiusura server
                 else if (strcmp(header_buff, "SRV_EXIT") == 0)
                 {
+                    struct Date date;
+                    int new_sd;
+
                     printf("Il server sta per chiudere\nDisconnessione in corso...\n");
 
                     // Invia ACK
                     send_ack_udp(udp.id, "S_XT_ACK", server_port);
 
-                    printf("Disconnessione riuscita\n");
+                    for (date = start_date; sooner(date, today); dnext(&date))
+                    {
+                        get_total(udp.id, my_port, 't', date, nbs, -1);
+                        get_total(udp.id, my_port, 'n', date, nbs, -1);
+                    }
 
-                    // Chiude tutti i socket
+                    send_udp_wait_ack(udp.id, "SRV_EXIT", HEADER_LEN, nbs.next, "S_XT_ACK");
+
+                    // accept elab req
+
+                    if ((new_sd = accept_connection(listener_s.id)) == -1)
+                    {
+                        printf("Errore: impossibile accettare connessione sul listener\n");
+                    }
+                    else
+                    {
+                        printf("TCP: richiesta di connessione accettata sul socket %d\n", new_sd);
+                    }
+
+                    handle_tcp_socket(my_port, new_sd);
+                    close(new_sd);
+
+                    while (!recv_udp_and_ack(udp.id, udp.buffer, HEADER_LEN, nbs.prev, "SRV_EXIT", "S_XT_ACK"))
+                    {
+                        FD_CLR(udp.id, &readset);
+                        select(udp.id + 1, &readset, NULL, NULL, NULL);
+                    }
+
+                    new_sd = tcp_connect_init(nbs.prev);
+                    close(new_sd);
+                    
+                    // tentativo di disconnessione
+                    if (!send_udp_wait_ack(udp.id, "CLT_EXIT", HEADER_LEN, server_port, "C_EX_ACK"))
+                    {
+                        printf("Errore: disconnessione non riuscita\n");
+                    }
+
+                    printf("Disconnessione riuscita\n"); // chiusura socket e terminazione
+                    close(listener_s.id);
                     close(udp.id);
                     _exit(0);
                 }
@@ -657,6 +696,81 @@ int main(int argc, char **argv)
                     {
                         send_udp_wait_ack(udp.id, udp.buffer, msg_len + 1, nbs.next, "FL_S_ACK");
                     }
+                }
+
+                // Server exit
+                else if (strcmp(header_buff, "SRV_EXIT") == 0 && src_port == nbs.prev)
+                {
+                    struct Date date;
+                    int sock, msg_len, ret;
+                    char buffer[MAX_TCP_MSG + 1];
+
+                    send_ack_udp(udp.id, "S_XT_ACK", src_port);
+
+                    sock = tcp_connect_init(nbs.prev);
+
+                    for (date = start_date; sooner(date, today); dnext(&date))
+                    {
+                        if (get_saved_elab(my_port, 'n', date) == -1)
+                        {
+                            msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", 'n', date.y, date.m, date.d);
+                            send_tcp(sock, buffer, msg_len);
+
+                            recv_tcp(sock, buffer);
+                            msg_len = sscanf(buffer, "%s %d", header_buff, &ret);
+                            if (msg_len == 2 && strcmp(header_buff, "ELAB_ACK") == 0)
+                            {
+                                char file[MAX_FILE_LEN + 1];
+                                get_file_string(file, my_port, 'n', ENTRIES, date);
+                                remove(file);
+                                create_elab(my_port, 'n', date, ret);
+                            }
+                        }
+                        if (get_saved_elab(my_port, 't', date) == -1)
+                        {
+                            msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", 't', date.y, date.m, date.d);
+                            send_tcp(sock, buffer, msg_len);
+
+                            recv_tcp(sock, buffer);
+                            msg_len = sscanf(buffer, "%s %d", header_buff, &ret);
+                            if (msg_len == 2 && strcmp(header_buff, "ELAB_ACK") == 0)
+                            {
+                                char file[MAX_FILE_LEN + 1];
+                                get_file_string(file, my_port, 't', ENTRIES, date);
+                                remove(file);
+                                create_elab(my_port, 't', date, ret);
+                            }
+                        }
+                    }
+                    close(sock);
+
+                    // tentativo di disconnessione
+                    if (!send_udp_wait_ack(udp.id, "CLT_EXIT", HEADER_LEN, server_port, "C_EX_ACK"))
+                    {
+                        printf("Errore: disconnessione non riuscita\n");
+                    }
+
+                    printf("Disconnessione riuscita\n"); // chiusura socket e terminazione
+
+                    send_udp_wait_ack(udp.id, "SRV_EXIT", HEADER_LEN, nbs.next, "S_XT_ACK");
+
+                    // accept elab req
+
+                    if ((sock = accept_connection(listener_s.id)) == -1)
+                    {
+                        printf("Errore: impossibile accettare connessione sul listener\n");
+                    }
+                    else
+                    {
+                        printf("TCP: richiesta di connessione accettata sul socket %d\n", sock);
+                    }
+
+                    handle_tcp_socket(my_port, sock);
+                    close(sock);
+
+                    close(listener_s.id);
+                    close(udp.id);
+                    _exit(0);
                 }
             }
             FD_CLR(udp.id, &readset);

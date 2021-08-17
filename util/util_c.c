@@ -524,6 +524,8 @@ void handle_tcp_socket(int port, int sock)
                 return;
             }
             send_all_entries_from_file(file, sock);
+
+            return;
         }
         else if (strcmp(header_buff, "EXIT_PRV") == 0)
         {
@@ -663,9 +665,9 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
             else if (strcmp(header_buff, "FL_S_REQ") == 0)
             {
                 printf("UDP: ritornato messaggio '%s'\n", buffer);
+                send_ack_udp(udp, "FL_S_ACK", nbs.prev);
 
                 create_elab(port, type, date, tot);
-                send_ack_udp(udp, "FL_S_ACK", HEADER_LEN);
                 return tot;
             }
         }

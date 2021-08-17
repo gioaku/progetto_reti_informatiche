@@ -29,6 +29,10 @@ void peer_file_lock()
 int peer_file_free(){
     return connected_peers.lock == 0;
 };
+
+int get_lock(){
+    return connected_peers.lock;
+}
 // Ritorna connected_peers.peers
 int get_n_peers()
 {

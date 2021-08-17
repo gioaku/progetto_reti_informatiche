@@ -85,6 +85,7 @@ int main(int argc, char **argv)
                 char date_buffer[DATE_LEN + 1];
                 if (!peer_file_free())
                 {
+                    printf("Richiesta rifiutata, lock: %d\n", get_lock());
                     continue;
                 }
                 // ack dell'arrivo della richiesta
@@ -184,6 +185,7 @@ int main(int argc, char **argv)
 
                 if (!peer_file_free())
                 {
+                    printf("Richiesta rifiutata, lock: %d\n", get_lock());
                     continue;
                 }
 
@@ -311,9 +313,9 @@ int main(int argc, char **argv)
                         remove_peer(port);
                     }
                 }
-                
+
                 remove_peer(first);
-                
+
                 close(sock.id);
                 _exit(0);
             }

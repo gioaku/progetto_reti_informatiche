@@ -17,6 +17,7 @@ void peer_file_init();
 void peer_file_unlock();
 void peer_file_lock();
 int peer_file_free();
+int get_lock();
 int get_n_peers();
 void peer_file_signal();
 int peer_file_wait();

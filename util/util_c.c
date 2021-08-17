@@ -298,8 +298,8 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         return ret;
     }
 
-    // se siamo solo due chiedo i dati, li aggiungo, elaboro, salvo, ritorno
-    if (nbs.tot < 2)
+    if (nbs.tot > 1)
+    /*
     {
         FILE *fd;
         int qty;
@@ -327,26 +327,27 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
         create_elab(port, type, date, ret);
         return ret;
     }
-
-    sock = tcp_connect_init(nbs.next);
-
-    msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
-
-    send_tcp(sock, buffer, msg_len);
-
-    recv_tcp(sock, buffer);
-    close(sock);
-
-    msg_len = sscanf(buffer, "%s %d", header_buff, &ret);
-    if (msg_len == 2 && strcmp(header_buff, "ELAB_ACK") == 0 && ret != -1)
+*/
     {
-        char file[MAX_FILE_LEN + 1];
-        get_file_string(file, port, type, ENTRIES, date);
-        remove(file);
-        create_elab(port, type, date, ret);
-        return ret;
-    }
+        sock = tcp_connect_init(nbs.next);
 
+        msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
+
+        send_tcp(sock, buffer, msg_len);
+
+        recv_tcp(sock, buffer);
+        close(sock);
+
+        msg_len = sscanf(buffer, "%s %d", header_buff, &ret);
+        if (msg_len == 2 && strcmp(header_buff, "ELAB_ACK") == 0 && ret != -1)
+        {
+            char file[MAX_FILE_LEN + 1];
+            get_file_string(file, port, type, ENTRIES, date);
+            remove(file);
+            create_elab(port, type, date, ret);
+            return ret;
+        }
+    }
     // altirmenti provo a cercare qualcuno che abbia tutti i dati
     if (server_port != -1)
     {

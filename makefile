@@ -3,8 +3,8 @@ all: ./ds ./peer
 ./peer: ./peer.o ./util/msg.o ./util/util_c.o ./util/neighbors.o ./util/util.o ./util/date.o
 	gcc -Wall ./peer.o ./util/msg.o ./util/util_c.o ./util/neighbors.o ./util/util.o ./util/date.o -o ./peer
 
-./ds: ./ds.o ./util/util_s.o ./util/util.o ./util/peer_file.o ./util/msg.o  ./util/neighbors.o ./util/date.o
-	gcc -Wall ./ds.o ./util/util_s.o ./util/util.o ./util/peer_file.o ./util/msg.o ./util/neighbors.o ./util/date.o -o ./ds
+./ds: ./ds.o ./util/util_s.o ./util/util.o ./util/peerlist.o ./util/msg.o  ./util/neighbors.o ./util/date.o
+	gcc -Wall ./ds.o ./util/util_s.o ./util/util.o ./util/peerlist.o ./util/msg.o ./util/neighbors.o ./util/date.o -o ./ds
 
 ./peer.o: ./peer.c ./util/util_c.h 
 	gcc -Wall -c ./peer.c -o ./peer.o
@@ -12,8 +12,8 @@ all: ./ds ./peer
 ./ds.o: ./ds.c ./util/util_s.h
 	gcc -Wall -c ./ds.c -o ./ds.o
 
-./util/peer_file.o: ./util/peer_file.c ./util/peer_file.h ./util/util.h ./util/neighbors.h
-	gcc -Wall -c ./util/peer_file.c -o ./util/peer_file.o
+./util/peerlist.o: ./util/peerlist.c ./util/peerlist.h ./util/util.h ./util/neighbors.h
+	gcc -Wall -c ./util/peerlist.c -o ./util/peerlist.o
 
 ./util/util.o: ./util/util.c ./util/util.h 
 	gcc -Wall -c ./util/util.c -o ./util/util.o
@@ -72,5 +72,14 @@ clean:
 	echo 405 > ./data/5004/n/entries/2021_08_01.txt
 	echo 406 > ./data/5004/n/entries/2021_08_02.txt
 	echo 407 > ./data/5004/n/entries/2021_08_03.txt
+	
+	mkdir -p ./data/5005/n/entries/
+	echo 501 > ./data/5005/n/entries/2021_07_28.txt
+	echo 502 > ./data/5005/n/entries/2021_07_29.txt
+	echo 503 > ./data/5005/n/entries/2021_07_30.txt
+	echo 504 > ./data/5005/n/entries/2021_07_31.txt
+	echo 505 > ./data/5005/n/entries/2021_08_01.txt
+	echo 506 > ./data/5005/n/entries/2021_08_02.txt
+	echo 507 > ./data/5005/n/entries/2021_08_03.txt
 	
 	

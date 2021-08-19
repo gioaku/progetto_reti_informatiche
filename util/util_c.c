@@ -63,6 +63,13 @@ void help_client(int i)
     return;
 }
 
+void print_client_commands_help()
+{
+    int i;
+    for (i = 0; i < 5; i++)
+        help_client(i);
+}
+
 int get_path_string(char *path, int port, char type, char *dir)
 {
     int len;
@@ -258,7 +265,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     int sock;
     int msg_len;
     // buffer per la comunicazione
-    char buffer[MAX_TCP_MSG + 1], header_buff[HEADER_LEN + 1];
+    char buffer[MAX_UDP_MSG + 1], header_buff[HEADER_LEN + 1];
     // porta ricevuta
     int peer_port;
 
@@ -268,6 +275,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     {
         return ret;
     }
+
     // se non ci sono altri ritorno la somma dei miei e la salvo
     if (nbs.tot == 0)
     {
@@ -277,7 +285,6 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     }
 
     // chiedo ai miei vicini se hanno il dato
-
     sock = tcp_connect_init(nbs.prev);
 
     msg_len = sprintf(buffer, "ELAB_REQ %c %04d_%02d_%02d", type, date.y, date.m, date.d);
@@ -299,35 +306,6 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     }
 
     if (nbs.tot > 1)
-    /*
-    {
-        FILE *fd;
-        int qty;
-
-        sock = tcp_connect_init(nbs.prev);
-        msg_len = sprintf(buffer, "SEND_ALL %c %04d_%02d_%02d", type, date.y, date.m, date.d);
-        send_tcp(sock, buffer, msg_len);
-        fd = open_reg(port, type, date, "a");
-
-        while (recv_tcp(sock, buffer) > 0)
-        {
-
-            msg_len = sscanf(buffer, "%s %d", header_buff, &qty);
-            header_buff[HEADER_LEN] = '\0';
-
-            if (msg_len == 2 && strcmp("NW_ENTRY", header_buff) == 0)
-            {
-                send_tcp(sock, "NW_E_ACK", HEADER_LEN);
-
-                fprintf(fd, "%d\n", qty);
-                ret += qty;
-            }
-        }
-
-        create_elab(port, type, date, ret);
-        return ret;
-    }
-*/
     {
         sock = tcp_connect_init(nbs.next);
 
@@ -348,6 +326,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
             return ret;
         }
     }
+
     // altirmenti provo a cercare qualcuno che abbia tutti i dati
     if (server_port != -1)
     {
@@ -363,6 +342,7 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
     msg_len = sscanf(buffer, "%s %d", header_buff, &peer_port);
     buffer[msg_len] = '\0';
 
+    // se qualcuno li ha tutti glieli chiedo, salvo e ritorno
     if (peer_port)
     {
         int qty;
@@ -389,7 +369,8 @@ int get_total(int udp, int port, char type, struct Date date, struct Neighbors n
                 ret += qty;
             }
         }
-
+        
+        close(sock);
         create_elab(port, type, date, ret);
         return ret;
     }
@@ -492,6 +473,7 @@ void handle_tcp_socket(int port, int sock)
     header_buff[HEADER_LEN] = '\0';
     while (ret > 0)
     {
+        // richiesta di elaborazione relativa a una query
         if (strcmp(header_buff, "ELAB_REQ") == 0)
         {
             char type;
@@ -509,6 +491,7 @@ void handle_tcp_socket(int port, int sock)
             send_tcp(sock, buffer, msg_len);
         }
 
+        // richiesta di tutte le entries relative a una query
         else if (strcmp(header_buff, "SEND_ALL") == 0)
         {
             char type;
@@ -528,6 +511,8 @@ void handle_tcp_socket(int port, int sock)
 
             return;
         }
+
+        // uscita del vicino precedere e ricezione delle sue entries
         else if (strcmp(header_buff, "EXIT_PRV") == 0)
         {
             char type;
@@ -542,7 +527,7 @@ void handle_tcp_socket(int port, int sock)
             {
                 strncpy(header_buff, buffer, HEADER_LEN);
                 header_buff[HEADER_LEN] = '\0';
-                // se recv_all
+                // mi sta per mandare le entries complete relative a una query
                 if (strcmp(header_buff, "RECV_ALL") == 0)
                 {
                     if (save_elab)
@@ -566,7 +551,7 @@ void handle_tcp_socket(int port, int sock)
                     }
                 }
 
-                // se recv_sme
+                // mi sta per mandare alcune delle entries relative a una query
                 else if (strcmp(header_buff, "RECV_SME") == 0)
                 {
                     if (save_elab)
@@ -588,7 +573,7 @@ void handle_tcp_socket(int port, int sock)
                     }
                 }
 
-                // se nw_entry
+                // nuova entry
                 else if (strcmp(header_buff, "NW_ENTRY") == 0)
                 {
                     int qty;
@@ -603,6 +588,7 @@ void handle_tcp_socket(int port, int sock)
                 }
             }
 
+            // se necessario salvo ultime entries inviate
             if (save_elab)
             {
                 create_elab(port, type, date, sum);
@@ -638,6 +624,7 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
             sscanf(buffer, "%s", header_buff);
             header_buff[HEADER_LEN] = '\0';
 
+            // qualcuno mi vuole mandare delle entries
             if (strcmp(header_buff, "PROP_SME") == 0)
             {
                 sscanf(buffer, "%s %d", header_buff, &recv_port);
@@ -664,6 +651,8 @@ int collect_all_entries(int port, int udp, char type, struct Date date)
                     }
                 }
             }
+
+            // ritorno del flood_some
             else if (strcmp(header_buff, "FL_S_REQ") == 0)
             {
                 printf("UDP: ritornato messaggio '%s'\n", buffer);

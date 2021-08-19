@@ -19,14 +19,12 @@
 #define USEC 15000
 // Tentativi per inviare un messaggio
 #define ACK_TRIES 10
-// Massima lunghezza di un'entry di aggiornamento con header (deriva dal massimo numero di peer connessi)
-#define MAX_ENTRY_UPDATE 630
 // Stringa di localhost
 #define LOCALHOST "127.0.0.1"
 // Massima lunghezza messaggio udp
-#define MAX_UDP_MSG 630
+#define MAX_UDP_MSG 26
 // Massima lunghezza messaggio tcp
-#define MAX_TCP_MSG 630
+#define MAX_TCP_MSG 21
 // Tutte le porte per le receive
 #define ALL_PORT -1
 

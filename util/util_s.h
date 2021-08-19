@@ -14,7 +14,7 @@
 // Gestione date
 #include "date.h"
 // Gestione peer graph
-#include "peer_file.h"
+#include "peerlist.h"
 // Gestione messaggi
 #include "msg.h"
 
@@ -24,9 +24,9 @@
 // Path della directory che contiene la start date
 #define START_DATE_DIR "./data/ds/"
 // Massima lunghezza di un messaggio proveniente da stdin per il server
-#define MAX_STDIN_S 30
+#define MAX_STDIN_S 19
 // Massima lunghezza di un comando per il server
-#define MAX_COMMAND_S 13
+#define MAX_COMMAND_S 14
 
 // Elenco dei comandi disponibili lato server
 void print_server_commands();

@@ -32,7 +32,7 @@ int tcp_listener_init(struct TcpSocket *sock, int port)
     }
 
     set_address(&(sock->addr), (socklen_t *)&(sock->addr_len), port);
-    
+
     reuse = 1;
     // Per evitare che il socket rimanga occupato quando il programma viene forzato a uscire
     if (setsockopt(sock->id, SOL_SOCKET, SO_REUSEADDR, (const char *)&reuse, sizeof(reuse)) < 0)
@@ -73,10 +73,18 @@ int accept_connection(int listener)
 {
     struct sockaddr_in addr;
     socklen_t addr_len;
+    int ret;
 
     addr_len = sizeof(addr);
-
-    return accept(listener, (struct sockaddr *)&addr, &addr_len);
+    if ((ret = accept(listener, (struct sockaddr *)&addr, &addr_len)) == -1)
+    {
+        printf("Errore: <accept_connection> impossibile accettare connessione sul listener\n");
+    }
+    else
+    {
+        printf("TCP: richiesta di connessione accettata sul socket %d\n", ret);
+    }
+    return ret;
 }
 
 int s_recv_udp(int socket, char *buffer, int buff_l)
@@ -140,11 +148,11 @@ int recv_udp(int socket, char *buffer, int buff_l, int port, char *correct_heade
         // se messaggio diverso scarta
         if (port != recv_port && port != ALL_PORT)
         {
-            printf("Warning: [R] Arrivato un messaggio %s inatteso da [err] %d mentre attendevo %s da %d, scartato\n", header_buff, recv_port, correct_header, port);
+            printf("Warning: [R] Arrivato un messaggio %s inatteso da %d [err] mentre attendevo %s da %d, scartato\n", header_buff, recv_port, correct_header, port);
         }
         else if (strcmp(correct_header, header_buff) != 0)
         {
-            printf("Warning: [R] Arrivato un messaggio [err] %s inatteso da %d mentre attendevo %s da %d, scartato\n", header_buff, recv_port, correct_header, port);
+            printf("Warning: [R] Arrivato un messaggio %s [err] inatteso da %d mentre attendevo %s da %d, scartato\n", header_buff, recv_port, correct_header, port);
         }
 
         // se messaggio giusto ritorna recv_port
@@ -209,7 +217,7 @@ void send_tcp(int sock, char *buffer, int msg_len)
 
     if (sock < 0)
     {
-        printf("Errore: [S] impossibile inviare sock: %d\n", sock);
+        printf("Errore: [S] impossibile inviare messaggi su sock: %d\n", sock);
         return;
     }
 

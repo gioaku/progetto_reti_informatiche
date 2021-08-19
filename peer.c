@@ -13,7 +13,7 @@ struct UdpSocket udp;
 char command_buffer[MAX_STDIN_C];
 
 // Listener socket
-struct TcpSocket listener_s;
+struct TcpSocket listener;
 
 // Struttura per mantenere lo stato dei vicini
 struct Neighbors nbs;
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     }
 
     // inizializzo listener non attivo
-    listener_s.id = -1;
+    listener.id = -1;
 
     // inizializzo set di descrittori
     FD_SET(0, &master);
@@ -77,9 +77,7 @@ int main(int argc, char **argv)
             // help
             if (strcmp(command, "help") == 0)
             {
-                int i;
-                for (i = 0; i < 5; i++)
-                    help_client(i);
+                print_client_commands_help();
             }
 
             // nbs
@@ -123,7 +121,7 @@ int main(int argc, char **argv)
                 }
 
                 // apertura listener tcp
-                if (tcp_listener_init(&listener_s, my_port) == -1)
+                if (tcp_listener_init(&listener, my_port) == -1)
                 {
                     printf("Errore: Impossibile creare socket di ascolto\n");
                     exit(1);
@@ -222,8 +220,8 @@ int main(int argc, char **argv)
 
                 printf("Connessione riuscita\n");
 
-                FD_SET(listener_s.id, &master);
-                fdmax = fdmax > listener_s.id ? fdmax : listener_s.id;
+                FD_SET(listener.id, &master);
+                fdmax = fdmax > listener.id ? fdmax : listener.id;
 
                 // stampa vicini
                 print_nbs(my_port, nbs);
@@ -420,7 +418,7 @@ int main(int argc, char **argv)
                 }
 
                 // chiusura socket e terminazione
-                close(listener_s.id);
+                close(listener.id);
                 close(udp.id);
                 _exit(0);
             }
@@ -432,33 +430,26 @@ int main(int argc, char **argv)
         }
 
         // richiesta di connessione sul socket listener
-        if (FD_ISSET(listener_s.id, &readset))
+        if (FD_ISSET(listener.id, &readset))
         {
             int new_sd;
             pid_t pid;
 
-            if ((new_sd = accept_connection(listener_s.id)) == -1)
-            {
-                printf("Errore: impossibile accettare connessione sul listener\n");
-            }
-            else
-            {
-                printf("TCP: richiesta di connessione accettata sul socket %d\n", new_sd);
-            }
-
+            new_sd = accept_connection(listener.id);
+            
             // fork per gestire la connessione tcp
             pid = fork();
             if (pid == 0)
             {
 
-                close(listener_s.id);
+                close(listener.id);
                 handle_tcp_socket(my_port, new_sd);
                 close(new_sd);
                 exit(0);
             }
 
             close(new_sd);
-            FD_CLR(listener_s.id, &readset);
+            FD_CLR(listener.id, &readset);
         }
 
         // messaggio sul socket udp
@@ -572,15 +563,8 @@ int main(int argc, char **argv)
 
                     // accept elab req
 
-                    if ((new_sd = accept_connection(listener_s.id)) == -1)
-                    {
-                        printf("Errore: impossibile accettare connessione sul listener\n");
-                    }
-                    else
-                    {
-                        printf("TCP: richiesta di connessione accettata sul socket %d\n", new_sd);
-                    }
-
+                    new_sd = accept_connection(listener.id);
+                    
                     handle_tcp_socket(my_port, new_sd);
                     close(new_sd);
 
@@ -600,7 +584,7 @@ int main(int argc, char **argv)
                     }
 
                     printf("Disconnessione riuscita\n"); // chiusura socket e terminazione
-                    close(listener_s.id);
+                    close(listener.id);
                     close(udp.id);
                     _exit(0);
                 }
@@ -632,7 +616,6 @@ int main(int argc, char **argv)
                     }
 
                     ret = get_saved_elab(my_port, type, date);
-                    printf("Debug: after flood all myport: %d, ret: %d, get_entries_sum: %d\n", my_port, ret, get_entries_sum(my_port, type, date));
 
                     if (ret > -1 && get_entries_sum(my_port, type, date))
                     {
@@ -756,19 +739,12 @@ int main(int argc, char **argv)
 
                     // accept elab req
 
-                    if ((sock = accept_connection(listener_s.id)) == -1)
-                    {
-                        printf("Errore: impossibile accettare connessione sul listener\n");
-                    }
-                    else
-                    {
-                        printf("TCP: richiesta di connessione accettata sul socket %d\n", sock);
-                    }
-
+                    sock = accept_connection(listener.id);
+                    
                     handle_tcp_socket(my_port, sock);
                     close(sock);
 
-                    close(listener_s.id);
+                    close(listener.id);
                     close(udp.id);
                     _exit(0);
                 }

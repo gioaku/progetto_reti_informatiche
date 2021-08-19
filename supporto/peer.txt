@@ -1,0 +1,212 @@
+***PEER***
+
+// numero di porta
+    my_port
+// numero di porta del server
+    server_port
+// data di inizio e data odierna
+    start_date
+    today
+// socket udp
+    udp
+// buffer comandi da stdin
+    command_buffer
+// socket di ascolto tcp
+    listener
+// vicini
+    nbs
+// gestione input e messaggi 
+    master
+    readset
+    fdmax   
+
+arrivo comando da stdin
+    help
+        print_client_commands_help
+    nbs
+        print_nbs
+    start addr port
+        tcp_listener_init
+        send CONN_REQ to server
+        recv NBR_LIST
+        recv SET_TDAY
+        recv SET_SDAY
+    add type qty
+        append_entry
+    get aggr type period
+        if (aggr == 't')
+            for date in [from, to]
+                sum += get_total
+        if (aggr == 'v')
+            old = get_total(from - 1)
+            for date in [from, to]
+                new = get_total
+                result = new - old
+                old = new
+    stop
+        send_entries_to_next
+        send CLT_EXIT to server
+        close listener
+        close udp
+        exit
+
+richiesta di connessione sul listener
+    accept_connection
+    fork
+        figlio: handle_tcp_socket
+
+arrivo messaggio dal server
+    PRE_UPDT
+        send PREV_ACK to server
+        aggiornamento vicini
+    NXT_UPDT
+        send NEXT_ACK to server
+        aggiornamento vicini
+    SET_TDAY
+        send TDAY_ACK to server
+        aggiornamento today
+    SRV_EXIT
+        send S_XT_ACK to server
+
+        for date in [start_date, today -1]
+            get_total('t')
+            get_total('n')
+        
+        send SRV_EXIT to next
+        
+        accept_connection from next
+        handle_tcp_socket
+        close connection
+        
+        recv SRV_EXIT from prev
+        
+        tcp_connect_init to prev
+        close connection
+
+        send CLT_EXIT to server
+        close listener
+        close udp
+        exit
+        
+arrivo messaggio udp da un peer
+    FL_A_REQ
+        send FL_A_ACK to peer
+        if get_saved_elab && get_entries_sum
+            send PROP_ALL to peer requesting
+        if next == peer requesting
+            send PROP_ALL to next
+        else 
+            send FL_A_REQ to next
+    FL_S_REQ
+        send FL_S_ACK to peer
+        if file_exists
+            send PROP_SME to peer requesting
+        send FL_S_REQ to next
+    SRV_EXIT
+        send S_XT_ACK to peer
+        
+        tcp_connect_init to prev
+            for date in [from, today - 1]
+                if(!get_saved_elab('t'/'n'))
+                    send ELAB_REQ
+                    recv ELAB_ACK
+                    create_elab
+        close connection
+
+        send CLT_EXIT to server
+
+        send SRV_EXIT to next
+
+        accept_connection from next
+        handle_tcp_socket
+        close connection
+
+        close udp
+        close listener
+        exit
+
+funzioni 
+
+get_total
+    if get_saved_elab
+        return elab
+    if !(ho vicini)
+        return get_entries_sum
+    tcp_connect_init to prev
+        send ELAB_REQ
+        if recv ELAB_ACK 
+            return elab
+    close connection
+    tcp_connect_init to next
+        send ELAB_REQ
+        if recv ELAB_ACK 
+            return elab
+    close connection
+
+    send LOCK_REQ to server
+
+    send FL_A_REQ to next
+    recv PROP_ALL from peer
+    if (peer)
+        tcp_connect_init to peer
+            send SEND_ALL
+            while recv NW_ENTRY
+                send NW_E_ACK
+                save_entry
+        close connection
+        create_elab
+        return elab
+    
+    send FL_S_REQ to next
+        elab = get_entries_sum
+        while recv
+            PROP_SME
+                tcp_connect_init
+                    send SEND_ALL
+                    while recv NW_ENTRY
+                        send NW_E_ACK
+                        append_entry
+                        elab += qty
+            FL_S_REQ
+                send FL_S_ACK
+                create_elab
+                break
+    send UNLK_REQ to server
+    return elab
+
+handle_tcp_socket
+    ELAB_REQ
+        get_saved_elab
+        send ELAB_ACK
+    SEND_ALL
+        open file
+        while scan(qty) != EOF
+            send NW_ENTRY
+            recv NW_E_ACK
+        close file
+    EXIT_PRV
+        send EX_P_ACK
+        while recv 
+            RECV_ALL
+                if bisogna 
+                    save_elab                
+                if get_saved_elab
+                    send RECV_SKP
+                else 
+                    send RECV_RDY
+                    elimina entries
+                    ricorda che bisogna salvare alla fine    
+            RECV_SME
+                if bisogna  
+                    save_elab
+
+                if get_saved_elab
+                    send RECV_SKP
+                else
+                    send RECV_RDY
+                    ricorda che non bisogna salvare
+            NW_ENTRY
+                append_entry
+                send NW_E_ACK
+        if bisogna 
+            save_elab

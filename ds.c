@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     FD_ZERO(&readset);
 
     // nessun peer connesso
-    peer_file_init();
+    peerlist_init();
 
     // creazione socket udp
     if (udp_socket_init(&sock, my_port) == -1)
@@ -83,9 +83,10 @@ int main(int argc, char **argv)
                 int msg_len;
                 // buffer per scrivere la data da inviare
                 char date_buffer[DATE_LEN + 1];
-                if (!peer_file_free())
+                if (!peerlist_free())
                 {
                     printf("Richiesta rifiutata, lock: %d\n", get_lock());
+                    FD_CLR(sock.id, &readset);
                     continue;
                 }
                 // ack dell'arrivo della richiesta
@@ -110,7 +111,7 @@ int main(int argc, char **argv)
                     msg_len = sprintf(sock.buffer, "%s", "NBR_LIST");
 
                 else
-                    msg_len = sprintf(sock.buffer, "%s %d %d", "NBR_LIST", nbs.prev, nbs.next);
+                    msg_len = sprintf(sock.buffer, "%s %04d %04d", "NBR_LIST", nbs.prev, nbs.next);
 
                 sock.buffer[msg_len] = '\0';
 
@@ -183,7 +184,7 @@ int main(int argc, char **argv)
                 // lunghezza del messaggio
                 int msg_len;
 
-                if (!peer_file_free())
+                if (!peerlist_free())
                 {
                     printf("Richiesta rifiutata, lock: %d\n", get_lock());
                     continue;
@@ -233,7 +234,7 @@ int main(int argc, char **argv)
                 send_ack_udp(sock.id, "LOCK_ACK", src_port);
                 if (get_position(src_port) != -1)
                 {
-                    peer_file_lock();
+                    peerlist_lock();
                 }
             }
             else if (strcmp(header_buff, "UNLK_REQ") == 0)
@@ -241,7 +242,7 @@ int main(int argc, char **argv)
                 send_ack_udp(sock.id, "UNLK_ACK", src_port);
                 if (get_position(src_port) != -1)
                 {
-                    peer_file_unlock();
+                    peerlist_unlock();
                 }
             }
         }
@@ -271,8 +272,8 @@ int main(int argc, char **argv)
                 print_peers();
             }
 
-            // showneighbor
-            else if (strcmp(command, "showneighbor\0") == 0)
+            // showneighbors
+            else if (strcmp(command, "showneighbors\0") == 0)
             {
 
                 if (input_number == 2)

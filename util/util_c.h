@@ -37,7 +37,7 @@
 // Massima lunghezza di un file
 #define MAX_FILE_LEN 36
 // Massima lunghezza di un messaggio proveniente da stdin per il peer
-#define MAX_STDIN_C 40
+#define MAX_STDIN_C 19
 // Massima lunghezza di un comando per il peer
 #define MAX_COMMAND_C 6
 
@@ -46,6 +46,9 @@ void print_client_commands();
 
 // Ulteriore ausilio per comprendere i comandi
 void help_client(int i);
+
+// Elenco comandi esteso 
+void print_client_commands_help();
 
 // Scrive la stringa del path dai dati forniti
 int get_path_string(char *path, int port, char type, char *dir);
@@ -80,7 +83,7 @@ void create_elab(int port, char type, struct Date date, int qty);
 // Gestisce una richiesta di connessione tcp
 void handle_tcp_socket(int port, int sock);
 
-// Raccoglie le entries(type, date) dei peer di tutta la rete
+// Raccoglie le entries(type, date) dei peer di tutta la rete una volta mandata la flood_some
 int collect_all_entries(int port, int udp, char type, struct Date date);
 
 // Manda tutte le entries al vicino successivo

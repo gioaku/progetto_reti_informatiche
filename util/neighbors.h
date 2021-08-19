@@ -11,6 +11,7 @@ struct Neighbors
     int tot;
 };
 
+// Stampa i vicini nbs di peer
 void print_nbs(int, struct Neighbors);
 
 #endif

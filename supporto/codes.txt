@@ -1,0 +1,32 @@
+peer to server udp
+           
+CONN_REQ;   CONN_ACK;   Richiesta di connessione 
+CLT_EXIT;   C_EX_ACK;   Uscita del peer
+LOCK_REQ;   LOCK_ACK;   Richiesta di blocco della stuttra dei peer
+UNLK_REQ;   UNLK_ACK;   Richiesta di rilascio del blocco della stuttura dei peer
+
+server to peer udp
+
+NBR_LIST [prev next];   LIST_ACK;   Invio lista di vicini a un peer appena entrato
+PRE_UPDT port;          PREV_ACK;   Aggiornamento vicino precedente
+NXT_UPDT port;          NEXT_ACK;   Aggiornamento vicino successivo
+SET_TDAY yyyy_mm_dd;    TDAY_ACK;   Comunicazione data odierna
+SET_SDAY yyyy_mm_dd;    SDAY_ACK;   Comunicazione data inizio raccolta dati
+SRV_EXIT;               S_XT_ACK;   Comunicazione chiusura rete 
+
+peer to peer udp
+
+FL_A_REQ port type yyyy_mm_dd;  FL_A_ACK;   Flood per chiedere se qualcuno ha tutti i dati relativi a una query
+PROP_ALL {port | 0};            PR_A_ACK;   Disponibile a inviarti tutti i dati relativi a una query
+FL_S_REQ port type yyyy_mm_dd;  FL_S_ACK;   Flood per chiedere dei dati relativi ad una query
+PROP_SME port;                  PR_S_ACK;   Disponibile a inviarti parte dei dati relativi a una query
+
+peer to peer tcp
+
+ELAB_REQ type yyyy_mm_dd;   ELAB_ACK {qty | -1};    Richiesta dato aggregato relativo a una query
+SEND_ALL type yyyy_mm_dd;                           Richiesta di tutte le entries possedute relative a una query
+NW_ENTRY qty;               NW_E_ACK;               Invio di una entry
+EXIT_PRV;                   EX_P_ACK;               Avviso di uscita da parte del vicino precedente
+RECV_ALL type yyyy_mm_dd;   {RECV_RDY | RECV_SKP};  Richiesta di ricezione di tutte le entries relative a una query
+RECV_SME type yyyy_mm_dd;   {RECV_RDY | RECV_SKP};  Richiesta di ricezione di alcune delle entries relative a una query
+   

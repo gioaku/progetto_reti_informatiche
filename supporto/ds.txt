@@ -1,0 +1,63 @@
+***DS***
+
+// numero di porta
+    my_port
+// data di inizio e data odierna
+    start_date
+    today
+// socket udp
+    sock
+// buffer di stdin
+    command_buffer
+// gestion input e messaggi
+    master
+    readset
+    fdmax   
+// struttura della rete dei peer
+    connected_peers
+
+arrivo messaggio peer
+    CONN_REQ
+        check unlocked
+        send CONN_ACK to peer
+        insert_peer
+        send NBR_LIST to peer
+        send SET_TDAY to peer
+        send SET_SDAY to peer
+        send PRE_UPDT to next
+        send NXT_UPDT to prev
+        print peers
+    CLT_EXIT
+        check unlocked
+        send C_EX_ACK to peer
+        remove_peer
+        send PRE_UPDT to next
+        send NXT_UPDT to prev
+    LOCK_REQ
+        send LOCK_ACK to peer
+        peerlist_lock
+    UNLK_REQ
+        send UNLK_ACK to peer
+        peerlist_unlock
+
+arrivo comando da stdin
+    help
+        print_server_commands
+    showpeers
+        print_peers
+    showneighbors [port]
+        if (port)
+            print_nbs(port)
+        else 
+            print_peers_nbs
+    esc
+        send SRV_EXIT to first
+        while recv CLT_EXIT from !first
+            remove_peer
+        remove_peer(first)
+        close udp socket
+        exit
+
+scattano le 18
+    for i in peers  
+        send SET_TDAY

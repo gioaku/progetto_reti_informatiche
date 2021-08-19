@@ -5,7 +5,7 @@
         "util_s.h": "c",
         "unistd.h": "c",
         "msg.h": "c",
-        "peer_file.h": "c",
+        "peerlist.h": "c",
         "random": "c",
         "stdio.h": "c",
         "inet.h": "c",

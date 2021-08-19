@@ -10,14 +10,13 @@
 
 #include "util_s.h"
 
-// Elenco dei comandi disponibili lato server
 void print_server_commands()
 {
     printf("Elenco dei comandi disponibili:\n");
-    printf("$ help                  - mostra elenco comandi e significato\n");
-    printf("$ showpeers             - mostra elenco peer connessi alla rete\n");
-    printf("$ showneighbor [<peer>] - mostra i neighbor di un peer o la lista completa se peer viene omesso\n");
-    printf("$ esc                   - termina il DS\n");
+    printf("$ help                   - mostra elenco comandi e significato\n");
+    printf("$ showpeers              - mostra elenco peer connessi alla rete\n");
+    printf("$ showneighbors [<peer>] - mostra i neighbor di un peer o la lista completa se peer viene omesso\n");
+    printf("$ esc                    - termina il DS\n");
 }
 
 struct Date get_start_date(struct Date today){

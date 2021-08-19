@@ -2,23 +2,23 @@
 Applicazione che implementa una rete peer-to-peer per la condivisione di dati relativi alla pandemia COVID-19.
 L'applicazione è formata da un discovery server (DS) che si occupa di mettere in comunicazione i diversi peer quando essi si vogliono connettere o disconnettere alla rete. Ogni peer poi ha la possibilità di inserire dati, richiederli agli altri peer ed effettuare delle elaborazioni su di essi.
 
-CONTENUTO PROGETTO
+## CONTENUTO PROGETTO
 
-## ds.c
+*ds.c*
 
 > Contiene il codice per eseguire il compito del discovery server.
 > Attraverso un socket UDP accetta messaggi di connessione e disconnessione da parte dei peer mantenendo aggiornata la lista e richieste di blocco e sblocco della rete per mantenerla statica durante le operazioni  di flood.
 > Accetta inoltre semplici comandi da tastiera per visualizzare informazioni sulla rete o per disconnettersi.
 > Inoltre mantiene aggiornati i peer sulla data da considerarsi corrente per l'inserimento dei dati.
 
-## peer.c
+*peer.c*
 
 > Contiene il codice per permettere ai peer di connettersi e disconnettersi dalla rete, aggiungere dati, condividerli ed elaborarli.
 > Attraverso un socket UDP comunica con il server e con gli altri peer per scambiare messaggi di coordinazione.
 > Attraverso un socket listener TCP accetta richieste di dati sensibili, scambiandoli sempre attraverso connessioni TCP. 
 > Sono disponibili dei comandi da terminale per inserire dati e per richiederne elaborazioni.
 
-## util/
+*util/*
 
 > Contiene i seguenti file di utilità con i relativi header:
 >>- date.c         file per la gestione e manipolazione di strutture 'Date'.
@@ -31,17 +31,17 @@ CONTENUTO PROGETTO
 >
 > Nei file.h sono presenti le definizio delle costanti e commenti che descrivono le diverse funzioni.
 
-## makefile
+*makefile*
 
-## exec.sh
+*exec.sh*
 
 > Compila il progetto attraverso il makefile e poi avvia il ds e 5 peer in locale.
 
-## data/
+*data/*
 
 > Contiene il registri dei peer secondo uno schema ad albero
 
-## support/
+*support/*
 
 > Contiene i seguenti file di documentazione:
 >
@@ -51,16 +51,16 @@ CONTENUTO PROGETTO
 >> peer.txt		   : descrizione in metacodice del comportamento dei peer
 
 		
-UTILIZZO
+## UTILIZZO
 
 > Per testare l'applicazione basta scaricare il progetto ed eseguire './exec.sh' che avvierà il DS e 5 peers in locale e inizializza dei dati in 'data/' (nuovi casi tra il 28/07/21 e il 03/08/21).
 > Usare poi i comandi default nel file commands.txt per eseguire delle semplici operazioni.
 	
-TOPOLOGIA
+## TOPOLOGIA
 
 > Lo stato della rete è mantenuto dal ds come una lista circolare in ordine di numero di porta in cui ogni peer ha un vicino prev e un vicino next. La rete ha la possibilità di essere bloccata attraverso una operazioni sulla variabile lock e mantiene il numero di peer connessi.
 
-ALGORITMI E STRUTTURE DATI
+## ALGORITMI E STRUTTURE DATI
 
  - Peerlist:
 > Sono principalmente comuni operazioni su una lista circolare ordinata di in cui il primo elemento non è necessariamente il più piccolo.
@@ -87,7 +87,7 @@ ALGORITMI E STRUTTURE DATI
 > Quando il DS si disconnette avvisa un peer *first* tramite un messaggio di `server-exit` e si mette in attesa che tutti i peer si disconnettano. *first* si assicura di avere tutte le somme dei giorni validi. Poi propaga la `server-exit` al vicino successivo e si mette a disposizione per inviare eventuali somme mancanti. Il successivo richiede i dati che non ha, avvisa il server di essersi disconnesso e propaga la `server-exit` mettendosi a sua volta a disposizione. Quando la notifica di `server-exit` torna a *first* esso per ultimo di disconnette, facendo capire al server che il messaggio ha fatto tutto il giro e si può disconnettere.
 > Questo fa in modo che tutti i peer abbiano gli stessi dati dopo che la rete è stata chiusa.
 
-VULNERABILITÀ
+## VULNERABILITÀ
 
 > La rete è completamente vulnerabile a qualunque peer malevolo che voglia falsificare i dati. Infatti il sistema si basa sulla fiducia in particolare dei vicini ma in generale di qualunque peer che sostenga di avere dei dati. Inoltre c'è la possibilità di bloccare l'accesso e la disconnessione dei peer con un semplice messaggio di lock ad DS. 
 >

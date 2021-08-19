@@ -23,6 +23,7 @@ CONTENUTO PROGETTO
 >>- util_c.c        	file che contiene funzioni generiche per il peer.
 >>- util_s.c        	file che contiene funzioni generiche per il discovery server.
 >>- util.c          	file che contiene funzioni generiche.
+>
 > Nei file.h sono presenti le definizio delle costanti e commenti che descrivono le diverse funzioni.
  - makefile
  - exec.sh

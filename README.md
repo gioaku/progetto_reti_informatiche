@@ -21,8 +21,8 @@ L'applicazione è formata da un discovery server (DS) che si occupa di mettere i
 *util/*
 
 > Contiene i seguenti file di utilità con i relativi header:
->>- date.c:  
-       file per la gestione e manipolazione di strutture 'Date'.
+>>- date.c  
+: file per la gestione e manipolazione di strutture 'Date'.
 >>- msg.c           file per la gestione di socket udp e tcp e relativi invii e ricezioni di messaggi.
 >>- peerlist.c      file per mantenere e modificare la struttura PeerList, lista di PeerElement, che rappresenta lo stato della rete.
 >>- neighbors.c     file che definisce la struttura Neighbors per la gestione dei vicini.

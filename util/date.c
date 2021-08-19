@@ -90,7 +90,7 @@ int update_date(struct Date *d)
     printf("Debug: <update_date>\n");
 
     now_time = time(NULL);
-    now_tm = gmtime(&now_time);
+    now_tm = localtime(&now_time);
 
     printf("Debug: <update_date> hour: %d\n", now_tm->tm_hour);
 

@@ -21,13 +21,13 @@ CONTENUTO PROGETTO
 ## util/
 
 > Contiene i seguenti file di utilità con i relativi header:
->>- date.c          |file per la gestione e manipolazione di strutture 'Date'.
->>- msg.c           |file per la gestione di socket udp e tcp e relativi invii e ricezioni di messaggi.
->>- peerlist.c      |file per mantenere e modificare la struttura PeerList, lista di PeerElement, che rappresenta lo stato della rete.
->>- neighbors.c     |file che definisce la struttura Neighbors per la gestione dei vicini.
->>- util_c.c        |file che contiene funzioni generiche per il peer.
->>- util_s.c        |file che contiene funzioni generiche per il discovery server.
->>- util.c          |file che contiene funzioni generiche.
+>>- date.c         file per la gestione e manipolazione di strutture 'Date'.
+>>- msg.c           file per la gestione di socket udp e tcp e relativi invii e ricezioni di messaggi.
+>>- peerlist.c      file per mantenere e modificare la struttura PeerList, lista di PeerElement, che rappresenta lo stato della rete.
+>>- neighbors.c     file che definisce la struttura Neighbors per la gestione dei vicini.
+>>- util_c.c        file che contiene funzioni generiche per il peer.
+>>- util_s.c        file che contiene funzioni generiche per il discovery server.
+>>- util.c          file che contiene funzioni generiche.
 >
 > Nei file.h sono presenti le definizio delle costanti e commenti che descrivono le diverse funzioni.
 
@@ -45,10 +45,10 @@ CONTENUTO PROGETTO
 
 > Contiene i seguenti file di documentazione:
 >
->> codes.txt		| sono presenti i dettagli degli header usati per la comunicazione
->> commands.txt   | comandi di default per testare i peer
->> ds.txt		   | descrizione in metacodice del comportamento del DS
->> peer.txt		   | descrizione in metacodice del comportamento dei peer
+>> codes.txt		: sono presenti i dettagli degli header usati per la comunicazione
+>> commands.txt   : comandi di default per testare i peer
+>> ds.txt		   : descrizione in metacodice del comportamento del DS
+>> peer.txt		   : descrizione in metacodice del comportamento dei peer
 
 		
 UTILIZZO

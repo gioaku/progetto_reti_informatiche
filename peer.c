@@ -10,7 +10,7 @@ struct Date start_date;
 struct UdpSocket udp;
 
 // Buffer stdin
-char command_buffer[MAX_STDIN_C];
+char command_buffer[MAX_STDIN_C + 1];
 
 // Listener socket
 struct TcpSocket listener;

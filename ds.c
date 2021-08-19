@@ -9,7 +9,7 @@ struct Date start_date;
 struct UdpSocket sock;
 
 // Buffer stdin
-char command_buffer[MAX_STDIN_S];
+char command_buffer[MAX_STDIN_S + 1];
 
 // Gestione input
 fd_set master;

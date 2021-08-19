@@ -8,7 +8,7 @@ peer
     nbs
 ds
     help
-    showpeers
-    showneighbors
+    showpeers 
+    showneighbors 5001
     esc
 

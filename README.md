@@ -77,6 +77,7 @@ ALGORITMI E STRUTTURE DATI
 VULNERABILITÀ
 
 > La rete è completamente vulnerabile a qualunque peer malevolo che voglia falsificare i dati. Infatti il sistema si basa sulla fiducia in particolare dei vicini ma in generale di qualunque peer che sostenga di avere dei dati. Inoltre c'è la possibilità di bloccare l'accesso e la disconnessione dei peer con un semplice messaggio di lock ad DS. 
----
+>
 > Il sistema del lock presenta delle vulnerabilità instrinseche. Potrebbe infatti bloccare lo stato della rete per lunghi periodi di tempo in caso di grande attività, ma allo stesso tempo permette di mandare più flood contemporaneamente che in casi di contemporateità potrebbero portare al fallimento delle stesse. Per valutare però queste problematiche con efficacia bisognerebbe testare l'applicazione in un contesto reale, nel quale essendo i dati già distribuiti questi problemi diventerebbero trascurabili.
+>
 > Inoltre la disconnessione del DS deve essere trattata come caso eccezionale oltre a non assicurare la validità dei dati relativi alla data nella quale avviene, l'incertezza su quali peer si riconnetteranno dopo un eventuale riaccensione della rete può portare al recupero di informazioni false riguarda a query su date precedenti allo spegnimento.

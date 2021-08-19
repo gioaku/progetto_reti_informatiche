@@ -51,6 +51,8 @@ L'applicazione è formata da un discovery server (DS) che si occupa di mettere i
 >>- **peer.txt**		descrizione in metacodice del comportamento dei peer
 
 **README.md**
+> 
+> this file
 		
 ## UTILIZZO
 

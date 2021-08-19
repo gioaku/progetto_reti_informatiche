@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     peerlist_init();
 
     // se time controller manda segnale invio la nuova data
-    signal(SIGUSR1, send_updated_date(&today, sock));
+    signal(SIGUSR1, send_updated_date);
 
     // creazione time controller
     time_controller = fork();

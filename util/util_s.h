@@ -35,4 +35,4 @@ void print_server_commands();
 struct Date get_start_date(struct Date today);
 
 // Manda a tutti peer la data aggiornata
-send_updated_date(struct Date *today, struct UdpSocket sock);
+void send_updated_date(int sig);

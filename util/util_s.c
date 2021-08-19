@@ -41,11 +41,12 @@ struct Date get_start_date(struct Date today)
     }
 }
 
-send_updated_date(struct Date *today, struct UdpSocket sock)
+void send_updated_date(int sig)
 {
-
+    extern struct Date today;
+    extern struct UdpSocket sock;
     update_date(&today);
-    
+
     // lunghezza del messaggio da inviare
     int msg_len;
     // buffer per la data da inviare

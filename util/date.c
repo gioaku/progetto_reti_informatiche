@@ -46,19 +46,23 @@ void dnext(struct Date *d)
     d->y++;
 }
 
-void dprev(struct Date *d){
+void dprev(struct Date *d)
+{
     d->d--;
-    if (dvalid(*d)){
+    if (dvalid(*d))
+    {
         return;
     }
     d->d = 31;
     d->m--;
-    if(d->m == 0){
+    if (d->m == 0)
+    {
         d->y--;
         d->m = 12;
         return;
     }
-    while(!dvalid(*d)){
+    while (!dvalid(*d))
+    {
         d->d--;
     }
 }
@@ -82,6 +86,8 @@ int update_date(struct Date *d)
 {
     time_t now_time;
     struct tm *now_tm;
+    
+    printf("Debug: <update_date>\n");
 
     now_time = time(NULL);
     now_tm = gmtime(&now_time);
@@ -93,7 +99,8 @@ int update_date(struct Date *d)
         mktime(now_tm);
     }
 
-    if (!dequal(*d, (struct Date){now_tm->tm_mday, now_tm->tm_mon + 1, now_tm->tm_year + 1900})){
+    if (!dequal(*d, (struct Date){now_tm->tm_mday, now_tm->tm_mon + 1, now_tm->tm_year + 1900}))
+    {
         *d = (struct Date){now_tm->tm_mday, now_tm->tm_mon + 1, now_tm->tm_year + 1900};
         return 1;
     }

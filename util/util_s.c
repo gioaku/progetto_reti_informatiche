@@ -19,9 +19,10 @@ void print_server_commands()
     printf("$ esc                    - termina il DS\n");
 }
 
-struct Date get_start_date(struct Date today){
+struct Date get_start_date(struct Date today)
+{
 
-    FILE* fd;
+    FILE *fd;
     if (!file_exists(START_DATE_FILE))
     {
         create_path(START_DATE_DIR);
@@ -37,5 +38,31 @@ struct Date get_start_date(struct Date today){
         fscanf(fd, DATE_FORMAT, &ret.y, &ret.m, &ret.d);
         fclose(fd);
         return ret;
-    } 
+    }
+}
+
+send_updated_date(struct Date *today, struct UdpSocket sock)
+{
+
+    update_date(&today);
+    
+    // lunghezza del messaggio da inviare
+    int msg_len;
+    // buffer per la data da inviare
+    char date_buffer[DATE_LEN];
+
+    //composizione messaggio
+    dtoa(date_buffer, today);
+    msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", date_buffer);
+    sock.buffer[msg_len] = '\0';
+    printf("Lista da inviare ai peer: %s (lunga %d byte)\n", sock.buffer, msg_len);
+
+    int i;
+    for (i = 0; i < get_n_peers(); i++)
+    {
+        if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, get_port(i), "TDAY_ACK"))
+        {
+            printf("Errore: impossibile comunicare data al peer %d\n", get_port(i));
+        }
+    }
 }

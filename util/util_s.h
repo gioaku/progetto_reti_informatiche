@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/wait.h>
 
 // Funzioni generiche
 #include "util.h"
@@ -17,7 +18,6 @@
 #include "peerlist.h"
 // Gestione messaggi
 #include "msg.h"
-
 
 // Path del file che contiene la start date
 #define START_DATE_FILE "./data/ds/start_date.txt"
@@ -33,3 +33,6 @@ void print_server_commands();
 
 // Restituisce la start date salvata se presente - altrimenti salva today e lo restituisce
 struct Date get_start_date(struct Date today);
+
+// Manda a tutti peer la data aggiornata
+send_updated_date(struct Date *today, struct UdpSocket sock);

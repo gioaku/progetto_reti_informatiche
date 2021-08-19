@@ -87,12 +87,8 @@ int update_date(struct Date *d)
     time_t now_time;
     struct tm *now_tm;
     
-    printf("Debug: <update_date>\n");
-
     now_time = time(NULL);
     now_tm = localtime(&now_time);
-
-    printf("Debug: <update_date> hour: %d\n", now_tm->tm_hour);
 
     // se sono passate le 18 si considera la data di domani
     if (now_tm->tm_hour > 17)

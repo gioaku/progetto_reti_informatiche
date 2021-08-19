@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     {
         while (1)
         {
-            if (!update_date(&today))
+            if (update_date(&today))
             {
                 kill(getppid(), SIGUSR1);
             }

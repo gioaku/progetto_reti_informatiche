@@ -45,10 +45,10 @@ L'applicazione è formata da un discovery server (DS) che si occupa di mettere i
 
 > Contiene i seguenti file di documentazione:
 >
->> **codes.txt**		: sono presenti i dettagli degli header usati per la comunicazione
->> **commands.txt**   : comandi di default per testare i peer
->> **ds.txt**		   : descrizione in metacodice del comportamento del DS
->> **peer.txt**		   : descrizione in metacodice del comportamento dei peer
+>>- **codes.txt**		: sono presenti i dettagli degli header usati per la comunicazione
+>>- **commands.txt**   : comandi di default per testare i peer
+>>- **ds.txt**		   : descrizione in metacodice del comportamento del DS
+>>- **peer.txt**		   : descrizione in metacodice del comportamento dei peer
 
 		
 ## UTILIZZO

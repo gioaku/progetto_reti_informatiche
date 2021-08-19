@@ -62,11 +62,12 @@ ALGORITMI E STRUTTURE DATI
 >>- type rappresenta il tipo di dati salvati (es. 't' / 'n')
 >>- aggr rappresenta se si tratta di un registro (entries) o di somme (elabs)
 >>- date nel formato yyyy_mm_dd
-    Per un peer 'port', una data 'date' e un tipo 'type' il peer ha:
-        tutti i dati e la somma di essi se esite data/port/type/entries/date.txt e data/port/type/elabs/date.txt
-        solo parte dei dati se esiste solo data/port/type/entries/date.txt
-        solo la somma di essi se esiste solo data/port/type/elabs/date.txt
-        nessun dato altrimenti
+>
+>Per un peer 'port', una data 'date' e un tipo 'type' il peer ha:
+>>- tutti i dati e la somma di essi se esite data/port/type/entries/date.txt e data/port/type/elabs/date.txt
+>>- solo parte dei dati se esiste solo data/port/type/entries/date.txt
+>>- solo la somma di essi se esiste solo data/port/type/elabs/date.txt
+>>- nessun dato altrimenti
 - Scambio di dati:
 > La prima volta che viene chiesta la somma dei dati relativi ad una data ed un tipo il peer *req_peer* fa girare un messaggio `flood-some`, ogni peer *prop_peer* che lo riceve e ha dei dati invia la propria disponibilità ad essere contattato attraverso una `prop-some`. A quel punto per ogni `prop-some` ricevuto il *req_peer* avvia una connessione tcp con ogni *prop_peer* e con una `send-all` richiede i dati posseduti che verranno inviati sequenzialmente tramite messaggi `new-entry`, che sommerà e salverà in un file elab.
 > Da li in poi un nuovo *new_req_peer* richiedente dati per gli stessi parametri non dovrà contattare nuovamente ogni peer ma facendo girare un messaggio `flood-all` avrà la risposta dal *req_peer* precedente che gli risponderà con una `prop-all` e interromperà la propagazione della `flood-all`. Sempre con la stessa procedura *req_peer* risponderà alla `send-all`, previa connessione, con tutte le entries da lui possedute.

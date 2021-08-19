@@ -16,6 +16,8 @@ fd_set master;
 fd_set readset;
 int fdmax;
 
+pid_t time_controller;
+
 int main(int argc, char **argv)
 {
     // lettura porta dagli argomenti
@@ -30,7 +32,7 @@ int main(int argc, char **argv)
     // pulizia set
     FD_ZERO(&master);
     FD_ZERO(&readset);
-
+    
     // nessun peer connesso
     peerlist_init();
 
@@ -46,6 +48,37 @@ int main(int argc, char **argv)
     FD_SET(0, &master);
     fdmax = sock.id;
 
+    time_controller = fork();
+
+    if (time_controller == 0)
+    {
+        while (1)
+        {
+            if (!update_date(&today))
+            {
+                // lunghezza del messaggio da inviare
+                int msg_len;
+                // buffer per la data da inviare
+                char date_buffer[DATE_LEN];
+
+                //composizione messaggio
+                dtoa(date_buffer, today);
+                msg_len = sprintf(sock.buffer, "%s %s", "SET_TDAY", date_buffer);
+                sock.buffer[msg_len] = '\0';
+                printf("Lista da inviare a tutti: %s (lunga %d byte)\n", sock.buffer, msg_len);
+
+                int i;
+                for (i = 0; i < get_n_peers(); i++)
+                {
+                    if (!send_udp_wait_ack(sock.id, sock.buffer, msg_len, get_port(i), "TDAY_ACK"))
+                    {
+                        printf("Errore: impossibile comunicare data al peer %d\n", get_port(i));
+                    }
+                }
+            }
+            sleep(60);
+        }
+    }
     // stapa elenco comandi
     print_server_commands();
 
@@ -330,6 +363,7 @@ int main(int argc, char **argv)
 
             FD_CLR(0, &readset);
         }
+        /*
         // Aggiornamento della data corrente
         if (update_date(&today))
         {
@@ -353,6 +387,7 @@ int main(int argc, char **argv)
                 }
             }
         }
+        */
     }
     return 0;
 }

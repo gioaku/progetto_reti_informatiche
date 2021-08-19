@@ -95,7 +95,7 @@ int update_date(struct Date *d)
     printf("Debug: <update_date> hour: %d\n", now_tm->tm_hour);
 
     // se sono passate le 18 si considera la data di domani
-    if (now_tm->tm_hour > 17 && now_tm->tm_min > 28)
+    if (now_tm->tm_hour > 17)
     {
         now_tm->tm_mday++;
         mktime(now_tm);

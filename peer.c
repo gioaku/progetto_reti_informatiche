@@ -71,7 +71,7 @@ int main(int argc, char **argv)
             char command[MAX_COMMAND_C];
 
             // lettura comando
-            fgets(command_buffer, MAX_STDIN_C, stdin);
+            fgets(command_buffer, MAX_STDIN_C + 1, stdin);
             sscanf(command_buffer, "%s", command);
 
             // help

@@ -1,4 +1,4 @@
-# progetto_reti_informatiche
+# progetto_reti_informatiche 2020/2021
 Applicazione che implementa una rete peer-to-peer per la condivisione di dati relativi alla pandemia COVID-19.
 L'applicazione è formata da un discovery server (DS) che si occupa di mettere in comunicazione i diversi peer quando essi si vogliono connettere o disconnettere alla rete. Ogni peer poi ha la possibilità di inserire dati, richiederli agli altri peer ed effettuare delle elaborazioni su di essi.
 

@@ -1,25 +1,18 @@
 # progetto_reti_informatiche
 Applicazione che implementa una rete peer-to-peer per la condivisione di dati relativi alla pandemia COVID-19.
-L'applicazione è formata da un discovery server (DS) che si occupa di mettere in comunicazione i diversi peer
-quando essi si vogliono connettere o disconnettere alla rete. Ogni peer poi ha la possibilità di inserire dati,
-richiederli agli altri peer ed effettuare delle elaborazioni su di essi.
+L'applicazione è formata da un discovery server (DS) che si occupa di mettere in comunicazione i diversi peer quando essi si vogliono connettere o disconnettere alla rete. Ogni peer poi ha la possibilità di inserire dati, richiederli agli altri peer ed effettuare delle elaborazioni su di essi.
 
 CONTENUTO PROGETTO
 
  - ds.c
 	Contiene il codice per eseguire il compito del discovery server.
-	Attraverso un socket UDP accetta messaggi di connessione e disconnessione da parte dei peer mantenendo
-	aggiornata la lista e richieste di blocco e sblocco della rete per mantenerla statica durante le operazioni 
-	di flood.
-    	Accetta inoltre semplici comandi da tastiera per visualizzare informazioni sulla rete o per disconnettersi.
-    	Inoltre mantiene aggiornati i peer sulla data da considerarsi corrente per l'inserimento dei dati.
+	Attraverso un socket UDP accetta messaggi di connessione e disconnessione da parte dei peer mantenendo aggiornata la lista e richieste di blocco e sblocco della rete per mantenerla statica durante le operazioni  di flood.
+    Accetta inoltre semplici comandi da tastiera per visualizzare informazioni sulla rete o per disconnettersi.
+    Inoltre mantiene aggiornati i peer sulla data da considerarsi corrente per l'inserimento dei dati.
  - peer.c
-    	Contiene il codice per permettere ai peer di connettersi e disconnettersi dalla rete, aggiungere dati, 
-	condividerli ed elaborarli.
-    	Attraverso un socket UDP comunica con il server e con gli altri peer per scambiare messaggi di
-	coordinazione.
-    	Attraverso un socket listener TCP accetta richieste di dati sensibili, scambiandoli sempre attraverso 
-	connessioni TCP. 
+    Contiene il codice per permettere ai peer di connettersi e disconnettersi dalla rete, aggiungere dati, condividerli ed elaborarli.
+    Attraverso un socket UDP comunica con il server e con gli altri peer per scambiare messaggi di coordinazione.
+    Attraverso un socket listener TCP accetta richieste di dati sensibili, scambiandoli sempre attraverso connessioni TCP. 
 	Sono disponibili dei comandi da terminale per inserire dati e per richiederne elaborazioni.
  - util/
 	Contiene i seguenti file di utilità con i relativi header:

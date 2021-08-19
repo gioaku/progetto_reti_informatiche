@@ -16,6 +16,7 @@ fd_set master;
 fd_set readset;
 int fdmax;
 
+// processo che controlla quando scattano le 18
 pid_t time_controller;
 
 int main(int argc, char **argv)

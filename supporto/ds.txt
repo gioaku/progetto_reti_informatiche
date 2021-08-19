@@ -15,7 +15,12 @@
     fdmax   
 // struttura della rete dei peer
     connected_peers
+// processo che controlla quando passano le 18
+    time_controller
 
+segnale da time_controller
+    for i in peers  
+        send SET_TDAY
 arrivo messaggio peer
     CONN_REQ
         check unlocked
@@ -57,7 +62,3 @@ arrivo comando da stdin
         remove_peer(first)
         close udp socket
         exit
-
-scattano le 18
-    for i in peers  
-        send SET_TDAY

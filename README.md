@@ -5,21 +5,21 @@ L'applicazione è formata da un discovery server (DS) che si occupa di mettere i
 ## CONTENUTO PROGETTO
 
 **ds.c**
-
+>
 > Contiene il codice per eseguire il compito del discovery server.
 > Attraverso un socket UDP accetta messaggi di connessione e disconnessione da parte dei peer mantenendo aggiornata la lista e richieste di blocco e sblocco della rete per mantenerla statica durante le operazioni  di flood.
 > Accetta inoltre semplici comandi da tastiera per visualizzare informazioni sulla rete o per disconnettersi.
 > Inoltre mantiene aggiornati i peer sulla data da considerarsi corrente per l'inserimento dei dati.
 
 **peer.c**
-
+>
 > Contiene il codice per permettere ai peer di connettersi e disconnettersi dalla rete, aggiungere dati, condividerli ed elaborarli.
 > Attraverso un socket UDP comunica con il server e con gli altri peer per scambiare messaggi di coordinazione.
 > Attraverso un socket listener TCP accetta richieste di dati sensibili, scambiandoli sempre attraverso connessioni TCP. 
 > Sono disponibili dei comandi da terminale per inserire dati e per richiederne elaborazioni.
 
 **util/**
-
+>
 > Contiene i seguenti file di utilità (file.c) con i relativi header (file.h):
 >>- **date.c**          file per la gestione e manipolazione di strutture 'Date'.
 >>- **msg.c**           file per la gestione di socket udp e tcp e relativi invii e ricezioni di messaggi.
@@ -32,15 +32,18 @@ L'applicazione è formata da un discovery server (DS) che si occupa di mettere i
 > Nei file.h sono presenti le definizio delle costanti e commenti che descrivono le diverse funzioni.
 
 **makefile**
+>
+> Compilazione e pulizia del progetto
+
 
 **exec.sh**
-
+>
 > Compila il progetto attraverso il makefile e poi avvia il ds e 5 peer in locale.
 
 **data/**
 
 > Contiene il registri dei peer secondo uno schema ad albero
-
+>
 **support/**
 
 > Contiene i seguenti file di documentazione:

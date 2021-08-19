@@ -37,7 +37,7 @@
 // Massima lunghezza di un file
 #define MAX_FILE_LEN 36
 // Massima lunghezza di un messaggio proveniente da stdin per il peer
-#define MAX_STDIN_C 29
+#define MAX_STDIN_C 27
 // Massima lunghezza di un comando per il peer
 #define MAX_COMMAND_C 6
 

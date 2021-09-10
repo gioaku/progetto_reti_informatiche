@@ -12,7 +12,7 @@ all: ./ds ./peer
 ./ds.o: ./ds.c ./util/util_s.h
 	gcc -Wall -c ./ds.c -o ./ds.o
 
-./util/peerlist.o: ./util/peerlist.c ./util/peerlist.h ./util/util.h ./util/neighbors.h
+./util/peerlist.o: ./util/peerlist.c ./util/peerlist.h
 	gcc -Wall -c ./util/peerlist.c -o ./util/peerlist.o
 
 ./util/util.o: ./util/util.c ./util/util.h 
@@ -21,7 +21,7 @@ all: ./ds ./peer
 ./util/msg.o: ./util/msg.c ./util/msg.h 
 	gcc -Wall -c ./util/msg.c -o ./util/msg.o
 
-./util/util_c.o: ./util/util_c.c ./util/util_c.h ./util/msg.h
+./util/util_c.o: ./util/util_c.c ./util/util_c.h 
 	gcc -Wall -c ./util/util_c.c -o ./util/util_c.o
 
 ./util/util_s.o: ./util/util_s.c ./util/util_s.h 

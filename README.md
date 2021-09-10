@@ -55,10 +55,13 @@ L'applicazione è formata da un discovery server (DS) che si occupa di mettere i
 > Lo stato della rete è mantenuto dal ds come una lista circolare in ordine di numero di porta in cui ogni peer ha un vicino prev e un vicino next. La rete ha la possibilità di essere bloccata attraverso una operazioni sulla variabile lock e mantiene il numero di peer connessi.
 
 ## ALGORITMI E STRUTTURE DATI
+
 **Peerlist**
 > Sono principalmente comuni operazioni su una lista circolare ordinata di in cui il primo elemento non è necessariamente il più piccolo.
+
 **Messaggi**
 > Entrambi i protocolli tcp e udp sfruttano lo scambio di messaggi e acknowledgment. Si è preferito minimizzare la lunghezza dei messaggi andando così ad aumentarne la quantità per lo scambio di tante informazioni.
+
 **Dati**
 > Ogni peer conserva i dati su files nel formato data/port/type/aggr/date.txt dove
 >> - data è la cartella predisposta a contenere i dati
@@ -71,10 +74,12 @@ L'applicazione è formata da un discovery server (DS) che si occupa di mettere i
 >> - solo parte dei dati se esiste solo data/port/type/entries/date.txt
 >> - solo la somma di essi se esiste solo data/port/type/elabs/date.txt
 >> - nessun dato altrimenti
+
 **Scambio di dati**
 > La prima volta che viene chiesta la somma dei dati relativi ad una data ed un tipo il peer *req_peer* fa girare un messaggio `flood-some`, ogni peer *prop_peer* che lo riceve e ha dei dati invia la propria disponibilità ad essere contattato attraverso una `prop-some`. A quel punto per ogni `prop-some` ricevuto il *req_peer* avvia una connessione tcp con ogni *prop_peer* e con una `send-all` richiede i dati posseduti che verranno inviati sequenzialmente tramite messaggi `new-entry`, che sommerà e salverà in un file elab.
 > Da li in poi un nuovo *new_req_peer* richiedente dati per gli stessi parametri non dovrà contattare nuovamente ogni peer ma facendo girare un messaggio `flood-all` avrà la risposta dal *req_peer* precedente che gli risponderà con una `prop-all` e interromperà la propagazione della `flood-all`. Sempre con la stessa procedura *req_peer* risponderà alla `send-all`, previa connessione, con tutte le entries da lui possedute.
 > Prima di mandare le flood i peer chiedono ai vicini se hanno la somma e in quel caso si accontentano di non avere tutte le rispettive entries.
+
 **Disconnessione server**
 > Quando il DS si disconnette avvisa un peer *first* tramite un messaggio di `server-exit` e si mette in attesa che tutti i peer si disconnettano. *first* si assicura di avere tutte le somme dei giorni validi. Poi propaga la `server-exit` al vicino successivo e si mette a disposizione per inviare eventuali somme mancanti. Il successivo richiede i dati che non ha, avvisa il server di essersi disconnesso e propaga la `server-exit` mettendosi a sua volta a disposizione. Quando la notifica di `server-exit` torna a *first* esso per ultimo di disconnette, facendo capire al server che il messaggio ha fatto tutto il giro e si può disconnettere.
 > Questo fa in modo che tutti i peer abbiano gli stessi dati dopo che la rete è stata chiusa.

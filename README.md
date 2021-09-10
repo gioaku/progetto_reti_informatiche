@@ -68,7 +68,8 @@ L'applicazione è formata da un discovery server (DS) che si occupa di mettere i
 >> - port rappresenta la porta del peer a cui appartengono i registri (es. 5001)
 >> - type rappresenta il tipo di dati salvati (es. 't' / 'n')
 >> - aggr rappresenta se si tratta di un registro (entries) o di somme (elabs)
->> - date nel formato yyyy_mm_dd
+>> - date nel formato yyyy_mm_dd  
+
 > Per un peer 'port', una data 'date' e un tipo 'type' il peer ha:
 >> - tutti i dati e la somma di essi se esite data/port/type/entries/date.txt e data/port/type/elabs/date.txt
 >> - solo parte dei dati se esiste solo data/port/type/entries/date.txt

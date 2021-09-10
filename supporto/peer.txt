@@ -125,7 +125,7 @@ arrivo messaggio udp da un peer
         close listener
         exit
 
-funzioni 
+//funzioni 
 
 get_total
     if get_saved_elab

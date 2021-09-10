@@ -45,7 +45,10 @@ L'applicazione è formata da un discovery server (DS) che si occupa di mettere i
 >> - **peer.txt**		descrizione in metacodice del comportamento dei peer
 
 **README.md**
-> this file
+> documentazione del progetto in formato markdown (questo file)
+
+**documentazione.pdf**
+> documentazione del progetto in formato pdf  
 		
 ## UTILIZZO
 > Per testare l'applicazione basta scaricare il progetto ed eseguire './exec.sh' che avvierà il DS e 5 peers in locale e inizializza dei dati in 'data/' (nuovi casi tra il 28/07/21 e il 03/08/21).
